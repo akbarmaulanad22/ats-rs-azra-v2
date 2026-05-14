@@ -18,5 +18,10 @@ class DatabaseSeeder extends Seeder
             'role' => Role::HrAdmin,
             'must_change_password' => true,
         ]);
+
+        $this->call([
+            WorkflowStageSeeder::class,
+            WorkflowTemplateSeeder::class,
+        ]);
     }
 }
