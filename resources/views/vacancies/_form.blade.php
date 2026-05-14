@@ -51,15 +51,19 @@
                 label-class="block text-xs font-medium text-gray-700 mb-1"
             />
 
-            <x-autocomplete-select
-                name="status"
-                label="Status"
-                :options="collect($statuses)->map(fn ($s) => ['id' => $s->value, 'label' => $s->label()])"
-                :value="old('status', ($lowongan->status ?? null)?->value)"
-                :required="true"
-                placeholder="Pilih status..."
-                label-class="block text-xs font-medium text-gray-700 mb-1"
-            />
+            <div>
+                <label for="tenggat_lamaran" class="block text-xs font-medium text-gray-700 mb-1">Tenggat Lamaran <span class="text-red-500">*</span></label>
+                <input
+                    type="date"
+                    id="tenggat_lamaran"
+                    name="tenggat_lamaran"
+                    value="{{ old('tenggat_lamaran', isset($lowongan) ? $lowongan->tenggat_lamaran->format('Y-m-d') : '') }}"
+                    class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('tenggat_lamaran') border-red-400 @else border-gray-200 @enderror"
+                >
+                @error('tenggat_lamaran')
+                    <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -79,15 +83,22 @@
             </div>
 
             <div>
-                <label for="tenggat_lamaran" class="block text-xs font-medium text-gray-700 mb-1">Tenggat Lamaran <span class="text-red-500">*</span></label>
-                <input
-                    type="date"
-                    id="tenggat_lamaran"
-                    name="tenggat_lamaran"
-                    value="{{ old('tenggat_lamaran', isset($lowongan) ? $lowongan->tenggat_lamaran->format('Y-m-d') : '') }}"
-                    class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('tenggat_lamaran') border-red-400 @else border-gray-200 @enderror"
-                >
-                @error('tenggat_lamaran')
+                <label class="block text-xs font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($statuses as $s)
+                        <label class="bg-white flex items-center gap-1.5 px-3 py-1.5 rounded border cursor-pointer text-xs font-medium transition-colors ease-out duration-150 has-[:checked]:bg-primary has-[:checked]:text-white has-[:checked]:border-primary border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 has-[:checked]:hover:bg-primary">
+                            <input
+                                type="radio"
+                                name="status"
+                                value="{{ $s->value }}"
+                                {{ old('status', ($lowongan->status ?? null)?->value) === $s->value ? 'checked' : '' }}
+                                class="sr-only"
+                            >
+                            {{ $s->label() }}
+                        </label>
+                    @endforeach
+                </div>
+                @error('status')
                     <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
                 @enderror
             </div>
