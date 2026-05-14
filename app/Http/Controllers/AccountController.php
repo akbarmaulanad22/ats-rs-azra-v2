@@ -8,21 +8,37 @@ use App\Http\Requests\UpdateAccountRequest;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AccountController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         Gate::authorize('viewAny', User::class);
 
         $accounts = User::with('employee')
+            ->when($request->q, function ($q, $search) {
+                $q->where(function ($q) use ($search) {
+                    $q->where('username', 'ilike', "%{$search}%")
+                        ->orWhereHas('employee', fn ($q) => $q
+                            ->where('nama_karyawan', 'ilike', "%{$search}%")
+                            ->orWhere('nip', 'ilike', "%{$search}%")
+                        );
+                });
+            })
+            ->when($request->role, fn ($q, $role) => $q->where('role', $role))
+            ->when($request->status === 'aktif', fn ($q) => $q->where('is_active', true))
+            ->when($request->status === 'nonaktif', fn ($q) => $q->where('is_active', false))
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('accounts.index', compact('accounts'));
+        $roles = Role::cases();
+
+        return view('accounts.index', compact('accounts', 'roles'));
     }
 
     public function create(): View
