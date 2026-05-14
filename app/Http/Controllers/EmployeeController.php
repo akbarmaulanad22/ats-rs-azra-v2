@@ -17,8 +17,10 @@ class EmployeeController extends Controller
         Gate::authorize('viewAny', Employee::class);
 
         $employees = Employee::query()
-            ->when($request->q, fn ($q, $search) => $q->where('nama_karyawan', 'like', "%{$search}%")
-                ->orWhere('nip', 'like', "%{$search}%"))
+            ->when($request->q, fn ($q, $search) => $q->where(function ($q) use ($search) {
+                $q->where('nama_karyawan', 'like', "%{$search}%")
+                    ->orWhere('nip', 'like', "%{$search}%");
+            }))
             ->when($request->unit, fn ($q, $unit) => $q->where('unit', $unit))
             ->when($request->posisi, fn ($q, $posisi) => $q->where('posisi_pekerjaan', $posisi))
             ->when($request->profesi, fn ($q, $profesi) => $q->where('profesi', $profesi))

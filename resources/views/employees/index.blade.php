@@ -102,7 +102,7 @@
                                 <a href="{{ route('karyawan.edit', $employee) }}" class="text-xs text-gray-500 hover:text-primary transition-colors px-2 py-1 rounded hover:bg-gray-100">
                                     Edit
                                 </a>
-                                <form method="POST" action="{{ route('karyawan.destroy', $employee) }}" onsubmit="return confirm('Hapus data karyawan {{ $employee->nama_karyawan }}?')">
+                                <form method="POST" action="{{ route('karyawan.destroy', $employee) }}" onsubmit="return confirm('Hapus data karyawan ' + @js($employee->nama_karyawan) + '?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-xs text-gray-500 hover:text-red-600 transition-colors px-2 py-1 rounded hover:bg-red-50">

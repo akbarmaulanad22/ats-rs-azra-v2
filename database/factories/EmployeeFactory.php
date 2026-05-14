@@ -17,12 +17,9 @@ class EmployeeFactory extends Factory
      */
     public function definition(): array
     {
-        static $counter = 0;
-        $counter++;
-
         return [
             'user_id' => null,
-            'nip' => str_pad((string) $counter, 8, '0', STR_PAD_LEFT),
+            'nip' => fake()->unique()->numerify('########'),
             'nama_karyawan' => fake()->name(),
             'unit' => fake()->randomElement(['ICU', 'IGD', 'HR', 'Finance', 'Farmasi', 'Radiologi']),
             'posisi_pekerjaan' => fake()->jobTitle(),

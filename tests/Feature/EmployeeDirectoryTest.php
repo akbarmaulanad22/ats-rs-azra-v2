@@ -67,6 +67,21 @@ class EmployeeDirectoryTest extends TestCase
         $response->assertDontSee('Karyawan Finance');
     }
 
+    public function test_search_combined_with_unit_filter_respects_both_constraints(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        Employee::factory()->create(['nama_karyawan' => 'Ahmad ICU', 'unit' => 'ICU', 'nip' => '00000010']);
+        Employee::factory()->create(['nama_karyawan' => 'Ahmad HR', 'unit' => 'HR', 'nip' => '00000011']);
+        Employee::factory()->create(['nama_karyawan' => 'Budi ICU', 'unit' => 'ICU', 'nip' => '00000012']);
+
+        $response = $this->actingAs($admin)->get(route('karyawan.index', ['q' => 'Ahmad', 'unit' => 'ICU']));
+
+        $response->assertStatus(200);
+        $response->assertSee('Ahmad ICU');
+        $response->assertDontSee('Ahmad HR');
+        $response->assertDontSee('Budi ICU');
+    }
+
     // ── Create ─────────────────────────────────────────────────────────────────
 
     public function test_hr_admin_can_view_create_form(): void
@@ -256,6 +271,33 @@ class EmployeeDirectoryTest extends TestCase
             'posisi_pekerjaan' => 'Test',
             'profesi' => 'Test',
             'jabatan' => 'Test',
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_employee_cannot_edit_own_linked_record(): void
+    {
+        $user = User::factory()->create(['role' => Role::Employee]);
+        $employee = Employee::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->get(route('karyawan.edit', $employee));
+
+        $response->assertStatus(403);
+    }
+
+    public function test_employee_cannot_update_own_linked_record(): void
+    {
+        $user = User::factory()->create(['role' => Role::Employee]);
+        $employee = Employee::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->put(route('karyawan.update', $employee), [
+            'nip' => $employee->nip,
+            'nama_karyawan' => 'Self Update',
+            'unit' => $employee->unit,
+            'posisi_pekerjaan' => $employee->posisi_pekerjaan,
+            'profesi' => $employee->profesi,
+            'jabatan' => $employee->jabatan,
         ]);
 
         $response->assertStatus(403);

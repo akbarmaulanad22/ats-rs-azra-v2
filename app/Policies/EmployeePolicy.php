@@ -19,7 +19,7 @@ class EmployeePolicy
             return true;
         }
 
-        return $user->hasRole(Role::Employee) && $employee->user_id === $user->id;
+        return $user->hasRole(Role::Employee) && $employee->user_id == $user->id;
     }
 
     public function create(User $user): bool
