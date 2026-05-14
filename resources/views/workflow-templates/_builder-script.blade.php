@@ -3,9 +3,10 @@ function stageBuilder(allStages, initialSelectedIds) {
     return {
         allStages: allStages,
         selectedStages: [],
+        dragIndex: null,
+        dragOverIndex: null,
 
         init() {
-            // If editing, use the saved order; else default to Application + Onboarding only.
             if (initialSelectedIds.length > 0) {
                 const stageMap = Object.fromEntries(allStages.map(s => [s.id, s]));
                 this.selectedStages = initialSelectedIds
@@ -26,7 +27,6 @@ function stageBuilder(allStages, initialSelectedIds) {
         add(stageId) {
             const stage = this.allStages.find(s => s.id === stageId);
             if (!stage) { return; }
-            // Insert before the last (Onboarding)
             this.selectedStages.splice(this.selectedStages.length - 1, 0, stage);
         },
 
@@ -34,18 +34,34 @@ function stageBuilder(allStages, initialSelectedIds) {
             this.selectedStages = this.selectedStages.filter(s => s.id !== stageId);
         },
 
-        moveUp(index) {
-            if (index <= 1) { return; }
-            [this.selectedStages[index - 1], this.selectedStages[index]] =
-                [this.selectedStages[index], this.selectedStages[index - 1]];
-            this.selectedStages = [...this.selectedStages];
+        onDragStart(event, index) {
+            const stage = this.selectedStages[index];
+            if (stage.is_locked_first || stage.is_locked_last) {
+                event.preventDefault();
+                return;
+            }
+            this.dragIndex = index;
+            event.dataTransfer.effectAllowed = 'move';
         },
 
-        moveDown(index) {
-            if (index >= this.selectedStages.length - 2) { return; }
-            [this.selectedStages[index], this.selectedStages[index + 1]] =
-                [this.selectedStages[index + 1], this.selectedStages[index]];
-            this.selectedStages = [...this.selectedStages];
+        onDragOver(event, index) {
+            if (this.dragIndex === null || this.dragIndex === index) { return; }
+            const target = this.selectedStages[index];
+            if (target.is_locked_first || target.is_locked_last) { return; }
+            this.dragOverIndex = index;
+        },
+
+        onDrop(event, dropIndex) {
+            if (this.dragIndex === null || this.dragIndex === dropIndex) { return; }
+            const target = this.selectedStages[dropIndex];
+            if (target.is_locked_first || target.is_locked_last) { return; }
+
+            const stages = [...this.selectedStages];
+            const [moved] = stages.splice(this.dragIndex, 1);
+            stages.splice(dropIndex, 0, moved);
+            this.selectedStages = stages;
+            this.dragIndex = null;
+            this.dragOverIndex = null;
         },
 
         prepareSubmit() {

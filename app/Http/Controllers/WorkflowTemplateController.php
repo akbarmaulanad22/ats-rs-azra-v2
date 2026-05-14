@@ -7,16 +7,23 @@ use App\Http\Requests\UpdateWorkflowTemplateRequest;
 use App\Models\Stage;
 use App\Models\WorkflowTemplate;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class WorkflowTemplateController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         Gate::authorize('viewAny', WorkflowTemplate::class);
 
-        $templates = WorkflowTemplate::with('stages')->orderBy('nama')->get();
+        $templates = WorkflowTemplate::with('stages')
+            ->when(
+                $request->q,
+                fn ($q, $search) => $q->whereRaw('LOWER(nama) LIKE ?', ['%'.strtolower($search).'%']),
+            )
+            ->orderBy('nama')
+            ->get();
 
         return view('workflow-templates.index', compact('templates'));
     }
@@ -80,11 +87,6 @@ class WorkflowTemplateController extends Controller
     public function destroy(WorkflowTemplate $templateAlur): RedirectResponse
     {
         Gate::authorize('delete', $templateAlur);
-
-        if ($templateAlur->vacancies()->exists()) {
-            return redirect()->route('template-alur.index')
-                ->with('error', 'Template tidak dapat dihapus karena sedang digunakan oleh lowongan aktif.');
-        }
 
         $templateAlur->delete();
 

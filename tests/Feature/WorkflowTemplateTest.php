@@ -55,6 +55,20 @@ class WorkflowTemplateTest extends TestCase
         $response->assertSee('Koordinator');
     }
 
+    public function test_index_search_filters_by_name(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $this->seedStages();
+        WorkflowTemplate::factory()->create(['nama' => 'Koordinator']);
+        WorkflowTemplate::factory()->create(['nama' => 'Staf Medis']);
+
+        $response = $this->actingAs($admin)->get(route('template-alur.index', ['q' => 'koordinator']));
+
+        $response->assertStatus(200);
+        $response->assertSee('Koordinator');
+        $response->assertDontSee('Staf Medis');
+    }
+
     public function test_non_hr_admin_cannot_view_template_list(): void
     {
         foreach ([Role::HrManager, Role::UnitHead, Role::Director, Role::Employee] as $role) {
