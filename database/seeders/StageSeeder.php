@@ -1,0 +1,33 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Stage;
+use Illuminate\Database\Seeder;
+
+class StageSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $stages = [
+            ['key' => 'aplikasi', 'nama' => 'Aplikasi', 'is_locked_first' => true, 'is_locked_last' => false],
+            ['key' => 'formulir_data_pribadi', 'nama' => 'Formulir Data Pribadi', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'skrining_cv_hr', 'nama' => 'Skrining CV HR', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'skrining_cv_kepala_unit', 'nama' => 'Skrining CV Kepala Unit', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'email_undangan', 'nama' => 'Email Undangan', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'tes_kompetensi', 'nama' => 'Tes Kompetensi', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'wawancara_kepala_unit', 'nama' => 'Wawancara Kepala Unit', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'wawancara_manajer_hr', 'nama' => 'Wawancara Manajer HR', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'wawancara_direktur', 'nama' => 'Wawancara Direktur', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'tes_disc', 'nama' => 'Tes DiSC', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'tes_mbti', 'nama' => 'Tes MBTI', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'surat_penawaran', 'nama' => 'Surat Penawaran', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'mcu', 'nama' => 'MCU', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'onboarding', 'nama' => 'Onboarding', 'is_locked_first' => false, 'is_locked_last' => true],
+        ];
+
+        foreach ($stages as $stage) {
+            Stage::firstOrCreate(['key' => $stage['key']], $stage);
+        }
+    }
+}
