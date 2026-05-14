@@ -28,6 +28,7 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'role' => Role::Employee,
             'must_change_password' => false,
+            'is_active' => true,
             'remember_token' => Str::random(10),
         ];
     }
@@ -56,5 +57,12 @@ class UserFactory extends Factory
     public function hrAdmin(): static
     {
         return $this->withRole(Role::HrAdmin);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
     }
 }
