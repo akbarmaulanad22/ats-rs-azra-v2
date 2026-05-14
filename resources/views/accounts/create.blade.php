@@ -10,7 +10,7 @@
         <h1 class="text-xl font-semibold text-gray-900">Buat Akun</h1>
     </div>
 
-    <div class="bg-white/80 border border-gray-200 rounded-md" x-data="accountCreate()">
+    <div class="bg-white/80 border border-gray-200 rounded-md" x-data="accountCreate()" @autocomplete-selected="onEmployeeSelected($event.detail)">
         <form method="POST" action="{{ route('akun.store') }}">
             @csrf
 
@@ -18,32 +18,18 @@
             <div class="px-4 pt-4 pb-5">
                 <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Karyawan</p>
                 <div class="space-y-3">
-                    <div>
-                        <label for="employee_id" class="block text-xs font-medium text-gray-700 mb-1">Karyawan <span class="text-red-500">*</span></label>
-                        <select
-                            id="employee_id"
-                            name="employee_id"
-                            x-on:change="onEmployeeChange($event)"
-                            class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('employee_id') border-red-400 @else border-gray-200 @enderror"
-                        >
-                            <option value="">-- Pilih karyawan --</option>
-                            @foreach ($employees as $employee)
-                                <option
-                                    value="{{ $employee->id }}"
-                                    data-name="{{ $employee->nama_karyawan }}"
-                                    @selected(old('employee_id') == $employee->id)
-                                >
-                                    {{ $employee->nama_karyawan }} ({{ $employee->nip }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('employee_id')
-                            <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
-                        @enderror
-                        @if ($employees->isEmpty())
-                            <p class="mt-1 text-[11px] text-amber-600">Semua karyawan sudah memiliki akun.</p>
-                        @endif
-                    </div>
+                    <x-autocomplete-select
+                        name="employee_id"
+                        label="Karyawan"
+                        :options="$employees->map(fn ($e) => ['id' => $e->id, 'label' => $e->nama_karyawan.' ('.$e->nip.')', 'employeeName' => $e->nama_karyawan])"
+                        :value="old('employee_id')"
+                        :required="true"
+                        placeholder="Cari nama atau NIP karyawan..."
+                        create-url="{{ route('karyawan.create') }}"
+                        refresh-url="{{ route('akun.karyawan-tersedia') }}"
+                        create-label="Tambah Karyawan Baru"
+                        empty-message="{{ $employees->isEmpty() ? 'Semua karyawan sudah memiliki akun.' : 'Tidak ada karyawan yang cocok.' }}"
+                    />
                 </div>
             </div>
 
@@ -71,24 +57,14 @@
                             <p class="mt-1 text-[11px] text-gray-400">Hanya huruf kecil dan angka, tanpa spasi</p>
                         </div>
 
-                        <div>
-                            <label for="role" class="block text-xs font-medium text-gray-700 mb-1">Role <span class="text-red-500">*</span></label>
-                            <select
-                                id="role"
-                                name="role"
-                                class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('role') border-red-400 @else border-gray-200 @enderror"
-                            >
-                                <option value="">-- Pilih role --</option>
-                                @foreach ($roles as $role)
-                                    <option value="{{ $role->value }}" @selected(old('role') === $role->value)>
-                                        {{ $role->label() }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('role')
-                                <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <x-autocomplete-select
+                            name="role"
+                            label="Role"
+                            :options="collect($roles)->map(fn ($r) => ['id' => $r->value, 'label' => $r->label()])"
+                            :value="old('role')"
+                            :required="true"
+                            placeholder="Pilih role..."
+                        />
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -140,9 +116,9 @@
         function accountCreate() {
             return {
                 username: @js(old('username', '')),
-                onEmployeeChange(event) {
-                    const option = event.target.selectedOptions[0];
-                    const name = option?.dataset?.name ?? '';
+                onEmployeeSelected(detail) {
+                    if (detail.name !== 'employee_id') return;
+                    const name = detail.option.employeeName ?? '';
                     if (name) {
                         this.username = this.generateUsername(name);
                     }

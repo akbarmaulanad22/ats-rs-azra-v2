@@ -4,18 +4,21 @@
     'options',        // Collection or array of objects with ->id and ->label (or 'id'/'label' keys)
     'value' => null,  // Selected ID (e.g. old('name'))
     'required' => false,
-    'createUrl' => null,    // URL to redirect when creating a new item
+    'createUrl' => null,    // URL opened in new tab when creating a new item
+    'refreshUrl' => null,   // JSON endpoint called after the new tab closes to reload options
     'createLabel' => 'Buat Baru',
     'placeholder' => 'Ketik untuk mencari...',
     'emptyMessage' => 'Tidak ada data yang cocok.',
+    'labelClass' => 'block text-xs font-medium text-gray-700 mb-1',
 ])
 
 @php
     $selectedId = old($name, $value);
-    $optionsList = collect($options)->map(fn ($o) => [
-        'id'    => is_array($o) ? $o['id']    : $o->id,
-        'label' => is_array($o) ? $o['label'] : $o->label,
-    ])->values()->all();
+    // Preserve all keys from array options; objects only get id + label
+    $optionsList = collect($options)->map(fn ($o) => is_array($o)
+        ? $o
+        : ['id' => $o->id, 'label' => $o->label]
+    )->values()->all();
     $selectedLabel = collect($optionsList)->firstWhere('id', $selectedId)['label'] ?? '';
 @endphp
 
@@ -24,14 +27,18 @@
         options: @js($optionsList),
         selectedId: @js((string) $selectedId),
         selectedLabel: @js($selectedLabel),
+        fieldName: @js($name),
+        createUrl: @js($createUrl),
+        refreshUrl: @js($refreshUrl),
     })"
+    @click.outside="close()"
     class="relative"
 >
     {{-- Hidden real input for form submission --}}
     <input type="hidden" name="{{ $name }}" x-model="selectedId">
 
     {{-- Label --}}
-    <label class="block text-xs font-medium text-gray-700 mb-1">
+    <label class="{{ $labelClass }}">
         {{ $label }}
         @if($required) <span class="text-red-500">*</span> @endif
     </label>
@@ -43,12 +50,11 @@
             x-ref="searchInput"
             x-model="query"
             @focus="open = true"
-            @input="open = true; selectedId = ''"
+            @input="open = true; selectedId = ''; highlighted = 0"
             @keydown.escape="close()"
             @keydown.enter.prevent="selectHighlighted()"
             @keydown.arrow-down.prevent="moveDown()"
             @keydown.arrow-up.prevent="moveUp()"
-            @click.outside="close()"
             placeholder="{{ $placeholder }}"
             autocomplete="off"
             class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring pr-7
@@ -95,17 +101,19 @@
         </template>
         <template x-if="filtered.length === 0">
             <div class="px-3 py-3 text-xs text-gray-500 flex items-center justify-between gap-2">
-                <span>{{ $emptyMessage }}</span>
+                <span x-text="refreshing ? 'Memperbarui data...' : '{{ $emptyMessage }}'"></span>
                 @if($createUrl)
-                    <a
-                        href="{{ $createUrl }}?redirect={{ urlencode(url()->current()) }}"
-                        class="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-dark font-medium whitespace-nowrap transition-colors ease-out duration-150"
+                    <button
+                        type="button"
+                        @click="openCreateTab()"
+                        :disabled="refreshing"
+                        class="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-dark font-medium whitespace-nowrap transition-colors ease-out duration-150 disabled:opacity-50"
                     >
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
                         {{ $createLabel }}
-                    </a>
+                    </button>
                 @endif
             </div>
         </template>
@@ -118,13 +126,17 @@
 </div>
 
 <script>
-    function autocompleteSelect({ options, selectedId, selectedLabel }) {
+    window.autocompleteSelect = window.autocompleteSelect || function ({ options, selectedId, selectedLabel, fieldName, createUrl, refreshUrl }) {
         return {
             options,
             selectedId,
+            fieldName,
+            createUrl,
+            refreshUrl,
             query: selectedLabel,
             open: false,
             highlighted: 0,
+            refreshing: false,
 
             get filtered() {
                 if (!this.query) {
@@ -138,6 +150,7 @@
                 this.selectedId = String(opt.id);
                 this.query = opt.label;
                 this.open = false;
+                this.$dispatch('autocomplete-selected', { name: this.fieldName, option: opt });
             },
 
             selectHighlighted() {
@@ -166,6 +179,40 @@
                     this.query = '';
                 }
             },
+
+            openCreateTab() {
+                if (!this.createUrl) return;
+                const url = new URL(this.createUrl, window.location.href);
+                url.searchParams.set('popup', '1');
+                const popup = window.open(url.toString(), '_blank');
+                if (!popup) return;
+                const poll = setInterval(() => {
+                    if (popup.closed) {
+                        clearInterval(poll);
+                        if (this.refreshUrl) {
+                            this.refreshOptions();
+                        }
+                    }
+                }, 500);
+            },
+
+            async refreshOptions() {
+                this.refreshing = true;
+                this.open = true;
+                try {
+                    const res = await fetch(this.refreshUrl, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    if (res.ok) {
+                        this.options = await res.json();
+                        this.$refs.searchInput.focus();
+                    }
+                } catch (_) {
+                    // silently fail
+                } finally {
+                    this.refreshing = false;
+                }
+            },
         };
-    }
+    };
 </script>

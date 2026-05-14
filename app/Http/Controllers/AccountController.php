@@ -7,6 +7,7 @@ use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
 use App\Models\Employee;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -40,6 +41,22 @@ class AccountController extends Controller
         $roles = Role::cases();
 
         return view('accounts.index', compact('accounts', 'roles'));
+    }
+
+    public function availableEmployees(): JsonResponse
+    {
+        Gate::authorize('create', User::class);
+
+        return response()->json(
+            Employee::whereNull('user_id')
+                ->orderBy('nama_karyawan')
+                ->get()
+                ->map(fn ($e) => [
+                    'id' => $e->id,
+                    'label' => $e->nama_karyawan.' ('.$e->nip.')',
+                    'employeeName' => $e->nama_karyawan,
+                ])
+        );
     }
 
     public function create(): View

@@ -13,6 +13,9 @@
     <div class="bg-white/80 border border-gray-200 rounded-md">
         <form method="POST" action="{{ route('karyawan.store') }}">
             @csrf
+            @if(old('popup', request('popup')))
+                <input type="hidden" name="popup" value="1">
+            @endif
 
             {{-- Identitas --}}
             <div class="px-4 pt-4 pb-5">

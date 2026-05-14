@@ -37,23 +37,14 @@
                             @enderror
                         </div>
 
-                        <div>
-                            <label for="role" class="block text-xs font-medium text-gray-700 mb-1">Role <span class="text-red-500">*</span></label>
-                            <select
-                                id="role"
-                                name="role"
-                                class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('role') border-red-400 @else border-gray-200 @enderror"
-                            >
-                                @foreach ($roles as $role)
-                                    <option value="{{ $role->value }}" @selected(old('role', $user->role->value) === $role->value)>
-                                        {{ $role->label() }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('role')
-                                <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <x-autocomplete-select
+                            name="role"
+                            label="Role"
+                            :options="collect($roles)->map(fn ($r) => ['id' => $r->value, 'label' => $r->label()])"
+                            :value="old('role', $user->role->value)"
+                            :required="true"
+                            placeholder="Pilih role..."
+                        />
                     </div>
                 </div>
             </div>
