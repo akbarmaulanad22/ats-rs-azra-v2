@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             StageSeeder::class,
             WorkflowTemplateSeeder::class,
+            UnitSeeder::class,
         ]);
     }
 }
