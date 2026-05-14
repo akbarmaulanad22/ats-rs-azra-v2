@@ -1,13 +1,13 @@
 <x-layouts.app title="Data Karyawan - ATS RS Azra">
 
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 leading-tight">Data Karyawan</h1>
-            <p class="text-xs text-gray-400 mt-1">Direktori karyawan RS Azra</p>
+            <h1 class="text-xl font-semibold text-gray-900">Data Karyawan</h1>
+            <p class="text-xs text-gray-500 mt-0.5">Direktori karyawan RS Azra</p>
         </div>
         <a
             href="{{ route('karyawan.create') }}"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
@@ -16,114 +16,226 @@
         </a>
     </div>
 
-    {{-- Search & Filter --}}
-    <div class="bg-white rounded-xl p-4 mb-5">
-        <form method="GET" action="{{ route('karyawan.index') }}" class="flex flex-wrap gap-3">
-            <input
-                type="text"
-                name="q"
-                value="{{ request('q') }}"
-                placeholder="Cari nama atau NIP..."
-                class="flex-1 min-w-48 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+    {{-- Search & Filter — blends into page background --}}
+    @php
+        $activeFilters = collect(['unit', 'posisi', 'profesi', 'jabatan'])
+            ->filter(fn ($k) => request($k))->count();
+    @endphp
+
+    <div class="mb-3" x-data="{ open: {{ $activeFilters > 0 ? 'true' : 'false' }} }">
+        <form method="GET" action="{{ route('karyawan.index') }}">
+
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+                <div class="relative flex-1 min-w-52">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ request('q') }}"
+                        placeholder="Cari nama atau NIP..."
+                        class="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus-ring bg-white placeholder:text-gray-400"
+                    >
+                </div>
+
+                <button
+                    type="button"
+                    @click="open = !open"
+                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md transition-colors ease-out duration-150 cursor-pointer bg-white"
+                    :class="open ? 'border-primary/40 text-primary bg-primary/5' : 'border-gray-200 text-gray-500 hover:border-primary/40 hover:text-primary'"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    Filter
+                    @if ($activeFilters > 0)
+                        <span class="inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold bg-primary text-white rounded-full">{{ $activeFilters }}</span>
+                    @endif
+                    <svg class="w-3 h-3 transition-transform ease-out duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                <button type="submit" class="px-3.5 py-1.5 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer">
+                    Cari
+                </button>
+
+                @if (request()->hasAny(['q', 'unit', 'posisi', 'profesi', 'jabatan']))
+                    <a href="{{ route('karyawan.index') }}" class="py-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors ease-out duration-150">
+                        Reset
+                    </a>
+                @endif
+            </div>
+
+            <div
+                x-show="open"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 -translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 -translate-y-1"
+                class="grid grid-cols-2 md:grid-cols-4 gap-2.5"
             >
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Unit</label>
+                    <select name="unit" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
+                        <option value="">Semua Unit</option>
+                        @foreach ($filters['units'] as $unit)
+                            <option value="{{ $unit }}" @selected(request('unit') === $unit)>{{ $unit }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <select name="unit" class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
-                <option value="">Semua Unit</option>
-                @foreach ($filters['units'] as $unit)
-                    <option value="{{ $unit }}" @selected(request('unit') === $unit)>{{ $unit }}</option>
-                @endforeach
-            </select>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Posisi</label>
+                    <select name="posisi" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
+                        <option value="">Semua Posisi</option>
+                        @foreach ($filters['posisi'] as $posisi)
+                            <option value="{{ $posisi }}" @selected(request('posisi') === $posisi)>{{ $posisi }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <select name="posisi" class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
-                <option value="">Semua Posisi</option>
-                @foreach ($filters['posisi'] as $posisi)
-                    <option value="{{ $posisi }}" @selected(request('posisi') === $posisi)>{{ $posisi }}</option>
-                @endforeach
-            </select>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Profesi</label>
+                    <select name="profesi" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
+                        <option value="">Semua Profesi</option>
+                        @foreach ($filters['profesi'] as $profesi)
+                            <option value="{{ $profesi }}" @selected(request('profesi') === $profesi)>{{ $profesi }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <select name="profesi" class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
-                <option value="">Semua Profesi</option>
-                @foreach ($filters['profesi'] as $profesi)
-                    <option value="{{ $profesi }}" @selected(request('profesi') === $profesi)>{{ $profesi }}</option>
-                @endforeach
-            </select>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Jabatan</label>
+                    <select name="jabatan" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
+                        <option value="">Semua Jabatan</option>
+                        @foreach ($filters['jabatan'] as $jabatan)
+                            <option value="{{ $jabatan }}" @selected(request('jabatan') === $jabatan)>{{ $jabatan }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
 
-            <select name="jabatan" class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
-                <option value="">Semua Jabatan</option>
-                @foreach ($filters['jabatan'] as $jabatan)
-                    <option value="{{ $jabatan }}" @selected(request('jabatan') === $jabatan)>{{ $jabatan }}</option>
-                @endforeach
-            </select>
-
-            <button type="submit" class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors">
-                Cari
-            </button>
-
-            @if (request()->hasAny(['q', 'unit', 'posisi', 'profesi', 'jabatan']))
-                <a href="{{ route('karyawan.index') }}" class="px-4 py-2 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    Reset
-                </a>
-            @endif
         </form>
     </div>
 
-    {{-- Table --}}
-    <div class="bg-white rounded-xl overflow-hidden">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="border-b border-gray-100">
-                    <th class="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">NIP</th>
-                    <th class="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Nama Karyawan</th>
-                    <th class="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Unit</th>
-                    <th class="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Posisi</th>
-                    <th class="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Profesi</th>
-                    <th class="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Jabatan</th>
-                    <th class="text-right px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50">
-                @forelse ($employees as $employee)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-5 py-3.5 font-mono text-gray-500 text-xs">{{ $employee->nip }}</td>
-                        <td class="px-5 py-3.5 font-medium text-gray-800">{{ $employee->nama_karyawan }}</td>
-                        <td class="px-5 py-3.5 text-gray-600">{{ $employee->unit }}</td>
-                        <td class="px-5 py-3.5 text-gray-600">{{ $employee->posisi_pekerjaan }}</td>
-                        <td class="px-5 py-3.5 text-gray-600">{{ $employee->profesi }}</td>
-                        <td class="px-5 py-3.5">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary/10 text-primary font-medium">
-                                {{ $employee->jabatan }}
-                            </span>
-                        </td>
-                        <td class="px-5 py-3.5 text-right">
-                            <div class="flex items-center justify-end gap-2">
-                                <a href="{{ route('karyawan.show', $employee) }}" class="text-xs text-gray-500 hover:text-primary transition-colors px-2 py-1 rounded hover:bg-gray-100">
-                                    Detail
-                                </a>
-                                <a href="{{ route('karyawan.edit', $employee) }}" class="text-xs text-gray-500 hover:text-primary transition-colors px-2 py-1 rounded hover:bg-gray-100">
-                                    Edit
-                                </a>
-                                <form method="POST" action="{{ route('karyawan.destroy', $employee) }}" onsubmit="return confirm('Hapus data karyawan ' + @js($employee->nama_karyawan) + '?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-xs text-gray-500 hover:text-red-600 transition-colors px-2 py-1 rounded hover:bg-red-50">
-                                        Hapus
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+    {{-- Table card --}}
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-primary border-b border-primary/10 text-white">
+                        <th class="text-left px-3 py-2.5 text-[10px] font-semibold  uppercase tracking-wider w-36">NIP</th>
+                        <th class="text-left px-3 py-2.5 text-[10px] font-semibold  uppercase tracking-wider">Nama Karyawan</th>
+                        <th class="text-left px-3 py-2.5 text-[10px] font-semibold  uppercase tracking-wider">Nama Karyawan</th>
+                        <th class="text-left px-3 py-2.5 text-[10px] font-semibold  uppercase tracking-wider">Unit</th>
+                        <th class="text-left px-3 py-2.5 text-[10px] font-semibold  uppercase tracking-wider">Posisi</th>
+                        <th class="text-left px-3 py-2.5 text-[10px] font-semibold  uppercase tracking-wider">Jabatan</th>
+                        <th class="w-24 px-3 py-2.5"></th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="px-5 py-12 text-center text-gray-400 text-sm">
-                            Belum ada data karyawan.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse ($employees as $employee)
+                        <tr class="odd:bg-white even:bg-primary/5 hover:bg-primary/10 transition-colors ease-out duration-100">
+                            <td class="px-3 py-1.5 font-mono text-xs text-gray-400 tabular-nums">{{ $employee->nip }}</td>
+                            <td class="px-3 py-1.5 text-xs">
+                                <a href="{{ route('karyawan.show', $employee) }}" class="font-medium text-gray-800 hover:text-primary transition-colors ease-out duration-150 leading-tight block">
+                                    {{ $employee->nama_karyawan }}
+                                </a>
+                            </td>
+                            <td class="px-3 py-1.5 text-gray-500 text-xs">{{ $employee->profesi }}</td>
+                            <td class="px-3 py-1.5 text-gray-500 text-xs">{{ $employee->unit }}</td>
+                            <td class="px-3 py-1.5 text-gray-500 text-xs">{{ $employee->posisi_pekerjaan }}</td>
+                            <td class="px-3 py-1.5">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary/10 text-primary font-medium">
+                                    {{ $employee->jabatan }}
+                                </span>
+                            </td>
+                            <td class="px-3 py-1.5">
+                                <div class="flex items-center justify-end gap-0.5">
+                                    <a
+                                        href="{{ route('karyawan.show', $employee) }}"
+                                        class="p-1.5 rounded text-primary/40 hover:text-primary hover:bg-primary/10 transition-colors ease-out duration-150"
+                                        title="Lihat detail"
+                                        aria-label="Lihat detail {{ $employee->nama_karyawan }}"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                    <a
+                                        href="{{ route('karyawan.edit', $employee) }}"
+                                        class="p-1.5 rounded text-amber-400/60 hover:text-amber-500 hover:bg-amber-50 transition-colors ease-out duration-150"
+                                        title="Edit karyawan"
+                                        aria-label="Edit {{ $employee->nama_karyawan }}"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                        </svg>
+                                    </a>
+                                    <form method="POST" action="{{ route('karyawan.destroy', $employee) }}" onsubmit="return confirm('Hapus data karyawan ' + @js($employee->nama_karyawan) + '?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button
+                                            type="submit"
+                                            class="p-1.5 rounded text-red-400/60 hover:text-red-500 hover:bg-red-50 transition-colors ease-out duration-150 cursor-pointer"
+                                            title="Hapus karyawan"
+                                            aria-label="Hapus {{ $employee->nama_karyawan }}"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-4 py-14 text-center">
+                                <div class="flex flex-col items-center gap-2.5 max-w-xs mx-auto">
+                                    <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                    </div>
+                                    @if (request()->hasAny(['q', 'unit', 'posisi', 'profesi', 'jabatan']))
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-700">Tidak ada hasil</p>
+                                            <p class="text-xs text-gray-400 mt-0.5">Coba ubah filter atau kata kunci pencarian</p>
+                                        </div>
+                                        <a href="{{ route('karyawan.index') }}" class="text-xs text-primary hover:text-primary-dark transition-colors ease-out duration-150">
+                                            Reset filter
+                                        </a>
+                                    @else
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-700">Belum ada data karyawan</p>
+                                            <p class="text-xs text-gray-400 mt-0.5">Mulai tambahkan karyawan RS Azra</p>
+                                        </div>
+                                        <a
+                                            href="{{ route('karyawan.create') }}"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Tambah Karyawan
+                                        </a>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
         @if ($employees->hasPages())
-            <div class="px-5 py-4 border-t border-gray-100">
+            <div class="px-4 py-3 border-t border-gray-100">
                 {{ $employees->links() }}
             </div>
         @endif

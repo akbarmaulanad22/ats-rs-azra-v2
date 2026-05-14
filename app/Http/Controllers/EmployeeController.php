@@ -17,23 +17,44 @@ class EmployeeController extends Controller
         Gate::authorize('viewAny', Employee::class);
 
         $employees = Employee::query()
-            ->when($request->q, fn ($q, $search) => $q->where(function ($q) use ($search) {
-                $q->where('nama_karyawan', 'like', "%{$search}%")
-                    ->orWhere('nip', 'like', "%{$search}%");
-            }))
+            ->when(
+                $request->q,
+                fn ($q, $search) => $q->where(function ($q) use ($search) {
+                    $q->where('nama_karyawan', 'ilike', "%{$search}%")->orWhere(
+                        'nip',
+                        'ilike',
+                        "%{$search}%",
+                    );
+                }),
+            )
             ->when($request->unit, fn ($q, $unit) => $q->where('unit', $unit))
-            ->when($request->posisi, fn ($q, $posisi) => $q->where('posisi_pekerjaan', $posisi))
-            ->when($request->profesi, fn ($q, $profesi) => $q->where('profesi', $profesi))
-            ->when($request->jabatan, fn ($q, $jabatan) => $q->where('jabatan', $jabatan))
+            ->when(
+                $request->posisi,
+                fn ($q, $posisi) => $q->where('posisi_pekerjaan', $posisi),
+            )
+            ->when(
+                $request->profesi,
+                fn ($q, $profesi) => $q->where('profesi', $profesi),
+            )
+            ->when(
+                $request->jabatan,
+                fn ($q, $jabatan) => $q->where('jabatan', $jabatan),
+            )
             ->orderBy('nama_karyawan')
             ->paginate(15)
             ->withQueryString();
 
         $filters = [
             'units' => Employee::distinct()->orderBy('unit')->pluck('unit'),
-            'posisi' => Employee::distinct()->orderBy('posisi_pekerjaan')->pluck('posisi_pekerjaan'),
-            'profesi' => Employee::distinct()->orderBy('profesi')->pluck('profesi'),
-            'jabatan' => Employee::distinct()->orderBy('jabatan')->pluck('jabatan'),
+            'posisi' => Employee::distinct()
+                ->orderBy('posisi_pekerjaan')
+                ->pluck('posisi_pekerjaan'),
+            'profesi' => Employee::distinct()
+                ->orderBy('profesi')
+                ->pluck('profesi'),
+            'jabatan' => Employee::distinct()
+                ->orderBy('jabatan')
+                ->pluck('jabatan'),
         ];
 
         return view('employees.index', compact('employees', 'filters'));
@@ -50,7 +71,8 @@ class EmployeeController extends Controller
     {
         Employee::create($request->validated());
 
-        return redirect()->route('karyawan.index')
+        return redirect()
+            ->route('karyawan.index')
             ->with('status', 'Data karyawan berhasil ditambahkan.');
     }
 
@@ -68,11 +90,14 @@ class EmployeeController extends Controller
         return view('employees.edit', compact('employee'));
     }
 
-    public function update(UpdateEmployeeRequest $request, Employee $employee): RedirectResponse
-    {
+    public function update(
+        UpdateEmployeeRequest $request,
+        Employee $employee,
+    ): RedirectResponse {
         $employee->update($request->validated());
 
-        return redirect()->route('karyawan.index')
+        return redirect()
+            ->route('karyawan.index')
             ->with('status', 'Data karyawan berhasil diperbarui.');
     }
 
@@ -82,7 +107,8 @@ class EmployeeController extends Controller
 
         $employee->delete();
 
-        return redirect()->route('karyawan.index')
+        return redirect()
+            ->route('karyawan.index')
             ->with('status', 'Data karyawan berhasil dihapus.');
     }
 }
