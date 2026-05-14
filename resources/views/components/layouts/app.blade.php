@@ -140,8 +140,22 @@
     >
         <div class="p-6">
             @if (session('status'))
-                <div class="mb-4 rounded-lg bg-green-50 border border-green-200 p-4">
+                <div
+                    class="mb-4 rounded-lg bg-green-50 border border-green-200 p-4 flex items-start justify-between gap-3 transition-opacity duration-500"
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-init="setTimeout(() => show = false, 2000)"
+                >
                     <p class="text-sm text-green-700">{{ session('status') }}</p>
+                    <button
+                        @click="show = false"
+                        class="text-green-500 hover:text-green-700 transition-colors shrink-0 -mt-0.5"
+                        aria-label="Tutup"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
                 </div>
             @endif
 
