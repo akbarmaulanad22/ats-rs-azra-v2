@@ -19,39 +19,25 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-                <label for="unit_id" class="block text-xs font-medium text-gray-700 mb-1">Unit <span class="text-red-500">*</span></label>
-                <select
-                    id="unit_id"
-                    name="unit_id"
-                    class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('unit_id') border-red-400 @else border-gray-200 @enderror"
-                >
-                    <option value="">-- Pilih Unit --</option>
-                    @foreach ($units as $unit)
-                        <option value="{{ $unit->id }}" @selected(old('unit_id', $lowongan->unit_id ?? '') == $unit->id)>{{ $unit->nama }}</option>
-                    @endforeach
-                </select>
-                @error('unit_id')
-                    <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-autocomplete-select
+                name="unit_id"
+                label="Unit"
+                :options="$units->map(fn ($u) => ['id' => $u->id, 'label' => $u->nama])"
+                :value="old('unit_id', $lowongan->unit_id ?? null)"
+                :required="true"
+                placeholder="Cari unit..."
+                label-class="block text-xs font-medium text-gray-700 mb-1"
+            />
 
-            <div>
-                <label for="workflow_template_id" class="block text-xs font-medium text-gray-700 mb-1">Template Alur Kerja <span class="text-red-500">*</span></label>
-                <select
-                    id="workflow_template_id"
-                    name="workflow_template_id"
-                    class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('workflow_template_id') border-red-400 @else border-gray-200 @enderror"
-                >
-                    <option value="">-- Pilih Template --</option>
-                    @foreach ($templates as $template)
-                        <option value="{{ $template->id }}" @selected(old('workflow_template_id', $lowongan->workflow_template_id ?? '') == $template->id)>{{ $template->nama }}</option>
-                    @endforeach
-                </select>
-                @error('workflow_template_id')
-                    <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-autocomplete-select
+                name="workflow_template_id"
+                label="Template Alur Kerja"
+                :options="$templates->map(fn ($t) => ['id' => $t->id, 'label' => $t->nama])"
+                :value="old('workflow_template_id', $lowongan->workflow_template_id ?? null)"
+                :required="true"
+                placeholder="Cari template..."
+                label-class="block text-xs font-medium text-gray-700 mb-1"
+            />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">

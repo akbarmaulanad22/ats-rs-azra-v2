@@ -87,15 +87,14 @@
                     </select>
                 </div>
 
-                <div>
-                    <label class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1">Unit</label>
-                    <select name="unit_id" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded focus-ring bg-white">
-                        <option value="">Semua Unit</option>
-                        @foreach ($units as $unit)
-                            <option value="{{ $unit->id }}" @selected(request('unit_id') == $unit->id)>{{ $unit->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-autocomplete-select
+                    name="unit_id"
+                    label="Unit"
+                    :options="$units->map(fn ($u) => ['id' => $u->id, 'label' => $u->nama])"
+                    :value="request('unit_id')"
+                    placeholder="Semua Unit"
+                    label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
+                />
             </div>
 
         </form>
