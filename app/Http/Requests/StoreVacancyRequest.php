@@ -3,8 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Enums\EmploymentType;
+use App\Enums\VacancyStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreVacancyRequest extends FormRequest
@@ -28,7 +30,7 @@ class StoreVacancyRequest extends FormRequest
             'kualifikasi' => ['required', 'string'],
             'jumlah_posisi' => ['required', 'integer', 'min:1'],
             'tenggat_lamaran' => ['required', 'date', 'after_or_equal:today'],
-            'status' => ['sometimes', 'string', 'in:draft,published'],
+            'status' => ['sometimes', Rule::in([VacancyStatus::Draft->value, VacancyStatus::Published->value])],
         ];
     }
 

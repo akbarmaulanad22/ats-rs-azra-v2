@@ -23,7 +23,7 @@ class VacancyController extends Controller
         $vacancies = Vacancy::with(['unit', 'workflowTemplate'])
             ->when(
                 $request->q,
-                fn ($q, $search) => $q->whereRaw('LOWER(judul_posisi) LIKE ?', ['%'.strtolower($search).'%']),
+                fn ($q, $search) => $q->whereRaw('LOWER(judul_posisi) LIKE ?', ['%'.strtolower(str_replace(['%', '_'], ['\%', '\_'], $search)).'%']),
             )
             ->when(
                 $request->status,
@@ -56,10 +56,9 @@ class VacancyController extends Controller
 
     public function store(StoreVacancyRequest $request): RedirectResponse
     {
-        $data = $request->validated();
-        $data['status'] = $data['status'] ?? VacancyStatus::Draft->value;
+        Gate::authorize('create', Vacancy::class);
 
-        Vacancy::create($data);
+        Vacancy::create($request->validated());
 
         return redirect()->route('lowongan.index')
             ->with('status', 'Lowongan berhasil dibuat.');

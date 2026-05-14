@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\VacancyStatus;
 use App\Models\Vacancy;
 use Illuminate\View\View;
 
@@ -19,7 +20,11 @@ class CareerController extends Controller
 
     public function show(Vacancy $vacancy): View
     {
-        abort_unless($vacancy->status->value === 'published' && $vacancy->tenggat_lamaran->gte(now()->startOfDay()), 404);
+        abort_unless(
+            $vacancy->status === VacancyStatus::Published
+            && $vacancy->tenggat_lamaran->gte(now()->startOfDay()),
+            404,
+        );
 
         $vacancy->load('unit', 'workflowTemplate');
 
