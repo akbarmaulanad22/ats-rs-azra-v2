@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\WorkflowTemplateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => auth()->check()
@@ -24,4 +25,8 @@ Route::middleware('auth')->group(function () {
         ->parameters(['akun' => 'user'])
         ->only(['index', 'create', 'store', 'edit', 'update']);
     Route::patch('/akun/{user}/toggle-aktif', [AccountController::class, 'toggleAktif'])->name('akun.toggle-aktif');
+
+    Route::resource('template-alur', WorkflowTemplateController::class)
+        ->parameters(['template-alur' => 'templateAlur'])
+        ->except(['show']);
 });
