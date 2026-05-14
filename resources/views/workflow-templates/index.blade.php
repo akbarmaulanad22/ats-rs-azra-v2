@@ -71,7 +71,7 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($templates as $template)
                         <tr class="odd:bg-white even:bg-primary/5 hover:bg-primary/10 transition-colors ease-out duration-100">
-                            <td class="px-3 py-2 text-xs text-gray-400 tabular-nums">{{ $loop->iteration }}</td>
+                            <td class="px-3 py-2 text-xs text-gray-400 tabular-nums">{{ $templates->firstItem() + $loop->index }}</td>
                             <td class="px-3 py-2">
                                 <span class="text-xs font-semibold text-gray-900">{{ $template->nama }}</span>
                                 <span class="block text-[10px] text-gray-400 mt-0.5">{{ $template->stages->count() }} tahap</span>
@@ -105,7 +105,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                         </svg>
                                     </a>
-                                    <form method="POST" action="{{ route('template-alur.destroy', $template) }}" onsubmit="return confirm('Hapus template {{ addslashes($template->nama) }}?')">
+                                    <form method="POST" action="{{ route('template-alur.destroy', $template) }}" onsubmit="return confirm('Hapus template ' + {{ Js::from($template->nama) }} + '?')">
                                         @csrf
                                         @method('DELETE')
                                         <button
@@ -161,5 +161,11 @@
             </table>
         </div>
     </div>
+
+    @if ($templates->hasPages())
+        <div class="mt-4">
+            {{ $templates->links() }}
+        </div>
+    @endif
 
 </x-layouts.app>

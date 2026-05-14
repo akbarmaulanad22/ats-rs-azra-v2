@@ -20,13 +20,13 @@ class WorkflowTemplateTest extends TestCase
 
     private function stageIds(array $keys): array
     {
-        return Stage::whereIn('key', $keys)->orderByRaw(
-            'CASE '.implode(' ', array_map(
-                fn ($k, $i) => "WHEN key = '{$k}' THEN {$i}",
-                $keys,
-                array_keys($keys)
-            )).' END'
-        )->pluck('id')->toArray();
+        $stages = Stage::whereIn('key', $keys)->get()->keyBy('key');
+
+        return collect($keys)
+            ->map(fn ($key) => $stages[$key]->id ?? null)
+            ->filter()
+            ->values()
+            ->toArray();
     }
 
     private function allStageIds(): array
@@ -168,7 +168,7 @@ class WorkflowTemplateTest extends TestCase
             'stages' => $ids,
         ]);
 
-        $response->assertStatus(422);
+        $response->assertSessionHasErrors('stages');
         $this->assertDatabaseMissing('workflow_templates', ['nama' => 'Template']);
     }
 
@@ -187,7 +187,7 @@ class WorkflowTemplateTest extends TestCase
             'stages' => $ids,
         ]);
 
-        $response->assertStatus(422);
+        $response->assertSessionHasErrors('stages');
     }
 
     public function test_store_allows_partial_stages_in_middle(): void

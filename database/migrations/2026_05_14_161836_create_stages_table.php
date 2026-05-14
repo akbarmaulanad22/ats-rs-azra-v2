@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('key')->unique();
             $table->string('nama');
-            $table->boolean('is_locked_first')->default(false);
-            $table->boolean('is_locked_last')->default(false);
+            $table->boolean('is_locked_first')->default(false)->index();
+            $table->boolean('is_locked_last')->default(false)->index();
             $table->timestamps();
         });
     }

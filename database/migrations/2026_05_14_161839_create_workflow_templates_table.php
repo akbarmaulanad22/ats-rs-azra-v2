@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('workflow_templates', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
+            $table->string('nama')->unique();
             $table->timestamps();
         });
     }

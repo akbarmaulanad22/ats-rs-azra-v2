@@ -9,6 +9,7 @@ use App\Models\WorkflowTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class WorkflowTemplateController extends Controller
@@ -23,7 +24,8 @@ class WorkflowTemplateController extends Controller
                 fn ($q, $search) => $q->whereRaw('LOWER(nama) LIKE ?', ['%'.strtolower($search).'%']),
             )
             ->orderBy('nama')
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
 
         return view('workflow-templates.index', compact('templates'));
     }
@@ -45,11 +47,7 @@ class WorkflowTemplateController extends Controller
 
         $template = WorkflowTemplate::create(['nama' => $request->validated()['nama']]);
 
-        $pivot = [];
-        foreach ($stageIds as $position => $stageId) {
-            $pivot[(int) $stageId] = ['position' => $position + 1];
-        }
-        $template->stages()->sync($pivot);
+        $this->syncStages($template, $stageIds);
 
         return redirect()->route('template-alur.index')
             ->with('status', 'Template alur kerja berhasil dibuat.');
@@ -74,11 +72,7 @@ class WorkflowTemplateController extends Controller
 
         $templateAlur->update(['nama' => $request->validated()['nama']]);
 
-        $pivot = [];
-        foreach ($stageIds as $position => $stageId) {
-            $pivot[(int) $stageId] = ['position' => $position + 1];
-        }
-        $templateAlur->stages()->sync($pivot);
+        $this->syncStages($templateAlur, $stageIds);
 
         return redirect()->route('template-alur.index')
             ->with('status', 'Template alur kerja berhasil diperbarui.');
@@ -94,6 +88,15 @@ class WorkflowTemplateController extends Controller
             ->with('status', 'Template alur kerja berhasil dihapus.');
     }
 
+    private function syncStages(WorkflowTemplate $template, array $stageIds): void
+    {
+        $pivot = [];
+        foreach ($stageIds as $position => $stageId) {
+            $pivot[(int) $stageId] = ['position' => $position + 1];
+        }
+        $template->stages()->sync($pivot);
+    }
+
     private function validateStageConstraints(array $stageIds): void
     {
         $stages = Stage::whereIn('id', $stageIds)->get()->keyBy('id');
@@ -105,19 +108,27 @@ class WorkflowTemplateController extends Controller
         $lastStage = $stages[$lastId] ?? null;
 
         if (! $firstStage || ! $firstStage->is_locked_first) {
-            abort(422, 'Tahap pertama harus berupa "Aplikasi".');
+            throw ValidationException::withMessages([
+                'stages' => 'Tahap pertama harus berupa "Aplikasi".',
+            ]);
         }
 
         if (! $lastStage || ! $lastStage->is_locked_last) {
-            abort(422, 'Tahap terakhir harus berupa "Onboarding".');
+            throw ValidationException::withMessages([
+                'stages' => 'Tahap terakhir harus berupa "Onboarding".',
+            ]);
         }
 
         foreach ($stages as $stage) {
             if ($stage->is_locked_first && $firstId !== $stage->id) {
-                abort(422, 'Tahap "Aplikasi" harus selalu berada di posisi pertama.');
+                throw ValidationException::withMessages([
+                    'stages' => 'Tahap "Aplikasi" harus selalu berada di posisi pertama.',
+                ]);
             }
             if ($stage->is_locked_last && $lastId !== $stage->id) {
-                abort(422, 'Tahap "Onboarding" harus selalu berada di posisi terakhir.');
+                throw ValidationException::withMessages([
+                    'stages' => 'Tahap "Onboarding" harus selalu berada di posisi terakhir.',
+                ]);
             }
         }
     }

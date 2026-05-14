@@ -21,7 +21,7 @@ class StoreWorkflowTemplateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nama' => ['required', 'string', 'max:255'],
+            'nama' => ['required', 'string', 'max:255', 'unique:workflow_templates,nama'],
             'stages' => ['required', 'array', 'min:2'],
             'stages.*' => ['required', 'integer', 'exists:stages,id'],
         ];
