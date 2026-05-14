@@ -20,11 +20,9 @@ class EmployeeController extends Controller
             ->when(
                 $request->q,
                 fn ($q, $search) => $q->where(function ($q) use ($search) {
-                    $q->where('nama_karyawan', 'ilike', "%{$search}%")->orWhere(
-                        'nip',
-                        'ilike',
-                        "%{$search}%",
-                    );
+                    $lower = strtolower($search);
+                    $q->whereRaw('LOWER(nama_karyawan) LIKE ?', ["%{$lower}%"])
+                        ->orWhereRaw('LOWER(nip) LIKE ?', ["%{$lower}%"]);
                 }),
             )
             ->when($request->unit, fn ($q, $unit) => $q->where('unit', $unit))

@@ -21,11 +21,12 @@ class AccountController extends Controller
 
         $accounts = User::with('employee')
             ->when($request->q, function ($q, $search) {
-                $q->where(function ($q) use ($search) {
-                    $q->where('username', 'ilike', "%{$search}%")
+                $lower = strtolower($search);
+                $q->where(function ($q) use ($lower) {
+                    $q->whereRaw('LOWER(username) LIKE ?', ["%{$lower}%"])
                         ->orWhereHas('employee', fn ($q) => $q
-                            ->where('nama_karyawan', 'ilike', "%{$search}%")
-                            ->orWhere('nip', 'ilike', "%{$search}%")
+                            ->whereRaw('LOWER(nama_karyawan) LIKE ?', ["%{$lower}%"])
+                            ->orWhereRaw('LOWER(nip) LIKE ?', ["%{$lower}%"])
                         );
                 });
             })
