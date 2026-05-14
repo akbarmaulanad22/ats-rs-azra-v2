@@ -77,15 +77,14 @@
                 x-transition:leave-end="opacity-0 -translate-y-1"
                 class="grid grid-cols-2 md:grid-cols-4 gap-2.5"
             >
-                <div>
-                    <label class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1">Status</label>
-                    <select name="status" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded focus-ring bg-white">
-                        <option value="">Semua Status</option>
-                        @foreach (\App\Enums\VacancyStatus::cases() as $s)
-                            <option value="{{ $s->value }}" @selected(request('status') === $s->value)>{{ $s->label() }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-autocomplete-select
+                    name="status"
+                    label="Status"
+                    :options="collect(\App\Enums\VacancyStatus::cases())->map(fn ($s) => ['id' => $s->value, 'label' => $s->label()])"
+                    :value="request('status')"
+                    placeholder="Semua Status"
+                    label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
+                />
 
                 <x-autocomplete-select
                     name="unit_id"
