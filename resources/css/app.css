@@ -6,7 +6,30 @@
 @source "../**/*.js";
 @source "../**/*.vue";
 
+/* Soft teal focus ring for form inputs — rgba(0,119,116,0.15) halo */
+.focus-ring:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 119, 116, 0.15);
+}
+
+/* Honour reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
+
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-primary: rgb(0, 119, 116);
+    --color-primary-dark: rgb(0, 88, 85);
+    --color-primary-light: rgb(0, 148, 144);
+    --color-secondary: rgb(129, 189, 65);
+    --color-secondary-dark: rgb(103, 153, 50);
+    --color-page: #f0f2f5;
+    --color-surface: #ffffff;
 }
