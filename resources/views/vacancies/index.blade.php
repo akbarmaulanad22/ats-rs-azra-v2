@@ -16,10 +16,15 @@
         </a>
     </div>
 
-    {{-- Filters --}}
-    <div class="mb-3">
+    @php
+        $activeFilters = collect(['status', 'unit_id'])
+            ->filter(fn ($k) => request($k))->count();
+    @endphp
+
+    <div class="mb-3" x-data="{ open: {{ $activeFilters > 0 ? 'true' : 'false' }} }">
         <form method="GET" action="{{ route('lowongan.index') }}">
-            <div class="flex flex-wrap items-center gap-2">
+
+            <div class="flex flex-wrap items-center gap-2 mb-2">
                 <div class="relative flex-1 min-w-52">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -32,31 +37,71 @@
                         class="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus-ring bg-white placeholder:text-gray-400"
                     >
                 </div>
-                <select name="status" class="py-1.5 px-3 text-sm border border-gray-200 rounded-md focus-ring bg-white">
-                    <option value="">Semua Status</option>
-                    @foreach (\App\Enums\VacancyStatus::cases() as $s)
-                        <option value="{{ $s->value }}" @selected(request('status') === $s->value)>{{ $s->label() }}</option>
-                    @endforeach
-                </select>
-                <select name="unit_id" class="py-1.5 px-3 text-sm border border-gray-200 rounded-md focus-ring bg-white">
-                    <option value="">Semua Unit</option>
-                    @foreach ($units as $unit)
-                        <option value="{{ $unit->id }}" @selected(request('unit_id') == $unit->id)>{{ $unit->nama }}</option>
-                    @endforeach
-                </select>
+
+                <button
+                    type="button"
+                    @click="open = !open"
+                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md transition-colors ease-out duration-150 cursor-pointer bg-white"
+                    :class="open ? 'border-primary/40 text-primary bg-primary/5' : 'border-gray-200 text-gray-500 hover:border-primary/40 hover:text-primary'"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    Filter
+                    @if ($activeFilters > 0)
+                        <span class="inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold bg-primary text-white rounded-full">{{ $activeFilters }}</span>
+                    @endif
+                    <svg class="w-3 h-3 transition-transform ease-out duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
                 <button type="submit" class="px-3.5 py-1.5 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer">
                     Cari
                 </button>
+
                 @if (request()->anyFilled(['q', 'status', 'unit_id']))
                     <a href="{{ route('lowongan.index') }}" class="py-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors ease-out duration-150">
                         Reset
                     </a>
                 @endif
             </div>
+
+            <div
+                x-show="open"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 -translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 -translate-y-1"
+                class="grid grid-cols-2 md:grid-cols-4 gap-2.5"
+            >
+                <div>
+                    <label class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1">Status</label>
+                    <select name="status" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded focus-ring bg-white">
+                        <option value="">Semua Status</option>
+                        @foreach (\App\Enums\VacancyStatus::cases() as $s)
+                            <option value="{{ $s->value }}" @selected(request('status') === $s->value)>{{ $s->label() }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1">Unit</label>
+                    <select name="unit_id" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded focus-ring bg-white">
+                        <option value="">Semua Unit</option>
+                        @foreach ($units as $unit)
+                            <option value="{{ $unit->id }}" @selected(request('unit_id') == $unit->id)>{{ $unit->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
         </form>
     </div>
 
-    {{-- Table --}}
+    {{-- Table card --}}
     <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -74,20 +119,20 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($vacancies as $vacancy)
                         <tr class="odd:bg-white even:bg-primary/5 hover:bg-primary/10 transition-colors ease-out duration-100">
-                            <td class="px-3 py-2 text-xs text-gray-400 tabular-nums">{{ $vacancies->firstItem() + $loop->index }}</td>
-                            <td class="px-3 py-2">
+                            <td class="px-3 py-1.5 text-xs text-gray-400 tabular-nums">{{ $vacancies->firstItem() + $loop->index }}</td>
+                            <td class="px-3 py-1.5">
                                 <span class="text-xs font-semibold text-gray-900">{{ $vacancy->judul_posisi }}</span>
                                 <span class="block text-[10px] text-gray-400 mt-0.5">{{ $vacancy->jumlah_posisi }} posisi</span>
                             </td>
-                            <td class="px-3 py-2 text-xs text-gray-600">{{ $vacancy->unit->nama }}</td>
-                            <td class="px-3 py-2 text-xs text-gray-600">{{ $vacancy->jenis_pekerjaan->label() }}</td>
-                            <td class="px-3 py-2 text-xs text-gray-600 tabular-nums">
+                            <td class="px-3 py-1.5 text-xs text-gray-600">{{ $vacancy->unit->nama }}</td>
+                            <td class="px-3 py-1.5 text-xs text-gray-600">{{ $vacancy->jenis_pekerjaan->label() }}</td>
+                            <td class="px-3 py-1.5 text-xs text-gray-600 tabular-nums">
                                 {{ $vacancy->tenggat_lamaran->format('d M Y') }}
                                 @if ($vacancy->tenggat_lamaran->isPast())
                                     <span class="block text-[10px] text-red-500">Kedaluwarsa</span>
                                 @endif
                             </td>
-                            <td class="px-3 py-2">
+                            <td class="px-3 py-1.5">
                                 @php
                                     $badgeClass = match ($vacancy->status) {
                                         \App\Enums\VacancyStatus::Draft => 'bg-gray-100 text-gray-600',
@@ -99,24 +144,26 @@
                                     {{ $vacancy->status->label() }}
                                 </span>
                             </td>
-                            <td class="px-3 py-2">
+                            <td class="px-3 py-1.5">
                                 <div class="flex items-center justify-end gap-0.5">
                                     <a
                                         href="{{ route('lowongan.edit', $vacancy) }}"
                                         class="p-1.5 rounded text-amber-400/60 hover:text-amber-500 hover:bg-amber-50 transition-colors ease-out duration-150"
                                         title="Edit lowongan"
+                                        aria-label="Edit {{ $vacancy->judul_posisi }}"
                                     >
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                         </svg>
                                     </a>
-                                    <form method="POST" action="{{ route('lowongan.destroy', $vacancy) }}" onsubmit="return confirm('Hapus lowongan {{ addslashes($vacancy->judul_posisi) }}?')">
+                                    <form method="POST" action="{{ route('lowongan.destroy', $vacancy) }}" onsubmit="return confirm('Hapus lowongan ' + @js($vacancy->judul_posisi) + '?')">
                                         @csrf
                                         @method('DELETE')
                                         <button
                                             type="submit"
                                             class="p-1.5 rounded text-red-400/60 hover:text-red-500 hover:bg-red-50 transition-colors ease-out duration-150 cursor-pointer"
                                             title="Hapus lowongan"
+                                            aria-label="Hapus {{ $vacancy->judul_posisi }}"
                                         >
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -138,7 +185,7 @@
                                     @if (request()->anyFilled(['q', 'status', 'unit_id']))
                                         <div>
                                             <p class="text-sm font-medium text-gray-700">Tidak ada hasil</p>
-                                            <p class="text-xs text-gray-400 mt-0.5">Coba ubah filter pencarian</p>
+                                            <p class="text-xs text-gray-400 mt-0.5">Coba ubah filter atau kata kunci pencarian</p>
                                         </div>
                                         <a href="{{ route('lowongan.index') }}" class="text-xs text-primary hover:text-primary-dark transition-colors ease-out duration-150">
                                             Reset filter
@@ -146,7 +193,7 @@
                                     @else
                                         <div>
                                             <p class="text-sm font-medium text-gray-700">Belum ada lowongan</p>
-                                            <p class="text-xs text-gray-400 mt-0.5">Buat lowongan kerja pertama</p>
+                                            <p class="text-xs text-gray-400 mt-0.5">Buat lowongan kerja pertama RS Azra</p>
                                         </div>
                                         <a
                                             href="{{ route('lowongan.create') }}"
@@ -165,12 +212,12 @@
                 </tbody>
             </table>
         </div>
-    </div>
 
-    @if ($vacancies->hasPages())
-        <div class="mt-4">
-            {{ $vacancies->links() }}
-        </div>
-    @endif
+        @if ($vacancies->hasPages())
+            <div class="px-4 py-3 border-t border-gray-100">
+                {{ $vacancies->links() }}
+            </div>
+        @endif
+    </div>
 
 </x-layouts.app>
