@@ -19,7 +19,7 @@ class AccountPolicy
 
     public function update(User $user, User $account): bool
     {
-        return $user->hasRole(Role::HrAdmin);
+        return $user->hasRole(Role::HrAdmin) && $user->id !== $account->id;
     }
 
     public function delete(User $user, User $account): bool

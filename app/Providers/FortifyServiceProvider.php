@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -28,7 +29,13 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::authenticateUsing(function (Request $request) {
             $user = User::where('username', $request->username)->first();
 
-            if ($user && Hash::check($request->password, $user->password) && $user->is_active) {
+            if ($user && Hash::check($request->password, $user->password)) {
+                if (! $user->is_active) {
+                    throw ValidationException::withMessages([
+                        'username' => 'Akun Anda telah dinonaktifkan. Hubungi HR Admin.',
+                    ]);
+                }
+
                 return $user;
             }
         });

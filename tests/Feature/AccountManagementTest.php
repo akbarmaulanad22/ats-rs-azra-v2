@@ -295,6 +295,28 @@ class AccountManagementTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $account->id, 'is_active' => true]);
     }
 
+    public function test_hr_admin_cannot_deactivate_own_account(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+
+        $response = $this->actingAs($admin)->patch(route('akun.toggle-aktif', $admin));
+
+        $response->assertStatus(403);
+        $this->assertDatabaseHas('users', ['id' => $admin->id, 'is_active' => true]);
+    }
+
+    public function test_hr_admin_cannot_edit_own_account(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+
+        $response = $this->actingAs($admin)->patch(route('akun.update', $admin), [
+            'username' => 'newusername',
+            'role' => Role::Employee->value,
+        ]);
+
+        $response->assertStatus(403);
+    }
+
     public function test_deactivated_account_cannot_login(): void
     {
         User::factory()->inactive()->create(['username' => 'nonaktif']);
@@ -306,6 +328,18 @@ class AccountManagementTest extends TestCase
 
         $response->assertRedirect(route('login'));
         $this->assertGuest();
+    }
+
+    public function test_deactivated_account_sees_specific_error_message(): void
+    {
+        User::factory()->inactive()->create(['username' => 'nonaktif']);
+
+        $response = $this->from(route('login'))->post(route('login'), [
+            'username' => 'nonaktif',
+            'password' => 'password',
+        ]);
+
+        $response->assertSessionHasErrors(['username' => 'Akun Anda telah dinonaktifkan. Hubungi HR Admin.']);
     }
 
     // ── Username Generation ────────────────────────────────────────────────────

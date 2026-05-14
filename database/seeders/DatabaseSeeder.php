@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Administrator',
             'username' => 'admin',
-            'email' => 'admin@ats.local',
             'password' => Hash::make('password'),
             'role' => Role::HrAdmin,
             'must_change_password' => true,
