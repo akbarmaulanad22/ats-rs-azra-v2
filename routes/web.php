@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => auth()->check()
@@ -14,4 +15,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/ubah-password', [PasswordChangeController::class, 'update'])->name('password.update');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('karyawan', EmployeeController::class)->parameters(['karyawan' => 'employee']);
 });
