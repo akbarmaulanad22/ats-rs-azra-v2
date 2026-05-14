@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
@@ -17,4 +18,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('karyawan', EmployeeController::class)->parameters(['karyawan' => 'employee']);
+
+    Route::resource('akun', AccountController::class)
+        ->parameters(['akun' => 'user'])
+        ->only(['index', 'create', 'store', 'edit', 'update']);
+    Route::patch('/akun/{user}/toggle-aktif', [AccountController::class, 'toggleAktif'])->name('akun.toggle-aktif');
 });
