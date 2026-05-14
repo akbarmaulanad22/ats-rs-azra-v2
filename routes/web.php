@@ -19,6 +19,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('karyawan', EmployeeController::class)->parameters(['karyawan' => 'employee']);
 
+    Route::get('/akun/karyawan-tersedia', [AccountController::class, 'availableEmployees'])->name('akun.karyawan-tersedia');
     Route::resource('akun', AccountController::class)
         ->parameters(['akun' => 'user'])
         ->only(['index', 'create', 'store', 'edit', 'update']);

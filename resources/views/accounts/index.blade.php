@@ -76,24 +76,23 @@
                 x-transition:leave-end="opacity-0 -translate-y-1"
                 class="grid grid-cols-2 md:grid-cols-4 gap-2.5"
             >
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Role</label>
-                    <select name="role" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
-                        <option value="">Semua Role</option>
-                        @foreach ($roles as $role)
-                            <option value="{{ $role->value }}" @selected(request('role') === $role->value)>{{ $role->label() }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-autocomplete-select
+                    name="role"
+                    label="Role"
+                    :options="collect($roles)->map(fn ($r) => ['id' => $r->value, 'label' => $r->label()])"
+                    :value="request('role')"
+                    placeholder="Semua Role"
+                    label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
+                />
 
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Status</label>
-                    <select name="status" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
-                        <option value="">Semua Status</option>
-                        <option value="aktif" @selected(request('status') === 'aktif')>Aktif</option>
-                        <option value="nonaktif" @selected(request('status') === 'nonaktif')>Nonaktif</option>
-                    </select>
-                </div>
+                <x-autocomplete-select
+                    name="status"
+                    label="Status"
+                    :options="[['id' => 'aktif', 'label' => 'Aktif'], ['id' => 'nonaktif', 'label' => 'Nonaktif']]"
+                    :value="request('status')"
+                    placeholder="Semua Status"
+                    label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
+                />
             </div>
 
         </form>

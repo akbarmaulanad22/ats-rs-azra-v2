@@ -43,6 +43,51 @@ class AccountManagementTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
+    public function test_account_list_is_searchable_by_username(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        User::factory()->create(['username' => 'budisantoso']);
+        User::factory()->create(['username' => 'sariindah']);
+
+        $response = $this->actingAs($admin)->get(route('akun.index', ['q' => 'budi']));
+
+        $response->assertStatus(200);
+        $response->assertSee('budisantoso');
+        $response->assertDontSee('sariindah');
+    }
+
+    public function test_account_list_is_searchable_by_employee_name(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+
+        $emp1 = Employee::factory()->create(['nama_karyawan' => 'Ahmad Fauzi']);
+        $user1 = User::factory()->create(['username' => 'ahmadfauzi']);
+        $emp1->update(['user_id' => $user1->id]);
+
+        $emp2 = Employee::factory()->create(['nama_karyawan' => 'Sari Dewi']);
+        $user2 = User::factory()->create(['username' => 'saridewi']);
+        $emp2->update(['user_id' => $user2->id]);
+
+        $response = $this->actingAs($admin)->get(route('akun.index', ['q' => 'Ahmad']));
+
+        $response->assertStatus(200);
+        $response->assertSee('ahmadfauzi');
+        $response->assertDontSee('saridewi');
+    }
+
+    public function test_account_list_is_filterable_by_role(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        User::factory()->create(['role' => Role::Employee, 'username' => 'empuser']);
+        User::factory()->create(['role' => Role::Director, 'username' => 'directoruser']);
+
+        $response = $this->actingAs($admin)->get(route('akun.index', ['role' => Role::Employee->value]));
+
+        $response->assertStatus(200);
+        $response->assertSee('empuser');
+        $response->assertDontSee('directoruser');
+    }
+
     // ── Create ─────────────────────────────────────────────────────────────────
 
     public function test_hr_admin_can_view_create_account_form(): void

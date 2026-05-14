@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -20,11 +21,9 @@ class EmployeeController extends Controller
             ->when(
                 $request->q,
                 fn ($q, $search) => $q->where(function ($q) use ($search) {
-                    $q->where('nama_karyawan', 'ilike', "%{$search}%")->orWhere(
-                        'nip',
-                        'ilike',
-                        "%{$search}%",
-                    );
+                    $lower = strtolower($search);
+                    $q->whereRaw('LOWER(nama_karyawan) LIKE ?', ["%{$lower}%"])
+                        ->orWhereRaw('LOWER(nip) LIKE ?', ["%{$lower}%"]);
                 }),
             )
             ->when($request->unit, fn ($q, $unit) => $q->where('unit', $unit))
@@ -67,9 +66,13 @@ class EmployeeController extends Controller
         return view('employees.create');
     }
 
-    public function store(StoreEmployeeRequest $request): RedirectResponse
+    public function store(StoreEmployeeRequest $request): RedirectResponse|Response
     {
         Employee::create($request->validated());
+
+        if ($request->boolean('popup')) {
+            return response('<script>window.close()</script>');
+        }
 
         return redirect()
             ->route('karyawan.index')

@@ -78,45 +78,41 @@
                 x-transition:leave-end="opacity-0 -translate-y-1"
                 class="grid grid-cols-2 md:grid-cols-4 gap-2.5"
             >
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Unit</label>
-                    <select name="unit" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
-                        <option value="">Semua Unit</option>
-                        @foreach ($filters['units'] as $unit)
-                            <option value="{{ $unit }}" @selected(request('unit') === $unit)>{{ $unit }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-autocomplete-select
+                    name="unit"
+                    label="Unit"
+                    :options="$filters['units']->map(fn ($u) => ['id' => $u, 'label' => $u])"
+                    :value="request('unit')"
+                    placeholder="Semua Unit"
+                    label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
+                />
 
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Posisi</label>
-                    <select name="posisi" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
-                        <option value="">Semua Posisi</option>
-                        @foreach ($filters['posisi'] as $posisi)
-                            <option value="{{ $posisi }}" @selected(request('posisi') === $posisi)>{{ $posisi }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-autocomplete-select
+                    name="posisi"
+                    label="Posisi"
+                    :options="$filters['posisi']->map(fn ($p) => ['id' => $p, 'label' => $p])"
+                    :value="request('posisi')"
+                    placeholder="Semua Posisi"
+                    label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
+                />
 
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Profesi</label>
-                    <select name="profesi" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
-                        <option value="">Semua Profesi</option>
-                        @foreach ($filters['profesi'] as $profesi)
-                            <option value="{{ $profesi }}" @selected(request('profesi') === $profesi)>{{ $profesi }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-autocomplete-select
+                    name="profesi"
+                    label="Profesi"
+                    :options="$filters['profesi']->map(fn ($p) => ['id' => $p, 'label' => $p])"
+                    :value="request('profesi')"
+                    placeholder="Semua Profesi"
+                    label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
+                />
 
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Jabatan</label>
-                    <select name="jabatan" class="px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus-ring bg-white text-gray-700">
-                        <option value="">Semua Jabatan</option>
-                        @foreach ($filters['jabatan'] as $jabatan)
-                            <option value="{{ $jabatan }}" @selected(request('jabatan') === $jabatan)>{{ $jabatan }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-autocomplete-select
+                    name="jabatan"
+                    label="Jabatan"
+                    :options="$filters['jabatan']->map(fn ($j) => ['id' => $j, 'label' => $j])"
+                    :value="request('jabatan')"
+                    placeholder="Semua Jabatan"
+                    label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
+                />
             </div>
 
         </form>
