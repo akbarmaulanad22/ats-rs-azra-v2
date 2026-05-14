@@ -18,7 +18,7 @@ class Vacancy extends Model
     protected $fillable = [
         'judul_posisi',
         'unit_id',
-        'workflow_template_id',
+        'workflow_template_snapshot_id',
         'jenis_pekerjaan',
         'deskripsi_pekerjaan',
         'kualifikasi',
@@ -42,9 +42,9 @@ class Vacancy extends Model
         return $this->belongsTo(Unit::class);
     }
 
-    public function workflowTemplate(): BelongsTo
+    public function workflowTemplateSnapshot(): BelongsTo
     {
-        return $this->belongsTo(WorkflowTemplate::class);
+        return $this->belongsTo(WorkflowTemplateSnapshot::class);
     }
 
     public function scopePublished(Builder $query): void

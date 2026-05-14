@@ -223,7 +223,7 @@ class VacancyManagementTest extends TestCase
         $admin = User::factory()->hrAdmin()->create();
         $this->seedStages();
         $vacancy = Vacancy::factory()->create(['status' => VacancyStatus::Draft]);
-        $payload = $this->validPayload($vacancy->unit, $vacancy->workflowTemplate);
+        $payload = $this->validPayload($vacancy->unit, WorkflowTemplate::factory()->create());
         $payload['status'] = VacancyStatus::Published->value;
 
         $this->actingAs($admin)->put(route('lowongan.update', $vacancy), $payload);
@@ -236,7 +236,7 @@ class VacancyManagementTest extends TestCase
         $admin = User::factory()->hrAdmin()->create();
         $this->seedStages();
         $vacancy = Vacancy::factory()->published()->create();
-        $payload = $this->validPayload($vacancy->unit, $vacancy->workflowTemplate);
+        $payload = $this->validPayload($vacancy->unit, WorkflowTemplate::factory()->create());
         $payload['status'] = VacancyStatus::Closed->value;
 
         $this->actingAs($admin)->put(route('lowongan.update', $vacancy), $payload);

@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateVacancyRequest;
 use App\Models\Unit;
 use App\Models\Vacancy;
 use App\Models\WorkflowTemplate;
+use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -20,7 +21,7 @@ class VacancyController extends Controller
     {
         Gate::authorize('viewAny', Vacancy::class);
 
-        $vacancies = Vacancy::with(['unit', 'workflowTemplate'])
+        $vacancies = Vacancy::with(['unit', 'workflowTemplateSnapshot'])
             ->when(
                 $request->q,
                 fn ($q, $search) => $q->whereRaw('LOWER(judul_posisi) LIKE ?', ['%'.strtolower(str_replace(['%', '_'], ['\%', '\_'], $search)).'%']),
@@ -58,7 +59,13 @@ class VacancyController extends Controller
     {
         Gate::authorize('create', Vacancy::class);
 
-        Vacancy::create($request->validated());
+        $template = WorkflowTemplate::with('stages')->findOrFail($request->validated('workflow_template_id'));
+        $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
+
+        $data = collect($request->validated())->except('workflow_template_id')->all();
+        $data['workflow_template_snapshot_id'] = $snapshot->id;
+
+        Vacancy::create($data);
 
         return redirect()->route('lowongan.index')
             ->with('status', 'Lowongan berhasil dibuat.');
@@ -80,7 +87,16 @@ class VacancyController extends Controller
     {
         Gate::authorize('update', $lowongan);
 
-        $lowongan->update($request->validated());
+        $data = $request->validated();
+
+        if (isset($data['workflow_template_id'])) {
+            $template = WorkflowTemplate::with('stages')->findOrFail($data['workflow_template_id']);
+            $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
+            unset($data['workflow_template_id']);
+            $data['workflow_template_snapshot_id'] = $snapshot->id;
+        }
+
+        $lowongan->update($data);
 
         return redirect()->route('lowongan.index')
             ->with('status', 'Lowongan berhasil diperbarui.');

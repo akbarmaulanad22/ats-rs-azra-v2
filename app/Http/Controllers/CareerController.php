@@ -26,7 +26,7 @@ class CareerController extends Controller
             404,
         );
 
-        $vacancy->load('unit', 'workflowTemplate');
+        $vacancy->load('unit', 'workflowTemplateSnapshot');
 
         return view('career.show', compact('vacancy'));
     }

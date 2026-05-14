@@ -33,7 +33,7 @@
                 name="workflow_template_id"
                 label="Template Alur Kerja"
                 :options="$templates->map(fn ($t) => ['id' => $t->id, 'label' => $t->nama])"
-                :value="old('workflow_template_id', $lowongan->workflow_template_id ?? null)"
+                :value="old('workflow_template_id')"
                 :required="true"
                 placeholder="Cari template..."
                 label-class="block text-xs font-medium text-gray-700 mb-1"
