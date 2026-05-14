@@ -40,24 +40,29 @@
             />
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-                <label for="jenis_pekerjaan" class="block text-xs font-medium text-gray-700 mb-1">Jenis Pekerjaan <span class="text-red-500">*</span></label>
-                <select
-                    id="jenis_pekerjaan"
-                    name="jenis_pekerjaan"
-                    class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('jenis_pekerjaan') border-red-400 @else border-gray-200 @enderror"
-                >
-                    <option value="">-- Pilih Jenis --</option>
-                    @foreach ($employmentTypes as $type)
-                        <option value="{{ $type->value }}" @selected(old('jenis_pekerjaan', ($lowongan->jenis_pekerjaan ?? null)?->value) === $type->value)>{{ $type->label() }}</option>
-                    @endforeach
-                </select>
-                @error('jenis_pekerjaan')
-                    <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <x-autocomplete-select
+                name="jenis_pekerjaan"
+                label="Jenis Pekerjaan"
+                :options="collect(\App\Enums\EmploymentType::cases())->map(fn ($t) => ['id' => $t->value, 'label' => $t->label()])"
+                :value="old('jenis_pekerjaan', ($lowongan->jenis_pekerjaan ?? null)?->value)"
+                :required="true"
+                placeholder="Pilih jenis pekerjaan..."
+                label-class="block text-xs font-medium text-gray-700 mb-1"
+            />
 
+            <x-autocomplete-select
+                name="status"
+                label="Status"
+                :options="collect($statuses)->map(fn ($s) => ['id' => $s->value, 'label' => $s->label()])"
+                :value="old('status', ($lowongan->status ?? null)?->value)"
+                :required="true"
+                placeholder="Pilih status..."
+                label-class="block text-xs font-medium text-gray-700 mb-1"
+            />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
                 <label for="jumlah_posisi" class="block text-xs font-medium text-gray-700 mb-1">Jumlah Posisi <span class="text-red-500">*</span></label>
                 <input
@@ -86,22 +91,6 @@
                     <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
                 @enderror
             </div>
-        </div>
-
-        <div>
-            <label for="status" class="block text-xs font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
-            <select
-                id="status"
-                name="status"
-                class="w-full sm:w-48 px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('status') border-red-400 @else border-gray-200 @enderror"
-            >
-                @foreach ($statuses as $s)
-                    <option value="{{ $s->value }}" @selected(old('status', ($lowongan->status ?? null)?->value) === $s->value)>{{ $s->label() }}</option>
-                @endforeach
-            </select>
-            @error('status')
-                <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
-            @enderror
         </div>
 
     </div>
