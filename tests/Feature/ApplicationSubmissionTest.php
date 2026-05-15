@@ -99,6 +99,12 @@ class ApplicationSubmissionTest extends TestCase
             // Step 6
             'alasan_melamar' => 'Tertarik berkarir di bidang kesehatan dan berkontribusi untuk RS Azra.',
             'gaji_diharapkan' => '6000000',
+            // Step 8
+            'pernah_sakit_serius' => 'tidak',
+            'kesiapan_kerja' => 'Siap bekerja segera, saat ini tidak sedang bekerja.',
+            'vaksinasi_covid' => 'sudah_2',
+            'sumber_informasi' => 'Instagram',
+            'pernyataan' => '1',
         ];
     }
 
@@ -330,14 +336,14 @@ class ApplicationSubmissionTest extends TestCase
 
     // ── Validation ────────────────────────────────────────────────────────────
 
-    public function test_cv_must_be_pdf(): void
+    public function test_cv_must_be_pdf_doc_or_docx(): void
     {
         $this->seedStages();
         Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
         $payload = $this->validPayload();
-        $payload['cv'] = UploadedFile::fake()->create('cv.docx', 100, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        $payload['cv'] = UploadedFile::fake()->create('cv.png', 100, 'image/png');
 
         $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
 
@@ -345,14 +351,14 @@ class ApplicationSubmissionTest extends TestCase
         $this->assertDatabaseCount('applications', 0);
     }
 
-    public function test_cv_must_not_exceed_5mb(): void
+    public function test_cv_must_not_exceed_3mb(): void
     {
         $this->seedStages();
         Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
         $payload = $this->validPayload();
-        $payload['cv'] = UploadedFile::fake()->create('cv.pdf', 6000, 'application/pdf');
+        $payload['cv'] = UploadedFile::fake()->create('cv.pdf', 4000, 'application/pdf');
 
         $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
 
@@ -367,7 +373,7 @@ class ApplicationSubmissionTest extends TestCase
 
         $response = $this->post(route('karier.lamar.store', $vacancy), []);
 
-        $response->assertSessionHasErrors(['nama_lengkap', 'email', 'no_telepon', 'cv', 'tempat_lahir', 'tanggal_lahir', 'formal_educations', 'informal_educations', 'alasan_melamar', 'gaji_diharapkan']);
+        $response->assertSessionHasErrors(['nama_lengkap', 'email', 'no_telepon', 'cv', 'tempat_lahir', 'tanggal_lahir', 'formal_educations', 'informal_educations', 'alasan_melamar', 'gaji_diharapkan', 'pernah_sakit_serius', 'kesiapan_kerja', 'vaksinasi_covid', 'sumber_informasi', 'pernyataan']);
     }
 
     public function test_adjustable_section_partial_fill_requires_all_columns(): void

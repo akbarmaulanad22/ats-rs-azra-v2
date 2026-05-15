@@ -273,7 +273,7 @@
 
         {{-- Step progress bar --}}
         <div class="step-progress">
-            @foreach (['Identitas', 'Keluarga', 'Pendidikan', 'Organisasi', 'Kerja', 'Minat', 'Referensi'] as $i => $label)
+            @foreach (['Identitas', 'Keluarga', 'Pendidikan', 'Organisasi', 'Kerja', 'Minat', 'Referensi', 'Lain-Lain'] as $i => $label)
                 <div class="step-dot"
                      :class="{ active: step === {{ $i + 1 }}, done: step > {{ $i + 1 }} }">
                     <div class="step-circle">
@@ -408,16 +408,6 @@
                             <input id="nama_ibu_kandung" name="nama_ibu_kandung" type="text" value="{{ old('nama_ibu_kandung') }}">
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="field">
-                            <label for="cv">CV / Resume (PDF) <span class="req">*</span></label>
-                            <input id="cv" name="cv" type="file" accept=".pdf"
-                                   class="{{ $errors->has('cv') ? 'error' : '' }}" style="padding:8px 10px;">
-                            <p style="font-size:11px;color:#8a948f;margin-top:4px;">Format PDF, maks. 5 MB</p>
-                            @error('cv')<p class="field-error">{{ $message }}</p>@enderror
-                        </div>
-                    </div>
-
                     <h3 class="form-section-h" style="margin-top:32px;">Kontak Darurat</h3>
                     <div class="form-row cols-3">
                         <div class="field">
@@ -894,6 +884,127 @@
                     </div>
                 </div>
 
+                {{-- ═══ STEP 8: Lain-Lain ═══ --}}
+                <div class="step-panel" :class="{ active: step === 8 }">
+                    <h2 class="form-section-h">VIII. Lain-Lain</h2>
+
+                    {{-- A. Riwayat Penyakit --}}
+                    <h3 style="font-size:13px;font-weight:600;color:#0d1614;margin:0 0 14px;">A. Riwayat Penyakit</h3>
+                    <div x-data="{ pernahSakit: '{{ old('pernah_sakit_serius', '') }}' }">
+                        <div class="field">
+                            <label>Pernah menderita sakit/kecelakaan serius? <span class="req">*</span></label>
+                            @error('pernah_sakit_serius')<p class="field-error">{{ $message }}</p>@enderror
+                            <div style="display:flex;gap:20px;margin-top:6px;">
+                                <label style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;cursor:pointer;">
+                                    <input type="radio" name="pernah_sakit_serius" value="ya" x-model="pernahSakit" style="accent-color:rgb(0,119,116);"> Ya
+                                </label>
+                                <label style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;cursor:pointer;">
+                                    <input type="radio" name="pernah_sakit_serius" value="tidak" x-model="pernahSakit" style="accent-color:rgb(0,119,116);"> Tidak
+                                </label>
+                            </div>
+                        </div>
+                        <div class="field" x-show="pernahSakit === 'ya'" style="margin-top:16px;">
+                            <label>Diagnosis dan kejadian</label>
+                            <textarea name="diagnosis_sakit" class="{{ $errors->has('diagnosis_sakit') ? 'error' : '' }}">{{ old('diagnosis_sakit') }}</textarea>
+                            @error('diagnosis_sakit')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+
+                    {{-- B. Dokumen dan Kesiapan Kerja --}}
+                    <h3 style="font-size:13px;font-weight:600;color:#0d1614;margin:28px 0 14px;">B. Dokumen dan Kesiapan Kerja</h3>
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="kesiapan_kerja">Kapan siap bekerja? Sertakan alasan <span class="req">*</span></label>
+                            <textarea id="kesiapan_kerja" name="kesiapan_kerja" style="min-height:100px;"
+                                      class="{{ $errors->has('kesiapan_kerja') ? 'error' : '' }}">{{ old('kesiapan_kerja') }}</textarea>
+                            @error('kesiapan_kerja')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                    <div class="form-row cols-2">
+                        <div class="field">
+                            <label for="cv">CV (CV, Ijazah & Transkrip jadi 1 file) <span class="req">*</span></label>
+                            <input id="cv" name="cv" type="file" accept=".pdf,.doc,.docx"
+                                   class="{{ $errors->has('cv') ? 'error' : '' }}" style="padding:8px 10px;">
+                            <p style="font-size:11px;color:#8a948f;margin-top:4px;">Format PDF/DOC/DOCX, maks. 3 MB</p>
+                            @error('cv')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="field">
+                            <label for="str_sip">STR/SIP/STRA/STRTTK</label>
+                            <input id="str_sip" name="str_sip" type="file" accept=".jpg,.jpeg,.png,.pdf"
+                                   class="{{ $errors->has('str_sip') ? 'error' : '' }}" style="padding:8px 10px;">
+                            <p style="font-size:11px;color:#8a948f;margin-top:4px;">Format JPG/PNG/PDF, maks. 3 MB</p>
+                            @error('str_sip')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field">
+                            <label>Sudah vaksinasi Covid-19? <span class="req">*</span></label>
+                            @error('vaksinasi_covid')<p class="field-error">{{ $message }}</p>@enderror
+                            <div style="display:flex;gap:20px;margin-top:6px;flex-wrap:wrap;">
+                                @foreach (['sudah_1' => 'Sudah 1 kali', 'sudah_2' => 'Sudah 2 kali', 'belum' => 'Belum pernah'] as $val => $lbl)
+                                <label style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;cursor:pointer;">
+                                    <input type="radio" name="vaksinasi_covid" value="{{ $val }}" {{ old('vaksinasi_covid') === $val ? 'checked' : '' }} style="accent-color:rgb(0,119,116);"> {{ $lbl }}
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- C. Akun Sosial Media --}}
+                    <h3 style="font-size:13px;font-weight:600;color:#0d1614;margin:28px 0 6px;">C. Akun Sosial Media</h3>
+                    <p class="form-section-sub">Opsional. Jika diisi sebagian, wajib lengkapi semua kolom.</p>
+                    <div class="adj-section" x-data="adjSection('social_media_accounts', @js(old('social_media_accounts', [])))">
+                        <template x-for="(item, idx) in items" :key="idx">
+                            <div class="adj-item">
+                                <div class="adj-item-num">Akun <span x-text="idx+1"></span></div>
+                                <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
+                                <div class="form-row cols-2">
+                                    <div class="field"><label>Platform</label>
+                                        <select :name="`social_media_accounts[${idx}][platform]`" x-model="item.platform">
+                                            <option value="">-- Pilih --</option>
+                                            @foreach (['Facebook', 'Instagram', 'LinkedIn', 'TikTok', 'Twitter/X', 'Lainnya'] as $platform)
+                                                <option value="{{ $platform }}">{{ $platform }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="field"><label>Link / Username</label>
+                                        <input :name="`social_media_accounts[${idx}][link]`" type="text" x-model="item.link" placeholder="mis. https://instagram.com/username">
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <button type="button" class="adj-add" @click="add()">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                            Tambah Akun
+                        </button>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="sumber_informasi">Darimana mengetahui informasi lowongan ini? <span class="req">*</span></label>
+                            <select id="sumber_informasi" name="sumber_informasi" class="{{ $errors->has('sumber_informasi') ? 'error' : '' }}">
+                                <option value="">-- Pilih --</option>
+                                @foreach (['Facebook', 'Instagram', 'LinkedIn', 'Teman/Keluarga', 'Website RS Azra', 'Job Portal', 'Lainnya'] as $src)
+                                    <option value="{{ $src }}" {{ old('sumber_informasi') === $src ? 'selected' : '' }}>{{ $src }}</option>
+                                @endforeach
+                            </select>
+                            @error('sumber_informasi')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+
+                    {{-- D. Pernyataan --}}
+                    <h3 style="font-size:13px;font-weight:600;color:#0d1614;margin:28px 0 14px;">D. Pernyataan</h3>
+                    <div class="field">
+                        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;color:#0d1614;line-height:1.6;">
+                            <input type="checkbox" name="pernyataan" value="1" {{ old('pernyataan') ? 'checked' : '' }}
+                                   style="width:16px;height:16px;flex-shrink:0;margin-top:3px;accent-color:rgb(0,119,116);"
+                                   class="{{ $errors->has('pernyataan') ? 'error' : '' }}">
+                            <span>Formulir lamaran kerja ini saya isi sendiri dengan sejujur-jujurnya sesuai dengan kenyataan sebenarnya. Apabila dikemudian hari data isian ini tidak sesuai dengan kenyataan yang sebenarnya maka saya bersedia diberikan sanksi sesuai dengan peraturan yang berlaku.</span>
+                        </label>
+                        @error('pernyataan')<p class="field-error">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+
                 {{-- Navigation --}}
                 <div class="step-nav">
                     <button type="button" class="btn-prev" x-show="step > 1" @click="prev()">
@@ -903,14 +1014,14 @@
                     <div x-show="step < 1" style="flex:1;"></div>
 
                     <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a948f;text-transform:uppercase;letter-spacing:.06em;">
-                        Langkah <span x-text="step"></span> dari 7
+                        Langkah <span x-text="step"></span> dari 8
                     </div>
 
-                    <button type="button" class="btn-next" x-show="step < 7" @click="next()">
+                    <button type="button" class="btn-next" x-show="step < 8" @click="next()">
                         Selanjutnya
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
                     </button>
-                    <button type="submit" class="btn-submit" x-show="step === 7">
+                    <button type="submit" class="btn-submit" x-show="step === 8">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                         Kirim Lamaran
                     </button>
@@ -938,7 +1049,7 @@
                 <div class="sidebar-card" style="margin-top:16px;">
                     <div class="sidebar-card-h bg-primary text-white">Langkah-Langkah</div>
                     <div class="step-list">
-                        @foreach (['Identitas Diri', 'Latar Belakang Keluarga', 'Pendidikan', 'Pengalaman Organisasi', 'Pengalaman Kerja', 'Minat', 'Referensi'] as $i => $label)
+                        @foreach (['Identitas Diri', 'Latar Belakang Keluarga', 'Pendidikan', 'Pengalaman Organisasi', 'Pengalaman Kerja', 'Minat', 'Referensi', 'Lain-Lain'] as $i => $label)
                             <div class="step-list-item"
                                  :class="{ active: step === {{ $i + 1 }}, done: step > {{ $i + 1 }} }">
                                 <span class="step-list-num" x-text="step > {{ $i + 1 }} ? '✓' : '{{ $i + 1 }}'"></span>
@@ -959,13 +1070,14 @@ function applyWizard() {
             $errorStep = 1;
             if ($errors->any()) {
                 $stepFields = [
-                    1 => ['nama_lengkap','tempat_lahir','tanggal_lahir','jenis_kelamin','agama','status_perkawinan','golongan_darah','alamat_ktp','alamat_domisili','no_telepon','email','no_ktp','npwp','nama_ibu_kandung','kontak_darurat_','cv'],
+                    1 => ['nama_lengkap','tempat_lahir','tanggal_lahir','jenis_kelamin','agama','status_perkawinan','golongan_darah','alamat_ktp','alamat_domisili','no_telepon','email','no_ktp','npwp','nama_ibu_kandung','kontak_darurat_'],
                     2 => ['ayah_','ibu_','saudara_','siblings','spouses','children'],
                     3 => ['formal_educations','achievements','informal_educations','language_skills'],
                     4 => ['organization_experiences'],
                     5 => ['is_fresh_graduate','work_experiences'],
                     6 => ['alasan_melamar','gaji_diharapkan','fasilitas_diharapkan'],
                     7 => ['references'],
+                    8 => ['pernah_sakit_serius','diagnosis_sakit','kesiapan_kerja','cv','str_sip','vaksinasi_covid','social_media_accounts','sumber_informasi','pernyataan'],
                 ];
                 foreach ($stepFields as $step => $prefixes) {
                     foreach ($errors->keys() as $key) {
@@ -984,7 +1096,7 @@ function applyWizard() {
         init() {},
 
         next() {
-            if (this.step < 7) { this.step++; this.scrollTop(); }
+            if (this.step < 8) { this.step++; this.scrollTop(); }
         },
         prev() {
             if (this.step > 1) { this.step--; this.scrollTop(); }

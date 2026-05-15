@@ -45,6 +45,9 @@ class Candidate extends Model
         'saudara_anak_ke',
         'saudara_dari_bersaudara',
         'is_fresh_graduate',
+        'pernah_sakit_serius',
+        'diagnosis_sakit',
+        'vaksinasi_covid',
     ];
 
     protected function casts(): array
@@ -57,6 +60,7 @@ class Candidate extends Model
             'ayah_pendidikan_terakhir' => JenisPendidikan::class,
             'ibu_pendidikan_terakhir' => JenisPendidikan::class,
             'is_fresh_graduate' => 'boolean',
+            'pernah_sakit_serius' => 'boolean',
         ];
     }
 

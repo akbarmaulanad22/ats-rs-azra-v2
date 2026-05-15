@@ -22,6 +22,9 @@ class Application extends Model
         'alasan_melamar',
         'gaji_diharapkan',
         'fasilitas_diharapkan',
+        'kesiapan_kerja',
+        'str_sip_path',
+        'sumber_informasi',
     ];
 
     public function candidate(): BelongsTo
@@ -64,5 +67,10 @@ class Application extends Model
     public function references(): HasMany
     {
         return $this->hasMany(ApplicationReference::class);
+    }
+
+    public function socialMediaAccounts(): HasMany
+    {
+        return $this->hasMany(ApplicationSocialMediaAccount::class);
     }
 }
