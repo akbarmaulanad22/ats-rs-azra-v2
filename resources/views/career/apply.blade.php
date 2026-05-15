@@ -475,7 +475,9 @@
                         </div>
                     </div>
 
-                    <div class="form-row cols-2" style="margin-top:24px;">
+                    <div style="margin-top:24px;">
+                        <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5a6864;margin-bottom:10px;">Data Anda</p>
+                        <div class="form-row cols-2">
                         <div class="field">
                             <label>Anda anak ke</label>
                             <input name="saudara_anak_ke" type="number" min="1" value="{{ old('saudara_anak_ke') }}">
@@ -483,6 +485,7 @@
                         <div class="field">
                             <label>Dari ... bersaudara</label>
                             <input name="saudara_dari_bersaudara" type="number" min="1" value="{{ old('saudara_dari_bersaudara') }}">
+                        </div>
                         </div>
                     </div>
 
