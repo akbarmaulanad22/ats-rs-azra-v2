@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 
 class ApplicationService
 {
+    public function __construct(private readonly EmailNotificationService $emailNotificationService) {}
+
     public function store(Request $request, Vacancy $vacancy): Application
     {
         $cvFile = $request->file('cv');
@@ -27,7 +29,7 @@ class ApplicationService
         }
 
         try {
-            return DB::transaction(function () use ($request, $vacancy, $cvPath, $strSipPath): Application {
+            $application = DB::transaction(function () use ($request, $vacancy, $cvPath, $strSipPath): Application {
                 $candidate = Candidate::updateOrCreate(
                     ['email' => $request->validated('email')],
                     $this->candidateData($request),
@@ -61,6 +63,19 @@ class ApplicationService
             }
             throw $e;
         }
+
+        try {
+            $application->load(['candidate', 'vacancy']);
+            $this->emailNotificationService->dispatch('lamaran_diterima', $application->candidate->email, [
+                'nama_kandidat' => $application->candidate->nama_lengkap,
+                'judul_lowongan' => $application->vacancy->judul_posisi,
+                'link_status' => route('karier.lamaran.konfirmasi', $application->token),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return $application;
     }
 
     /** @return array<string, mixed> */
