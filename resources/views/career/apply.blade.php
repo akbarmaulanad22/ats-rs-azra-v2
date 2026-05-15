@@ -4,6 +4,7 @@
     .apply-wrap {
         max-width: 1320px; margin: 0 auto;
         padding: 56px 28px 80px;
+        overflow-x: hidden;
     }
     .apply-back {
         font-family: "IBM Plex Mono", monospace;
@@ -77,9 +78,10 @@
         gap: 48px;
         align-items: start;
     }
-    .apply-form-main {}
+    .apply-form-main { min-width: 0; }
     .apply-sidebar {
         position: sticky; top: 100px;
+        min-width: 0;
     }
 
     /* Step panels */
