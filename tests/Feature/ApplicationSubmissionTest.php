@@ -470,4 +470,41 @@ class ApplicationSubmissionTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    // ── currentStage() edge cases ────────────────────────────────────────────
+
+    public function test_current_stage_returns_failed_stage_when_candidate_fails(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
+
+        $application = Application::first();
+        $application->stages()->where('key', 'skrining_cv_hr')->update(['status' => ApplicationStageStatus::Gagal]);
+        $application->load('stages');
+
+        $current = $application->currentStage();
+
+        $this->assertNotNull($current);
+        $this->assertEquals('skrining_cv_hr', $current->key);
+        $this->assertEquals(ApplicationStageStatus::Gagal, $current->status);
+    }
+
+    public function test_current_stage_returns_last_stage_when_all_selesai(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
+
+        $application = Application::first();
+        $application->stages()->update(['status' => ApplicationStageStatus::Selesai]);
+        $application->load('stages');
+
+        $current = $application->currentStage();
+
+        $this->assertNotNull($current);
+        $this->assertEquals('onboarding', $current->key);
+    }
 }
