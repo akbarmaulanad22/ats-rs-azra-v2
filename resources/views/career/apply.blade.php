@@ -438,7 +438,7 @@
                     <h2 class="form-section-h">II. Latar Belakang Keluarga</h2>
 
                     <h3 style="font-size:13px;font-weight:600;color:#0d1614;margin:0 0 14px;">A. Data Orang Tua</h3>
-                    <div class="form-row">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5a6864;margin-bottom:10px;">Data Ayah</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-y-[16px] md:gap-[16px]">
