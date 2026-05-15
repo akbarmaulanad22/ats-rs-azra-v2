@@ -1077,7 +1077,7 @@
 
 <script>
 window.__adjRegistry = {};
-window.__atsFormKey = 'ats_apply_{{ $vacancy->id }}';
+window.__atsFormKey = 'ats_apply_' + @js($vacancy->id);
 window.__atsHasErrors = {{ $errors->any() ? 'true' : 'false' }};
 
 function applyWizard() {
@@ -1109,8 +1109,14 @@ function applyWizard() {
         @endphp {{ $errorStep }},
         isFreshGraduate: {{ old('is_fresh_graduate', '0') === '1' ? 'true' : 'false' }},
         hasSavedData: false,
+        _submitting: false,
 
         init() {
+            this._validFields = new Set(
+                Array.from(document.querySelectorAll('#apply-form [name]'))
+                    .map(el => el.getAttribute('name'))
+                    .filter(n => n && !n.includes('['))
+            );
             if (!window.__atsHasErrors) {
                 const saved = this._load();
                 if (saved) { this.hasSavedData = true; }
@@ -1126,6 +1132,7 @@ function applyWizard() {
             if (saved.fields) {
                 this.$nextTick(() => {
                     Object.entries(saved.fields).forEach(([name, val]) => {
+                        if (!this._validFields.has(name)) { return; }
                         const el = document.querySelector(`#apply-form [name="${CSS.escape(name)}"]`);
                         if (!el || el.type === 'file') { return; }
                         el.value = val;
@@ -1149,7 +1156,7 @@ function applyWizard() {
         },
 
         _save() {
-            if (window.__atsHasErrors) { return; }
+            if (window.__atsHasErrors || this._submitting) { return; }
             const fields = {};
             document.querySelectorAll('#apply-form [name]').forEach(el => {
                 const name = el.getAttribute('name');
@@ -1199,6 +1206,7 @@ function applyWizard() {
         },
 
         submitForm() {
+            this._submitting = true;
             this._clear();
             document.getElementById('apply-form').submit();
         },
