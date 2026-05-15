@@ -145,7 +145,7 @@ class StoreApplicationRequest extends FormRequest
             'str_sip' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:3072'],
             'vaksinasi_covid' => ['required', Rule::in(['sudah_1', 'sudah_2', 'belum'])],
             'social_media_accounts' => ['nullable', 'array'],
-            'social_media_accounts.*.platform' => ['required_with:social_media_accounts.*.link', 'string', 'max:50'],
+            'social_media_accounts.*.platform' => ['required_with:social_media_accounts.*.link', 'string', Rule::in(['Facebook', 'Instagram', 'LinkedIn', 'TikTok', 'Twitter/X', 'Lainnya'])],
             'social_media_accounts.*.link' => ['required_with:social_media_accounts.*.platform', 'string', 'max:500'],
             'sumber_informasi' => ['required', 'string', 'max:100'],
             'pernyataan' => ['accepted'],

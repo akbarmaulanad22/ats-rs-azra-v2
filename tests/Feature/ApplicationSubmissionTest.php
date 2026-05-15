@@ -358,7 +358,7 @@ class ApplicationSubmissionTest extends TestCase
         $vacancy = $this->createPublishedVacancyWithStages();
 
         $payload = $this->validPayload();
-        $payload['cv'] = UploadedFile::fake()->create('cv.pdf', 4000, 'application/pdf');
+        $payload['cv'] = UploadedFile::fake()->create('cv.pdf', 3073, 'application/pdf');
 
         $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
 

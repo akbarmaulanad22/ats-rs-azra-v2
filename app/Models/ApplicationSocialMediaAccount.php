@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApplicationSocialMediaAccount extends Model
 {
-    protected $fillable = ['application_id', 'platform', 'link'];
+    protected $fillable = ['platform', 'link'];
 
     public function application(): BelongsTo
     {

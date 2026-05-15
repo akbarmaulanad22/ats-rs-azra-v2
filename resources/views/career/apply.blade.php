@@ -890,7 +890,7 @@
 
                     {{-- A. Riwayat Penyakit --}}
                     <h3 style="font-size:13px;font-weight:600;color:#0d1614;margin:0 0 14px;">A. Riwayat Penyakit</h3>
-                    <div x-data="{ pernahSakit: '{{ old('pernah_sakit_serius', '') }}' }">
+                    <div x-data="{ pernahSakit: @js(old('pernah_sakit_serius', '')) }">
                         <div class="field">
                             <label>Pernah menderita sakit/kecelakaan serius? <span class="req">*</span></label>
                             @error('pernah_sakit_serius')<p class="field-error">{{ $message }}</p>@enderror

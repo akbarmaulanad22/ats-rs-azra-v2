@@ -16,13 +16,13 @@ class ApplicationService
     public function store(Request $request, Vacancy $vacancy): Application
     {
         $cvFile = $request->file('cv');
-        $ext = $cvFile->getClientOriginalExtension();
+        $ext = $cvFile->guessExtension() ?? 'bin';
         $cvPath = $cvFile->storeAs('cv', Str::random(40).'.'.$ext, 'local');
 
         $strSipPath = null;
         if ($request->hasFile('str_sip')) {
             $strFile = $request->file('str_sip');
-            $strExt = $strFile->getClientOriginalExtension();
+            $strExt = $strFile->guessExtension() ?? 'bin';
             $strSipPath = $strFile->storeAs('str_sip', Str::random(40).'.'.$strExt, 'local');
         }
 
