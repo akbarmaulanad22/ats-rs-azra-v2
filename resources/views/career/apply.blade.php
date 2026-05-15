@@ -4,6 +4,7 @@
     .apply-wrap {
         max-width: 1320px; margin: 0 auto;
         padding: 56px 28px 80px;
+        overflow-x: hidden;
     }
     .apply-back {
         font-family: "IBM Plex Mono", monospace;
@@ -77,9 +78,10 @@
         gap: 48px;
         align-items: start;
     }
-    .apply-form-main {}
+    .apply-form-main { min-width: 0; }
     .apply-sidebar {
         position: sticky; top: 100px;
+        min-width: 0;
     }
 
     /* Step panels */
@@ -438,7 +440,7 @@
                     <h2 class="form-section-h">II. Latar Belakang Keluarga</h2>
 
                     <h3 style="font-size:13px;font-weight:600;color:#0d1614;margin:0 0 14px;">A. Data Orang Tua</h3>
-                    <div class="form-row">
+                    <div class="flex flex-col gap-6">
                         <div>
                             <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5a6864;margin-bottom:10px;">Data Ayah</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-y-[16px] md:gap-[16px]">
@@ -475,7 +477,9 @@
                         </div>
                     </div>
 
-                    <div class="form-row cols-2" style="margin-top:24px;">
+                    <div style="margin-top:24px;">
+                        <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5a6864;margin-bottom:10px;">Data Anda</p>
+                        <div class="form-row cols-2">
                         <div class="field">
                             <label>Anda anak ke</label>
                             <input name="saudara_anak_ke" type="number" min="1" value="{{ old('saudara_anak_ke') }}">
@@ -483,6 +487,7 @@
                         <div class="field">
                             <label>Dari ... bersaudara</label>
                             <input name="saudara_dari_bersaudara" type="number" min="1" value="{{ old('saudara_dari_bersaudara') }}">
+                        </div>
                         </div>
                     </div>
 
