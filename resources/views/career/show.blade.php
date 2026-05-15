@@ -162,9 +162,9 @@
                         <div class="sidebar-row-val">{{ $vacancy->created_at->locale('id')->diffForHumans() }}</div>
                     </div>
                 </div>
-                <a href="{{ route('karier.lamar', $vacancy) }}" class="apply-cta bg-secondary text-white hover:bg-secondary-dark">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                <a href="{{ route('login') }}" class="apply-cta bg-secondary text-white hover:bg-secondary-dark">
                     Lamar Sekarang
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
                 </a>
             </div>
         </aside>
