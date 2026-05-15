@@ -289,15 +289,15 @@
         <div class="apply-body">
             <div class="apply-form-main">
 
+                @if ($errors->any())
+                    <div style="background:#fdf4f2;border:1px solid #f5c6bc;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#7a1f0f;">
+                        Mohon periksa kembali data yang diisi.
+                    </div>
+                @endif
+
                 {{-- ═══ STEP 1: Identitas Diri ═══ --}}
                 <div class="step-panel" :class="{ active: step === 1 }">
                     <h2 class="form-section-h">I. Identitas Diri</h2>
-
-                    @if ($errors->any())
-                        <div style="background:#fdf4f2;border:1px solid #f5c6bc;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#7a1f0f;">
-                            Mohon periksa kembali data yang diisi.
-                        </div>
-                    @endif
 
                     <div class="form-row cols-2">
                         <div class="field">
@@ -946,14 +946,33 @@
 <script>
 function applyWizard() {
     return {
-        step: {{ $errors->any() ? 1 : 1 }},
+        step: @php
+            $errorStep = 1;
+            if ($errors->any()) {
+                $stepFields = [
+                    1 => ['nama_lengkap','tempat_lahir','tanggal_lahir','jenis_kelamin','agama','status_perkawinan','golongan_darah','alamat_ktp','alamat_domisili','no_telepon','email','no_ktp','npwp','nama_ibu_kandung','kontak_darurat_','cv'],
+                    2 => ['ayah_','ibu_','saudara_','siblings','spouses','children'],
+                    3 => ['formal_educations','achievements','informal_educations','language_skills'],
+                    4 => ['organization_experiences'],
+                    5 => ['is_fresh_graduate','work_experiences'],
+                    6 => ['alasan_melamar','gaji_diharapkan','fasilitas_diharapkan'],
+                    7 => ['references'],
+                ];
+                foreach ($stepFields as $step => $prefixes) {
+                    foreach ($errors->keys() as $key) {
+                        foreach ($prefixes as $prefix) {
+                            if (str_starts_with($key, $prefix)) {
+                                $errorStep = $step;
+                                break 3;
+                            }
+                        }
+                    }
+                }
+            }
+        @endphp {{ $errorStep }},
         isFreshGraduate: {{ old('is_fresh_graduate', '0') === '1' ? 'true' : 'false' }},
 
-        init() {
-            @if ($errors->any())
-                this.step = 1;
-            @endif
-        },
+        init() {},
 
         next() {
             if (this.step < 7) { this.step++; this.scrollTop(); }
