@@ -297,6 +297,18 @@
                     </div>
                 @endif
 
+                {{-- Restore banner --}}
+                <div id="ats-restore-banner" x-show="hasSavedData" x-cloak style="background:#f0f9f6;border:1px solid #a3d4cc;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#1a4a46;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                    <div>
+                        <strong>Terdapat data yang tersimpan.</strong>
+                        Lanjutkan dari sesi sebelumnya? <em>File CV dan STR/SIP perlu diunggah ulang.</em>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-shrink:0;">
+                        <button type="button" @click="restoreProgress()" style="background:#007774;color:#fff;border:none;padding:6px 14px;font-size:12px;cursor:pointer;border-radius:3px;">Lanjutkan</button>
+                        <button type="button" @click="discardProgress()" style="background:transparent;color:#1a4a46;border:1px solid #a3d4cc;padding:6px 14px;font-size:12px;cursor:pointer;border-radius:3px;">Hapus</button>
+                    </div>
+                </div>
+
                 {{-- ═══ STEP 1: Identitas Diri ═══ --}}
                 <div class="step-panel" :class="{ active: step === 1 }">
                     <h2 class="form-section-h">I. Identitas Diri</h2>
@@ -1021,7 +1033,7 @@
                         Selanjutnya
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
                     </button>
-                    <button type="submit" class="btn-submit" x-show="step === 8">
+                    <button type="button" class="btn-submit" x-show="step === 8" @click="submitForm()">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                         Kirim Lamaran
                     </button>
@@ -1064,6 +1076,10 @@
 </div>
 
 <script>
+window.__adjRegistry = {};
+window.__atsFormKey = 'ats_apply_' + @js($vacancy->id);
+window.__atsHasErrors = {{ $errors->any() ? 'true' : 'false' }};
+
 function applyWizard() {
     return {
         step: @php
@@ -1092,17 +1108,107 @@ function applyWizard() {
             }
         @endphp {{ $errorStep }},
         isFreshGraduate: {{ old('is_fresh_graduate', '0') === '1' ? 'true' : 'false' }},
+        hasSavedData: false,
+        _submitting: false,
 
-        init() {},
+        init() {
+            this._validFields = new Set(
+                Array.from(document.querySelectorAll('#apply-form [name]'))
+                    .map(el => el.getAttribute('name'))
+                    .filter(n => n && !n.includes('['))
+            );
+            if (!window.__atsHasErrors) {
+                const saved = this._load();
+                if (saved) { this.hasSavedData = true; }
+            }
+            window.addEventListener('beforeunload', () => { this._save(); });
+        },
+
+        restoreProgress() {
+            const saved = this._load();
+            if (!saved) { return; }
+            this.step = saved.step || 1;
+            this.isFreshGraduate = !!saved.isFreshGraduate;
+            if (saved.fields) {
+                this.$nextTick(() => {
+                    Object.entries(saved.fields).forEach(([name, val]) => {
+                        if (!this._validFields.has(name)) { return; }
+                        const el = document.querySelector(`#apply-form [name="${CSS.escape(name)}"]`);
+                        if (!el || el.type === 'file') { return; }
+                        el.value = val;
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                });
+            }
+            if (saved.adjItems) {
+                Object.entries(saved.adjItems).forEach(([prefix, items]) => {
+                    const comp = window.__adjRegistry[prefix];
+                    if (comp) { comp.items = items; }
+                });
+            }
+            this.hasSavedData = false;
+        },
+
+        discardProgress() {
+            this._clear();
+            this.hasSavedData = false;
+        },
+
+        _save() {
+            if (window.__atsHasErrors || this._submitting) { return; }
+            const fields = {};
+            document.querySelectorAll('#apply-form [name]').forEach(el => {
+                const name = el.getAttribute('name');
+                if (!name || name.includes('[') || el.type === 'file' || el.type === 'submit') { return; }
+                if (el.type === 'radio' || el.type === 'checkbox') { return; }
+                fields[name] = el.value;
+            });
+            document.querySelectorAll('#apply-form input[type="radio"]:checked, #apply-form input[type="checkbox"]:checked').forEach(el => {
+                const name = el.getAttribute('name');
+                if (name && !name.includes('[')) { fields[name] = el.value; }
+            });
+            const adjItems = {};
+            Object.entries(window.__adjRegistry).forEach(([k, comp]) => {
+                adjItems[k] = comp.items;
+            });
+            const data = { step: this.step, isFreshGraduate: this.isFreshGraduate, fields, adjItems, savedAt: Date.now() };
+            try { localStorage.setItem(window.__atsFormKey, JSON.stringify(data)); } catch {}
+        },
+
+        _load() {
+            try {
+                const raw = localStorage.getItem(window.__atsFormKey);
+                if (!raw) { return null; }
+                const data = JSON.parse(raw);
+                if (!data || !data.savedAt) { return null; }
+                if (Date.now() - data.savedAt > 7 * 24 * 60 * 60 * 1000) { this._clear(); return null; }
+                return data;
+            } catch { return null; }
+        },
+
+        _clear() {
+            try { localStorage.removeItem(window.__atsFormKey); } catch {}
+        },
 
         next() {
+            this._save();
             if (this.step < 8) { this.step++; this.scrollTop(); }
         },
+
         prev() {
+            this._save();
             if (this.step > 1) { this.step--; this.scrollTop(); }
         },
+
         scrollTop() {
             window.scrollTo({ top: document.querySelector('.apply-header').offsetTop - 20, behavior: 'smooth' });
+        },
+
+        submitForm() {
+            this._submitting = true;
+            this._clear();
+            document.getElementById('apply-form').submit();
         },
     };
 }
@@ -1111,6 +1217,9 @@ function adjSection(prefix, initialItems) {
     const blank = () => ({});
     return {
         items: (initialItems && initialItems.length) ? initialItems : [],
+        init() {
+            window.__adjRegistry[prefix] = this;
+        },
         add() { this.items.push(blank()); },
         remove(idx) { this.items.splice(idx, 1); },
     };

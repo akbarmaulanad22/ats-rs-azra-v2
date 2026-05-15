@@ -477,6 +477,207 @@ class ApplicationSubmissionTest extends TestCase
         $response->assertStatus(403);
     }
 
+    // ── Fresh graduate toggle ─────────────────────────────────────────────────
+
+    public function test_fresh_graduate_does_not_require_work_experiences(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['is_fresh_graduate'] = '1';
+        unset($payload['work_experiences']);
+
+        $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $response->assertRedirect();
+        $this->assertDatabaseCount('applications', 1);
+        $this->assertDatabaseHas('candidates', ['is_fresh_graduate' => true]);
+    }
+
+    public function test_non_fresh_graduate_requires_work_experiences(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['is_fresh_graduate'] = '0';
+        unset($payload['work_experiences']);
+
+        $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $response->assertSessionHasErrors('work_experiences');
+    }
+
+    // ── Step 8 fields ─────────────────────────────────────────────────────────
+
+    public function test_step8_fields_stored_in_candidate_and_application(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['pernah_sakit_serius'] = 'ya';
+        $payload['diagnosis_sakit'] = 'Hipertensi';
+        $payload['vaksinasi_covid'] = 'sudah_1';
+        $payload['kesiapan_kerja'] = 'Siap 2 minggu setelah pengumuman.';
+
+        $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $this->assertDatabaseHas('candidates', [
+            'pernah_sakit_serius' => true,
+            'diagnosis_sakit' => 'Hipertensi',
+            'vaksinasi_covid' => 'sudah_1',
+        ]);
+        $this->assertDatabaseHas('applications', [
+            'kesiapan_kerja' => 'Siap 2 minggu setelah pengumuman.',
+        ]);
+    }
+
+    public function test_diagnosis_required_when_pernah_sakit_serius_ya(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['pernah_sakit_serius'] = 'ya';
+        unset($payload['diagnosis_sakit']);
+
+        $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $response->assertSessionHasErrors('diagnosis_sakit');
+    }
+
+    public function test_str_sip_file_uploaded_and_stored(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['str_sip'] = UploadedFile::fake()->create('str.pdf', 200, 'application/pdf');
+
+        $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $application = Application::first();
+        $this->assertNotNull($application->str_sip_path);
+        Storage::disk('local')->assertExists($application->str_sip_path);
+    }
+
+    // ── Relation storage ─────────────────────────────────────────────────────
+
+    public function test_work_experiences_stored(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
+
+        $this->assertDatabaseCount('candidate_work_experiences', 1);
+        $this->assertDatabaseHas('candidate_work_experiences', [
+            'nama_perusahaan' => 'PT Contoh Teknologi',
+            'jabatan' => 'Software Engineer',
+        ]);
+    }
+
+    public function test_organization_experiences_stored(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['organization_experiences'] = [
+            [
+                'nama_organisasi' => 'BEM Fakultas',
+                'jabatan' => 'Ketua',
+                'periode_mulai' => '2013-09-01',
+                'periode_selesai' => '2014-08-31',
+                'keterangan' => 'Memimpin kegiatan kemahasiswaan.',
+            ],
+        ];
+
+        $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $this->assertDatabaseCount('candidate_organization_experiences', 1);
+        $this->assertDatabaseHas('candidate_organization_experiences', [
+            'nama_organisasi' => 'BEM Fakultas',
+        ]);
+    }
+
+    public function test_language_skills_stored(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['language_skills'] = [
+            [
+                'nama_bahasa' => 'Inggris',
+                'berbicara' => 'baik',
+                'menulis' => 'baik',
+                'membaca' => 'sedang',
+            ],
+        ];
+
+        $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $this->assertDatabaseCount('candidate_language_skills', 1);
+        $this->assertDatabaseHas('candidate_language_skills', ['nama_bahasa' => 'Inggris']);
+    }
+
+    public function test_references_stored(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['references'] = [
+            [
+                'nama_karyawan' => 'Dr. Sari',
+                'hubungan' => 'Atasan langsung',
+                'keterangan' => 'Bisa dihubungi kapan saja.',
+            ],
+        ];
+
+        $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $this->assertDatabaseCount('application_references', 1);
+        $this->assertDatabaseHas('application_references', ['nama_karyawan' => 'Dr. Sari']);
+    }
+
+    public function test_social_media_accounts_stored(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['social_media_accounts'] = [
+            ['platform' => 'LinkedIn', 'link' => 'https://linkedin.com/in/budi'],
+        ];
+
+        $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $this->assertDatabaseCount('application_social_media_accounts', 1);
+        $this->assertDatabaseHas('application_social_media_accounts', [
+            'platform' => 'LinkedIn',
+            'link' => 'https://linkedin.com/in/budi',
+        ]);
+    }
+
+    // ── View smoke tests ──────────────────────────────────────────────────────
+
+    public function test_view_contains_restore_banner_and_form_key_script(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $response = $this->get(route('karier.lamar', $vacancy));
+
+        $response->assertStatus(200);
+        $response->assertSee('ats-restore-banner', false);
+        $response->assertSee('__atsFormKey', false);
+        $response->assertSee('File CV dan STR/SIP perlu diunggah ulang', false);
+    }
+
     // ── currentStage() edge cases ────────────────────────────────────────────
 
     public function test_current_stage_returns_failed_stage_when_candidate_fails(): void
