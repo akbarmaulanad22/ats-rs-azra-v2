@@ -32,6 +32,8 @@ html {
         "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
+    --font-serif: "IBM Plex Serif", Georgia, serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
     --color-primary: rgb(0, 119, 116);
     --color-primary-dark: rgb(0, 88, 85);
@@ -40,4 +42,14 @@ html {
     --color-secondary-dark: rgb(103, 153, 50);
     --color-page: #f0f2f5;
     --color-surface: #ffffff;
+
+    --color-ink: #0d1614;
+    --color-ink-2: #2a3835;
+    --color-ink-3: #5a6864;
+    --color-ink-4: #8a948f;
+    --color-line: #d9ddd9;
+    --color-line-2: #ebeeea;
+    --color-paper: #f7f6f1;
+    --color-paper-2: #efede5;
+    --color-primary-50: #e5f1f0;
 }
