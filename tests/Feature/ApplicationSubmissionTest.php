@@ -84,6 +84,18 @@ class ApplicationSubmissionTest extends TestCase
             ],
             // Step 5
             'is_fresh_graduate' => '0',
+            'work_experiences' => [
+                [
+                    'nama_perusahaan' => 'PT Contoh Teknologi',
+                    'jabatan' => 'Software Engineer',
+                    'alamat_perusahaan' => 'Jl. Gatot Subroto No. 10, Jakarta',
+                    'periode_mulai' => '2016-01-01',
+                    'periode_selesai' => '2020-12-31',
+                    'rincian_tugas' => 'Mengembangkan dan memelihara aplikasi web perusahaan.',
+                    'gaji_terakhir' => '5000000',
+                    'alasan_meninggalkan' => 'Mencari tantangan baru.',
+                ],
+            ],
             // Step 6
             'alasan_melamar' => 'Tertarik berkarir di bidang kesehatan dan berkontribusi untuk RS Azra.',
             'gaji_diharapkan' => '6000000',
