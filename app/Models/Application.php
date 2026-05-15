@@ -41,8 +41,22 @@ class Application extends Model
 
     public function currentStage(): ?ApplicationStage
     {
+        $gagal = $this->stages->firstWhere('status', ApplicationStageStatus::Gagal);
+        if ($gagal) {
+            return $gagal;
+        }
+
+        $aktif = $this->stages->firstWhere('status', ApplicationStageStatus::Aktif);
+        if ($aktif) {
+            return $aktif;
+        }
+
+        if ($this->stages->isNotEmpty() && $this->stages->every(fn ($s) => $s->status === ApplicationStageStatus::Selesai)) {
+            return $this->stages->sortByDesc('position')->first();
+        }
+
         return $this->stages
-            ->whereIn('status', [ApplicationStageStatus::Aktif, ApplicationStageStatus::Pending])
+            ->where('status', ApplicationStageStatus::Pending)
             ->sortBy('position')
             ->first();
     }
