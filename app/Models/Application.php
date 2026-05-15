@@ -19,6 +19,9 @@ class Application extends Model
         'vacancy_id',
         'token',
         'cv_path',
+        'alasan_melamar',
+        'gaji_diharapkan',
+        'fasilitas_diharapkan',
     ];
 
     public function candidate(): BelongsTo
@@ -42,5 +45,10 @@ class Application extends Model
             ->whereIn('status', [ApplicationStageStatus::Aktif, ApplicationStageStatus::Pending])
             ->sortBy('position')
             ->first();
+    }
+
+    public function references(): HasMany
+    {
+        return $this->hasMany(ApplicationReference::class);
     }
 }
