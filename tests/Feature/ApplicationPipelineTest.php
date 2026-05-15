@@ -300,6 +300,38 @@ class ApplicationPipelineTest extends TestCase
         $response->assertStatus(403);
     }
 
+    public function test_advance_rejects_application_from_different_vacancy(): void
+    {
+        $this->seedStages();
+        $admin = User::factory()->hrAdmin()->create();
+
+        $vacancy1 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy2 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $application = $this->makeApplication($vacancy1);
+
+        $response = $this->actingAs($admin)->post(
+            route('lowongan.lamaran.lanjut', [$vacancy2, $application])
+        );
+
+        $response->assertNotFound();
+    }
+
+    public function test_fail_rejects_application_from_different_vacancy(): void
+    {
+        $this->seedStages();
+        $admin = User::factory()->hrAdmin()->create();
+
+        $vacancy1 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy2 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $application = $this->makeApplication($vacancy1);
+
+        $response = $this->actingAs($admin)->post(
+            route('lowongan.lamaran.gagal', [$vacancy2, $application])
+        );
+
+        $response->assertNotFound();
+    }
+
     public function test_hr_manager_can_advance_application(): void
     {
         $this->seedStages();
