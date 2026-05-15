@@ -17,21 +17,23 @@ class ApplicationPipelineService
      */
     public function advance(Application $application): void
     {
-        $application->load(['stages', 'candidate', 'vacancy']);
+        $application->load(['candidate', 'vacancy']);
 
-        $currentStage = $application->stages->first(
-            fn ($s) => $s->status->isAdvanceable()
-        );
+        DB::transaction(function () use ($application): void {
+            $stages = $application->stages()->lockForUpdate()->orderBy('position')->get();
 
-        if (! $currentStage) {
-            throw new \RuntimeException('Tidak ada tahap aktif yang dapat dilanjutkan.');
-        }
+            $currentStage = $stages->first(
+                fn ($s) => $s->status->isAdvanceable()
+            );
 
-        $nextStage = $application->stages->first(
-            fn ($s) => $s->position > $currentStage->position && $s->status === ApplicationStageStatus::Pending
-        );
+            if (! $currentStage) {
+                throw new \RuntimeException('Tidak ada tahap aktif yang dapat dilanjutkan.');
+            }
 
-        DB::transaction(function () use ($currentStage, $nextStage): void {
+            $nextStage = $stages->first(
+                fn ($s) => $s->position > $currentStage->position && $s->status === ApplicationStageStatus::Pending
+            );
+
             $currentStage->update(['status' => ApplicationStageStatus::Selesai]);
 
             if ($nextStage) {
@@ -57,17 +59,21 @@ class ApplicationPipelineService
      */
     public function fail(Application $application): void
     {
-        $application->load(['stages', 'candidate', 'vacancy']);
+        $application->load(['candidate', 'vacancy']);
 
-        $currentStage = $application->stages->first(
-            fn ($s) => $s->status->isAdvanceable()
-        );
+        DB::transaction(function () use ($application): void {
+            $stages = $application->stages()->lockForUpdate()->orderBy('position')->get();
 
-        if (! $currentStage) {
-            throw new \RuntimeException('Tidak ada tahap aktif yang dapat digagalkan.');
-        }
+            $currentStage = $stages->first(
+                fn ($s) => $s->status->isAdvanceable()
+            );
 
-        $currentStage->update(['status' => ApplicationStageStatus::Gagal]);
+            if (! $currentStage) {
+                throw new \RuntimeException('Tidak ada tahap aktif yang dapat digagalkan.');
+            }
+
+            $currentStage->update(['status' => ApplicationStageStatus::Gagal]);
+        });
 
         try {
             $this->emailNotificationService->dispatch('kandidat_ditolak', $application->candidate->email, [
