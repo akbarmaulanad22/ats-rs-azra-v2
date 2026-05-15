@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\VacancyController;
+use App\Http\Controllers\VacancyPipelineController;
 use App\Http\Controllers\WorkflowTemplateController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +18,9 @@ Route::get('/', fn () => auth()->check()
 
 Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
 Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
+Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])->name('karier.lamar');
+Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])->name('karier.lamar.store');
+Route::get('/karier/lamaran/{token}', [ApplicationController::class, 'confirmation'])->name('karier.lamaran.konfirmasi');
 
 Route::middleware('auth')->group(function () {
     Route::get('/ubah-password', [PasswordChangeController::class, 'show'])->name('password.change');
@@ -38,4 +43,5 @@ Route::middleware('auth')->group(function () {
     Route::resource('lowongan', VacancyController::class)
         ->parameters(['lowongan' => 'lowongan'])
         ->except(['show']);
+    Route::get('/lowongan/{lowongan}/pipeline', [VacancyPipelineController::class, 'show'])->name('lowongan.pipeline');
 });

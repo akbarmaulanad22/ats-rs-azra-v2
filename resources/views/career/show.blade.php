@@ -48,7 +48,7 @@
         <div class="px-6 py-5 border-t border-gray-100 bg-gray-50/50">
             <p class="text-xs text-gray-500 mb-3">Tertarik melamar posisi ini? Klik tombol di bawah untuk memulai proses lamaran.</p>
             <a
-                href="#"
+                href="{{ route('karier.lamar', $vacancy) }}"
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
