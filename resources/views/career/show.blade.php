@@ -1,62 +1,175 @@
-<x-layouts.public title="{{ $vacancy->judul_posisi }} - RS Azra">
+<x-layouts.public title="{{ $vacancy->judul_posisi }} - RS Azra" main-class="w-full bg-paper">
 
-    <div class="mb-4">
-        <a href="{{ route('karier.index') }}" class="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors ease-out duration-150">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-            </svg>
-            Kembali ke Lowongan
-        </a>
+<style>
+    .detail-wrap {
+        max-width: 1320px; margin: 0 auto;
+        padding: 56px 28px 80px;
+    }
+    .detail-back {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px; text-transform: uppercase;
+        letter-spacing: 0.1em; color: #5a6864;
+        text-decoration: none;
+        display: inline-flex; align-items: center; gap: 8px;
+        margin-bottom: 40px;
+        transition: color 0.15s;
+    }
+    .detail-back:hover { color: rgb(0,119,116); }
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 48px;
+        align-items: start;
+    }
+    /* Left column */
+    .detail-eyebrow {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px; color: #005f5c;
+        text-transform: uppercase; letter-spacing: 0.14em; font-weight: 500;
+        margin-bottom: 16px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .detail-eyebrow::before {
+        content: ""; width: 28px; height: 1px; background: rgb(0,119,116);
+    }
+    .detail-title {
+        font-family: "IBM Plex Serif", Georgia, serif;
+        font-weight: 500;
+        font-size: clamp(28px, 4vw, 48px);
+        line-height: 1.08; letter-spacing: -0.02em;
+        margin: 0 0 24px; color: #0d1614;
+    }
+    .detail-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 32px; }
+    .detail-tag {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10.5px; text-transform: uppercase;
+        letter-spacing: 0.06em; padding: 4px 10px;
+        background: #efede5; color: #2a3835; border-radius: 2px;
+    }
+    .detail-tag.dept { background: #e5f1f0; color: #005f5c; }
+    .detail-section { margin-bottom: 36px; }
+    .detail-section-h {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px; text-transform: uppercase;
+        letter-spacing: 0.1em; font-weight: 600;
+        color: #0d1614; margin: 0 0 12px;
+        border-top: 2px solid #0d1614;
+        padding-top: 14px;
+    }
+    .detail-body {
+        font-size: 15px; line-height: 1.65; color: #2a3835;
+        white-space: pre-line;
+    }
+
+    /* Right sidebar */
+    .detail-sidebar {
+        position: sticky; top: 100px;
+    }
+    .sidebar-card {
+        border: 1px solid #0d1614;
+        background: #fff;
+        overflow: hidden;
+    }
+    .sidebar-card-h {
+        background: #0d1614; color: #fff;
+        padding: 16px 20px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px; text-transform: uppercase;
+        letter-spacing: 0.1em; font-weight: 600;
+    }
+    .sidebar-meta { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .sidebar-row {}
+    .sidebar-row-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10px; text-transform: uppercase;
+        letter-spacing: 0.08em; color: #8a948f;
+        margin-bottom: 4px;
+    }
+    .sidebar-row-val {
+        font-size: 14px; font-weight: 500; color: #0d1614;
+    }
+    .apply-cta {
+        display: block; text-align: center;
+        background: rgb(0,119,116); color: white;
+        padding: 14px 20px;
+        font-size: 14px; font-weight: 600;
+        text-decoration: none;
+        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        transition: background 0.15s;
+        margin: 0 20px 20px;
+    }
+    .apply-cta:hover { background: rgb(0,88,85); }
+
+    @media (max-width: 900px) {
+        .detail-wrap { padding: 32px 16px 60px; }
+        .detail-grid { grid-template-columns: 1fr; gap: 32px; }
+        .detail-sidebar { position: static; }
+    }
+</style>
+
+<div class="detail-wrap">
+    <a href="{{ route('karier.index') }}" class="detail-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+        Kembali ke Lowongan
+    </a>
+
+    <div class="detail-grid">
+        {{-- Left: job detail --}}
+        <div>
+            <div class="detail-eyebrow">{{ $vacancy->unit->nama }}</div>
+            <h1 class="detail-title">{{ $vacancy->judul_posisi }}</h1>
+            <div class="detail-tags">
+                <span class="detail-tag dept">{{ $vacancy->unit->nama }}</span>
+                <span class="detail-tag">{{ $vacancy->jenis_pekerjaan->label() }}</span>
+                @if ($vacancy->created_at->gte(now()->subDays(3)))
+                    <span class="detail-tag" style="background:#f0f7e6;color:#5e9425;">Baru</span>
+                @endif
+                @if ($vacancy->tenggat_lamaran->lte(now()->addDays(7)))
+                    <span class="detail-tag" style="background:#f8e6e1;color:#b54327;">Mendesak</span>
+                @endif
+            </div>
+
+            <div class="detail-section">
+                <h2 class="detail-section-h">Deskripsi Pekerjaan</h2>
+                <div class="detail-body">{{ $vacancy->deskripsi_pekerjaan }}</div>
+            </div>
+
+            <div class="detail-section">
+                <h2 class="detail-section-h">Kualifikasi</h2>
+                <div class="detail-body">{{ $vacancy->kualifikasi }}</div>
+            </div>
+        </div>
+
+        {{-- Right: sidebar --}}
+        <aside class="detail-sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-card-h">Detail Posisi</div>
+                <div class="sidebar-meta">
+                    <div class="sidebar-row">
+                        <div class="sidebar-row-label">Jenis Pekerjaan</div>
+                        <div class="sidebar-row-val">{{ $vacancy->jenis_pekerjaan->label() }}</div>
+                    </div>
+                    <div class="sidebar-row">
+                        <div class="sidebar-row-label">Jumlah Posisi</div>
+                        <div class="sidebar-row-val">{{ $vacancy->jumlah_posisi }}</div>
+                    </div>
+                    <div class="sidebar-row">
+                        <div class="sidebar-row-label">Tenggat Lamaran</div>
+                        <div class="sidebar-row-val">{{ $vacancy->tenggat_lamaran->format('d M Y') }}</div>
+                    </div>
+                    <div class="sidebar-row">
+                        <div class="sidebar-row-label">Ditayangkan</div>
+                        <div class="sidebar-row-val">{{ $vacancy->created_at->locale('id')->diffForHumans() }}</div>
+                    </div>
+                </div>
+                <a href="{{ route('karier.lamar', $vacancy) }}" class="apply-cta">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    Lamar Sekarang
+                </a>
+            </div>
+        </aside>
     </div>
-
-    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        {{-- Header --}}
-        <div class="bg-primary px-6 py-6">
-            <h1 class="text-xl font-bold text-white mb-1">{{ $vacancy->judul_posisi }}</h1>
-            <p class="text-white/70 text-sm">{{ $vacancy->unit->nama }}</p>
-        </div>
-
-        {{-- Meta info --}}
-        <div class="px-6 py-4 border-b border-gray-100 flex flex-wrap gap-4">
-            <div>
-                <span class="text-[10px] text-gray-400 uppercase tracking-wider font-medium block">Jenis Pekerjaan</span>
-                <span class="text-sm text-gray-700 font-medium">{{ $vacancy->jenis_pekerjaan->label() }}</span>
-            </div>
-            <div>
-                <span class="text-[10px] text-gray-400 uppercase tracking-wider font-medium block">Jumlah Posisi</span>
-                <span class="text-sm text-gray-700 font-medium">{{ $vacancy->jumlah_posisi }}</span>
-            </div>
-            <div>
-                <span class="text-[10px] text-gray-400 uppercase tracking-wider font-medium block">Tenggat Lamaran</span>
-                <span class="text-sm text-gray-700 font-medium">{{ $vacancy->tenggat_lamaran->format('d M Y') }}</span>
-            </div>
-        </div>
-
-        {{-- Description & qualifications --}}
-        <div class="px-6 py-5 space-y-6">
-            <div>
-                <h2 class="text-sm font-semibold text-gray-900 mb-2">Deskripsi Pekerjaan</h2>
-                <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ $vacancy->deskripsi_pekerjaan }}</div>
-            </div>
-            <div>
-                <h2 class="text-sm font-semibold text-gray-900 mb-2">Kualifikasi</h2>
-                <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ $vacancy->kualifikasi }}</div>
-            </div>
-        </div>
-
-        {{-- Apply CTA --}}
-        <div class="px-6 py-5 border-t border-gray-100 bg-gray-50/50">
-            <p class="text-xs text-gray-500 mb-3">Tertarik melamar posisi ini? Klik tombol di bawah untuk memulai proses lamaran.</p>
-            <a
-                href="{{ route('karier.lamar', $vacancy) }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
-            >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Lamar Sekarang
-            </a>
-        </div>
-    </div>
+</div>
 
 </x-layouts.public>

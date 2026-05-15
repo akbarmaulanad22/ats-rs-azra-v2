@@ -2,21 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ApplicationStageStatus;
+use App\Enums\GolonganDarah;
+use App\Enums\JenisKelamin;
+use App\Enums\JenisPendidikan;
+use App\Enums\StatusPerkawinan;
+use App\Enums\TingkatKemampuanBahasa;
 use App\Enums\VacancyStatus;
 use App\Http\Requests\StoreApplicationRequest;
 use App\Models\Application;
-use App\Models\Candidate;
 use App\Models\Vacancy;
+use App\Services\ApplicationService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ApplicationController extends Controller
 {
+    public function __construct(private readonly ApplicationService $service) {}
+
     public function create(Vacancy $vacancy): View
     {
         abort_unless(
@@ -27,10 +30,17 @@ class ApplicationController extends Controller
 
         $vacancy->load('unit');
 
-        return view('career.apply', compact('vacancy'));
+        return view('career.apply', [
+            'vacancy' => $vacancy,
+            'jenisKelaminOptions' => JenisKelamin::cases(),
+            'statusPerkawinanOptions' => StatusPerkawinan::cases(),
+            'golonganDarahOptions' => GolonganDarah::cases(),
+            'jenisPendidikanOptions' => JenisPendidikan::cases(),
+            'tingkatBahasaOptions' => TingkatKemampuanBahasa::cases(),
+        ]);
     }
 
-    public function store(StoreApplicationRequest $request, Vacancy $vacancy): RedirectResponse|View
+    public function store(StoreApplicationRequest $request, Vacancy $vacancy): RedirectResponse
     {
         abort_unless(
             $vacancy->status === VacancyStatus::Published
@@ -40,61 +50,12 @@ class ApplicationController extends Controller
 
         $vacancy->load('workflowTemplateSnapshot.stages');
 
-        $cvPath = $request->file('cv')->storeAs(
-            'cv',
-            Str::random(40).'.pdf',
-            'local',
-        );
-
         try {
-            $application = DB::transaction(function () use ($request, $vacancy, $cvPath): Application {
-                $candidate = Candidate::updateOrCreate(
-                    ['email' => $request->validated('email')],
-                    [
-                        'nama_lengkap' => $request->validated('nama_lengkap'),
-                        'no_telepon' => $request->validated('no_telepon'),
-                    ],
-                );
-
-                $application = Application::create([
-                    'candidate_id' => $candidate->id,
-                    'vacancy_id' => $vacancy->id,
-                    'token' => Str::uuid()->toString(),
-                    'cv_path' => $cvPath,
-                ]);
-
-                $stages = $vacancy->workflowTemplateSnapshot->stages;
-
-                $stagesData = $stages->map(function ($stage, $index) use ($application): array {
-                    return [
-                        'application_id' => $application->id,
-                        'position' => $stage->position,
-                        'key' => $stage->key,
-                        'nama' => $stage->nama,
-                        'status' => $index === 0
-                            ? ApplicationStageStatus::Selesai->value
-                            : ($index === 1
-                                ? ApplicationStageStatus::Aktif->value
-                                : ApplicationStageStatus::Pending->value),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                })->all();
-
-                $application->stages()->insert($stagesData);
-
-                return $application;
-            });
+            $application = $this->service->store($request, $vacancy);
         } catch (UniqueConstraintViolationException) {
-            Storage::disk('local')->delete($cvPath);
-
             return back()->withErrors([
                 'email' => 'Anda sudah pernah melamar lowongan ini.',
             ])->withInput();
-        } catch (\Throwable $e) {
-            Storage::disk('local')->delete($cvPath);
-
-            throw $e;
         }
 
         return redirect()->route('karier.lamaran.konfirmasi', ['token' => $application->token]);

@@ -48,10 +48,45 @@ class ApplicationSubmissionTest extends TestCase
         Storage::fake('local');
 
         return [
+            // Step 1
             'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_lahir' => '1990-01-01',
+            'jenis_kelamin' => 'laki-laki',
+            'agama' => 'Islam',
+            'status_perkawinan' => 'belum_menikah',
+            'golongan_darah' => 'A',
+            'alamat_ktp' => 'Jl. Sudirman No. 1, Jakarta',
+            'alamat_domisili' => 'Jl. Sudirman No. 1, Jakarta',
             'no_telepon' => '081234567890',
+            'email' => 'budi@example.com',
+            'no_ktp' => '3174012301900001',
             'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
+            // Step 3 — required min:1
+            'formal_educations' => [
+                [
+                    'jenis_pendidikan' => 'd4_s1',
+                    'nama_sekolah' => 'Universitas Indonesia',
+                    'kota' => 'Depok',
+                    'tahun_lulus' => 2015,
+                    'ip_nilai' => '3.50',
+                    'jurusan' => 'Teknik Informatika',
+                ],
+            ],
+            'informal_educations' => [
+                [
+                    'nama' => 'Pelatihan Laravel',
+                    'topik' => 'Web Development',
+                    'periode_mulai' => '2022-01-01',
+                    'periode_selesai' => '2022-01-14',
+                    'penyelenggara' => 'Laracasts',
+                ],
+            ],
+            // Step 5
+            'is_fresh_graduate' => '0',
+            // Step 6
+            'alasan_melamar' => 'Tertarik berkarir di bidang kesehatan dan berkontribusi untuk RS Azra.',
+            'gaji_diharapkan' => '6000000',
         ];
     }
 
@@ -94,17 +129,9 @@ class ApplicationSubmissionTest extends TestCase
     public function test_candidate_can_submit_application(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
-        $payload = [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ];
-
-        $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
+        $response = $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $response->assertRedirect();
 
@@ -118,15 +145,9 @@ class ApplicationSubmissionTest extends TestCase
     public function test_application_stores_cv_file_on_local_disk(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
         Storage::disk('local')->assertExists($application->cv_path);
@@ -135,15 +156,9 @@ class ApplicationSubmissionTest extends TestCase
     public function test_application_generates_unique_token(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
         $this->assertNotNull($application->token);
@@ -153,18 +168,42 @@ class ApplicationSubmissionTest extends TestCase
     public function test_successful_submission_redirects_to_confirmation_page(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
-        $response = $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $response = $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
         $response->assertRedirect(route('karier.lamaran.konfirmasi', ['token' => $application->token]));
+    }
+
+    public function test_extended_candidate_data_is_stored(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
+
+        $this->assertDatabaseHas('candidates', [
+            'email' => 'budi@example.com',
+            'tempat_lahir' => 'Jakarta',
+            'jenis_kelamin' => 'laki-laki',
+            'no_ktp' => '3174012301900001',
+        ]);
+        $this->assertDatabaseCount('candidate_formal_educations', 1);
+        $this->assertDatabaseCount('candidate_informal_educations', 1);
+    }
+
+    public function test_application_interest_data_is_stored(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
+
+        $this->assertDatabaseHas('applications', [
+            'alasan_melamar' => 'Tertarik berkarir di bidang kesehatan dan berkontribusi untuk RS Azra.',
+            'gaji_diharapkan' => '6000000',
+        ]);
     }
 
     // ── Pipeline initialization ───────────────────────────────────────────────
@@ -172,15 +211,9 @@ class ApplicationSubmissionTest extends TestCase
     public function test_pipeline_initialized_from_workflow_snapshot(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
         $this->assertCount(3, $application->stages);
@@ -189,15 +222,9 @@ class ApplicationSubmissionTest extends TestCase
     public function test_first_stage_is_selesai_on_submission(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
         $firstStage = $application->stages->firstWhere('key', 'aplikasi');
@@ -208,15 +235,9 @@ class ApplicationSubmissionTest extends TestCase
     public function test_second_stage_is_aktif_on_submission(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
         $secondStage = $application->stages->firstWhere('key', 'skrining_cv_hr');
@@ -227,15 +248,9 @@ class ApplicationSubmissionTest extends TestCase
     public function test_remaining_stages_are_pending_on_submission(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
         $lastStage = $application->stages->firstWhere('key', 'onboarding');
@@ -246,15 +261,9 @@ class ApplicationSubmissionTest extends TestCase
     public function test_stages_preserve_position_ordering(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
         $positions = $application->stages->pluck('position')->all();
@@ -267,18 +276,10 @@ class ApplicationSubmissionTest extends TestCase
     public function test_existing_candidate_matched_by_email(): void
     {
         $this->seedStages();
-        Storage::fake('local');
-
         $existingCandidate = Candidate::factory()->create(['email' => 'budi@example.com']);
-
         $vacancy = $this->createPublishedVacancyWithStages();
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Lain',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $this->assertDatabaseCount('candidates', 1);
         $this->assertEquals($existingCandidate->id, Application::first()->candidate_id);
@@ -289,22 +290,14 @@ class ApplicationSubmissionTest extends TestCase
     public function test_candidate_can_apply_to_multiple_vacancies(): void
     {
         $this->seedStages();
-        Storage::fake('local');
-
         $vacancy1 = $this->createPublishedVacancyWithStages();
         $vacancy2 = $this->createPublishedVacancyWithStages();
 
-        $payload = [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ];
-
+        $payload = $this->validPayload();
         $this->post(route('karier.lamar.store', $vacancy1), $payload);
 
-        $payload['cv'] = UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf');
-        $this->post(route('karier.lamar.store', $vacancy2), $payload);
+        $payload2 = $this->validPayload();
+        $this->post(route('karier.lamar.store', $vacancy2), $payload2);
 
         $this->assertDatabaseCount('candidates', 1);
         $this->assertDatabaseCount('applications', 2);
@@ -313,20 +306,11 @@ class ApplicationSubmissionTest extends TestCase
     public function test_duplicate_application_to_same_vacancy_is_rejected(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
-        $payload = [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ];
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
-        $this->post(route('karier.lamar.store', $vacancy), $payload);
-
-        $payload['cv'] = UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf');
-        $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
+        $response = $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $response->assertSessionHasErrors('email');
         $this->assertDatabaseCount('applications', 1);
@@ -340,12 +324,10 @@ class ApplicationSubmissionTest extends TestCase
         Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
-        $response = $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.docx', 100, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
-        ]);
+        $payload = $this->validPayload();
+        $payload['cv'] = UploadedFile::fake()->create('cv.docx', 100, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+        $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
 
         $response->assertSessionHasErrors('cv');
         $this->assertDatabaseCount('applications', 0);
@@ -357,12 +339,10 @@ class ApplicationSubmissionTest extends TestCase
         Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
-        $response = $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 6000, 'application/pdf'),
-        ]);
+        $payload = $this->validPayload();
+        $payload['cv'] = UploadedFile::fake()->create('cv.pdf', 6000, 'application/pdf');
+
+        $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
 
         $response->assertSessionHasErrors('cv');
         $this->assertDatabaseCount('applications', 0);
@@ -375,7 +355,22 @@ class ApplicationSubmissionTest extends TestCase
 
         $response = $this->post(route('karier.lamar.store', $vacancy), []);
 
-        $response->assertSessionHasErrors(['nama_lengkap', 'email', 'no_telepon', 'cv']);
+        $response->assertSessionHasErrors(['nama_lengkap', 'email', 'no_telepon', 'cv', 'tempat_lahir', 'tanggal_lahir', 'formal_educations', 'informal_educations', 'alasan_melamar', 'gaji_diharapkan']);
+    }
+
+    public function test_adjustable_section_partial_fill_requires_all_columns(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $payload = $this->validPayload();
+        $payload['siblings'] = [
+            ['nama' => 'Siti', 'usia' => null, 'jenis_kelamin' => null, 'pendidikan_terakhir' => null, 'pekerjaan_jabatan' => null],
+        ];
+
+        $response = $this->post(route('karier.lamar.store', $vacancy), $payload);
+
+        $response->assertSessionHasErrors(['siblings.0.usia']);
     }
 
     public function test_post_to_draft_vacancy_returns_404(): void
@@ -384,12 +379,7 @@ class ApplicationSubmissionTest extends TestCase
         Storage::fake('local');
         $vacancy = Vacancy::factory()->create(['status' => VacancyStatus::Draft]);
 
-        $response = $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $response = $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $response->assertStatus(404);
     }
@@ -397,16 +387,10 @@ class ApplicationSubmissionTest extends TestCase
     public function test_post_to_expired_vacancy_returns_404(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
         $vacancy->update(['tenggat_lamaran' => now()->subDay()->format('Y-m-d')]);
 
-        $response = $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $response = $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $response->assertStatus(404);
     }
@@ -416,15 +400,9 @@ class ApplicationSubmissionTest extends TestCase
     public function test_confirmation_page_accessible_by_token(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $vacancy = $this->createPublishedVacancyWithStages();
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
 
@@ -459,16 +437,10 @@ class ApplicationSubmissionTest extends TestCase
     public function test_pipeline_view_shows_candidates_grouped_by_stage(): void
     {
         $this->seedStages();
-        Storage::fake('local');
         $admin = User::factory()->hrAdmin()->create();
         $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
 
-        $this->post(route('karier.lamar.store', $vacancy), [
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'no_telepon' => '081234567890',
-            'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
-        ]);
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $response = $this->actingAs($admin)->get(route('lowongan.pipeline', $vacancy));
 
