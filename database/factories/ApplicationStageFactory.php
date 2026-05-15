@@ -32,4 +32,9 @@ class ApplicationStageFactory extends Factory
     {
         return $this->state(['status' => ApplicationStageStatus::Aktif]);
     }
+
+    public function reserved(): static
+    {
+        return $this->state(['status' => ApplicationStageStatus::Reserved]);
+    }
 }
