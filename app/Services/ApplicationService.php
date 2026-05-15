@@ -15,14 +15,19 @@ class ApplicationService
 {
     public function store(Request $request, Vacancy $vacancy): Application
     {
-        $cvPath = $request->file('cv')->storeAs(
-            'cv',
-            Str::random(40).'.pdf',
-            'local',
-        );
+        $cvFile = $request->file('cv');
+        $ext = $cvFile->guessExtension() ?? 'bin';
+        $cvPath = $cvFile->storeAs('cv', Str::random(40).'.'.$ext, 'local');
+
+        $strSipPath = null;
+        if ($request->hasFile('str_sip')) {
+            $strFile = $request->file('str_sip');
+            $strExt = $strFile->guessExtension() ?? 'bin';
+            $strSipPath = $strFile->storeAs('str_sip', Str::random(40).'.'.$strExt, 'local');
+        }
 
         try {
-            return DB::transaction(function () use ($request, $vacancy, $cvPath): Application {
+            return DB::transaction(function () use ($request, $vacancy, $cvPath, $strSipPath): Application {
                 $candidate = Candidate::updateOrCreate(
                     ['email' => $request->validated('email')],
                     $this->candidateData($request),
@@ -38,15 +43,22 @@ class ApplicationService
                     'alasan_melamar' => $request->validated('alasan_melamar'),
                     'gaji_diharapkan' => $request->validated('gaji_diharapkan'),
                     'fasilitas_diharapkan' => $request->validated('fasilitas_diharapkan'),
+                    'kesiapan_kerja' => $request->validated('kesiapan_kerja'),
+                    'str_sip_path' => $strSipPath,
+                    'sumber_informasi' => $request->validated('sumber_informasi'),
                 ]);
 
                 $this->createApplicationStages($application, $vacancy);
                 $this->createApplicationReferences($application, $request);
+                $this->createApplicationSocialMediaAccounts($application, $request);
 
                 return $application;
             });
         } catch (\Throwable $e) {
             Storage::disk('local')->delete($cvPath);
+            if ($strSipPath) {
+                Storage::disk('local')->delete($strSipPath);
+            }
             throw $e;
         }
     }
@@ -82,6 +94,9 @@ class ApplicationService
             'saudara_anak_ke' => $request->validated('saudara_anak_ke'),
             'saudara_dari_bersaudara' => $request->validated('saudara_dari_bersaudara'),
             'is_fresh_graduate' => $request->validated('is_fresh_graduate', false),
+            'pernah_sakit_serius' => $request->validated('pernah_sakit_serius') === 'ya',
+            'diagnosis_sakit' => $request->validated('diagnosis_sakit'),
+            'vaksinasi_covid' => $request->validated('vaksinasi_covid'),
         ];
     }
 
@@ -160,6 +175,13 @@ class ApplicationService
     {
         foreach ($request->validated('references', []) as $row) {
             $application->references()->create($row);
+        }
+    }
+
+    private function createApplicationSocialMediaAccounts(Application $application, Request $request): void
+    {
+        foreach ($request->validated('social_media_accounts', []) as $row) {
+            $application->socialMediaAccounts()->create($row);
         }
     }
 }

@@ -46,7 +46,7 @@ class StoreApplicationRequest extends FormRequest
             'kontak_darurat_nama' => ['nullable', 'string', 'max:255'],
             'kontak_darurat_no_telp' => ['nullable', 'string', 'max:20'],
             'kontak_darurat_hubungan' => ['nullable', 'string', 'max:100'],
-            'cv' => ['required', 'file', 'mimes:pdf', 'max:5120'],
+            'cv' => ['required', 'file', 'mimes:pdf,doc,docx', 'max:3072'],
 
             // Step 2 — Latar Belakang Keluarga
             'ayah_nama' => ['nullable', 'string', 'max:255'],
@@ -137,6 +137,18 @@ class StoreApplicationRequest extends FormRequest
             'references.*.nama_karyawan' => ['required_with:references.*.hubungan', 'string', 'max:255'],
             'references.*.hubungan' => ['required_with:references.*.nama_karyawan', 'string', 'max:100'],
             'references.*.keterangan' => ['nullable', 'string', 'max:1000'],
+
+            // Step 8 — Lain-Lain
+            'pernah_sakit_serius' => ['required', Rule::in(['ya', 'tidak'])],
+            'diagnosis_sakit' => ['nullable', 'required_if:pernah_sakit_serius,ya', 'string', 'max:2000'],
+            'kesiapan_kerja' => ['required', 'string', 'max:2000'],
+            'str_sip' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:3072'],
+            'vaksinasi_covid' => ['required', Rule::in(['sudah_1', 'sudah_2', 'belum'])],
+            'social_media_accounts' => ['nullable', 'array'],
+            'social_media_accounts.*.platform' => ['required_with:social_media_accounts.*.link', 'string', Rule::in(['Facebook', 'Instagram', 'LinkedIn', 'TikTok', 'Twitter/X', 'Lainnya'])],
+            'social_media_accounts.*.link' => ['required_with:social_media_accounts.*.platform', 'string', 'max:500'],
+            'sumber_informasi' => ['required', 'string', 'max:100'],
+            'pernyataan' => ['accepted'],
         ];
     }
 
@@ -157,6 +169,13 @@ class StoreApplicationRequest extends FormRequest
             'no_ktp' => 'nomor KTP',
             'npwp' => 'NPWP',
             'cv' => 'CV/resume',
+            'pernah_sakit_serius' => 'riwayat penyakit serius',
+            'diagnosis_sakit' => 'diagnosis penyakit',
+            'kesiapan_kerja' => 'kesiapan kerja',
+            'str_sip' => 'STR/SIP/STRA/STRTTK',
+            'vaksinasi_covid' => 'vaksinasi Covid-19',
+            'sumber_informasi' => 'sumber informasi',
+            'pernyataan' => 'pernyataan',
             'formal_educations' => 'pendidikan formal',
             'informal_educations' => 'pendidikan informal',
             'alasan_melamar' => 'alasan melamar',
