@@ -71,7 +71,6 @@
         overflow: hidden;
     }
     .sidebar-card-h {
-        background: #0d1614; color: #fff;
         padding: 16px 20px;
         font-family: "IBM Plex Mono", monospace;
         font-size: 11px; text-transform: uppercase;
@@ -90,7 +89,7 @@
     }
     .apply-cta {
         display: block; text-align: center;
-        background: rgb(0,119,116); color: white;
+        /*background: rgb(0,119,116); color: white;*/
         padding: 14px 20px;
         font-size: 14px; font-weight: 600;
         text-decoration: none;
@@ -99,7 +98,7 @@
         transition: background 0.15s;
         margin: 0 20px 20px;
     }
-    .apply-cta:hover { background: rgb(0,88,85); }
+    /*.apply-cta:hover { background: rgb(0,88,85); }*/
 
     @media (max-width: 900px) {
         .detail-wrap { padding: 32px 16px 60px; }
@@ -144,7 +143,7 @@
         {{-- Right: sidebar --}}
         <aside class="detail-sidebar">
             <div class="sidebar-card">
-                <div class="sidebar-card-h">Detail Posisi</div>
+                <div class="sidebar-card-h bg-primary text-white">Detail Posisi</div>
                 <div class="sidebar-meta">
                     <div class="sidebar-row">
                         <div class="sidebar-row-label">Jenis Pekerjaan</div>
@@ -163,7 +162,7 @@
                         <div class="sidebar-row-val">{{ $vacancy->created_at->locale('id')->diffForHumans() }}</div>
                     </div>
                 </div>
-                <a href="{{ route('karier.lamar', $vacancy) }}" class="apply-cta">
+                <a href="{{ route('karier.lamar', $vacancy) }}" class="apply-cta bg-secondary text-white hover:bg-secondary-dark">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     Lamar Sekarang
                 </a>

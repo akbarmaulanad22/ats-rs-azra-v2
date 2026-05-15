@@ -18,7 +18,7 @@
 
     /* Wizard header */
     .apply-header {
-        border-bottom: 1px solid #d9ddd9;
+        /*border-bottom: 1px solid #d9ddd9;*/
         padding-bottom: 32px;
         margin-bottom: 40px;
     }
@@ -209,7 +209,7 @@
         overflow: hidden;
     }
     .sidebar-card-h {
-        background: #0d1614; color: #fff;
+        /*background: #0d1614; color: #fff;*/
         padding: 14px 18px;
         font-family: "IBM Plex Mono", monospace;
         font-size: 11px; text-transform: uppercase;
@@ -236,7 +236,7 @@
         font-family: "IBM Plex Sans", system-ui, sans-serif;
     }
     .step-list-item.active { color: #0d1614; font-weight: 600; }
-    .step-list-item.done { color: rgb(0,119,116); }
+    .step-list-item.done { color: var(--color-secondary); }
     .step-list-num {
         font-family: "IBM Plex Mono", monospace;
         font-size: 10px; width: 20px; text-align: center;
@@ -438,36 +438,40 @@
                     <h2 class="form-section-h">II. Latar Belakang Keluarga</h2>
 
                     <h3 style="font-size:13px;font-weight:600;color:#0d1614;margin:0 0 14px;">A. Data Orang Tua</h3>
-                    <div class="form-row cols-2">
+                    <div class="form-row">
                         <div>
                             <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5a6864;margin-bottom:10px;">Data Ayah</p>
-                            <div class="field"><label>Nama</label><input name="ayah_nama" type="text" value="{{ old('ayah_nama') }}"></div>
-                            <div class="field" style="margin-top:10px;"><label>Usia</label><input name="ayah_usia" type="number" min="1" max="150" value="{{ old('ayah_usia') }}"></div>
-                            <div class="field" style="margin-top:10px;">
-                                <label>Pendidikan Terakhir</label>
-                                <select name="ayah_pendidikan_terakhir">
-                                    <option value="">-- Pilih --</option>
-                                    @foreach ($jenisPendidikanOptions as $opt)
-                                        <option value="{{ $opt->value }}" {{ old('ayah_pendidikan_terakhir') === $opt->value ? 'selected' : '' }}>{{ $opt->label() }}</option>
-                                    @endforeach
-                                </select>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-[16px] md:gap-[16px]">
+                                <div class="field"><label>Nama</label><input name="ayah_nama" type="text" value="{{ old('ayah_nama') }}"></div>
+                                <div class="field"><label>Usia</label><input name="ayah_usia" type="number" min="1" max="150" value="{{ old('ayah_usia') }}"></div>
+                                <div class="field">
+                                    <label>Pendidikan Terakhir</label>
+                                    <select name="ayah_pendidikan_terakhir">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach ($jenisPendidikanOptions as $opt)
+                                            <option value="{{ $opt->value }}" {{ old('ayah_pendidikan_terakhir') === $opt->value ? 'selected' : '' }}>{{ $opt->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="field"><label>Pekerjaan / Jabatan</label><input name="ayah_pekerjaan" type="text" value="{{ old('ayah_pekerjaan') }}"></div>
                             </div>
-                            <div class="field" style="margin-top:10px;"><label>Pekerjaan / Jabatan</label><input name="ayah_pekerjaan" type="text" value="{{ old('ayah_pekerjaan') }}"></div>
                         </div>
                         <div>
                             <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5a6864;margin-bottom:10px;">Data Ibu</p>
-                            <div class="field"><label>Nama</label><input name="ibu_nama" type="text" value="{{ old('ibu_nama') }}"></div>
-                            <div class="field" style="margin-top:10px;"><label>Usia</label><input name="ibu_usia" type="number" min="1" max="150" value="{{ old('ibu_usia') }}"></div>
-                            <div class="field" style="margin-top:10px;">
-                                <label>Pendidikan Terakhir</label>
-                                <select name="ibu_pendidikan_terakhir">
-                                    <option value="">-- Pilih --</option>
-                                    @foreach ($jenisPendidikanOptions as $opt)
-                                        <option value="{{ $opt->value }}" {{ old('ibu_pendidikan_terakhir') === $opt->value ? 'selected' : '' }}>{{ $opt->label() }}</option>
-                                    @endforeach
-                                </select>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-[16px] md:gap-[16px]">
+                                <div class="field"><label>Nama</label><input name="ibu_nama" type="text" value="{{ old('ibu_nama') }}"></div>
+                                <div class="field"><label>Usia</label><input name="ibu_usia" type="number" min="1" max="150" value="{{ old('ibu_usia') }}"></div>
+                                <div class="field">
+                                    <label>Pendidikan Terakhir</label>
+                                    <select name="ibu_pendidikan_terakhir">
+                                        <option value="">-- Pilih --</option>
+                                        @foreach ($jenisPendidikanOptions as $opt)
+                                            <option value="{{ $opt->value }}" {{ old('ibu_pendidikan_terakhir') === $opt->value ? 'selected' : '' }}>{{ $opt->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="field"><label>Pekerjaan / Jabatan</label><input name="ibu_pekerjaan" type="text" value="{{ old('ibu_pekerjaan') }}"></div>
                             </div>
-                            <div class="field" style="margin-top:10px;"><label>Pekerjaan / Jabatan</label><input name="ibu_pekerjaan" type="text" value="{{ old('ibu_pekerjaan') }}"></div>
                         </div>
                     </div>
 
@@ -911,7 +915,7 @@
             {{-- Sidebar --}}
             <aside class="apply-sidebar">
                 <div class="sidebar-card">
-                    <div class="sidebar-card-h">Posisi Dilamar</div>
+                    <div class="sidebar-card-h bg-primary text-white">Posisi Dilamar</div>
                     <div class="sidebar-body">
                         <div class="sidebar-pos">{{ $vacancy->judul_posisi }}</div>
                         <div class="sidebar-unit">{{ $vacancy->unit->nama }}</div>
@@ -927,7 +931,7 @@
                 </div>
 
                 <div class="sidebar-card" style="margin-top:16px;">
-                    <div class="sidebar-card-h">Langkah-Langkah</div>
+                    <div class="sidebar-card-h bg-primary text-white">Langkah-Langkah</div>
                     <div class="step-list">
                         @foreach (['Identitas Diri', 'Latar Belakang Keluarga', 'Pendidikan', 'Pengalaman Organisasi', 'Pengalaman Kerja', 'Minat', 'Referensi'] as $i => $label)
                             <div class="step-list-item"
