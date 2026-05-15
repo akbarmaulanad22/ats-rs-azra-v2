@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Enums\ApplicationStageStatus;
 use App\Enums\Role;
 use App\Enums\VacancyStatus;
+use App\Mail\TemplatedMail;
 use App\Models\Application;
 use App\Models\Candidate;
+use App\Models\EmailTemplate;
 use App\Models\Stage;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -14,6 +16,7 @@ use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -713,5 +716,41 @@ class ApplicationSubmissionTest extends TestCase
 
         $this->assertNotNull($current);
         $this->assertEquals('onboarding', $current->key);
+    }
+
+    // ── Email notification on application received ────────────────────────────
+
+    public function test_confirmation_email_sent_to_candidate_on_application_submission(): void
+    {
+        Mail::fake();
+        $this->seedStages();
+
+        EmailTemplate::create([
+            'key' => 'lamaran_diterima',
+            'deskripsi' => 'Test',
+            'subjek' => 'Konfirmasi {judul_lowongan}',
+            'isi' => 'Halo {nama_kandidat}, lamaran Anda untuk {judul_lowongan} diterima. Status: {link_status}',
+        ]);
+
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
+
+        Mail::assertSent(TemplatedMail::class, function (TemplatedMail $mail) {
+            return $mail->hasTo('budi@example.com')
+                && $mail->key === 'lamaran_diterima'
+                && str_contains($mail->body, 'Budi Santoso');
+        });
+    }
+
+    public function test_no_confirmation_email_when_template_missing(): void
+    {
+        Mail::fake();
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages();
+
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
+
+        Mail::assertNothingSent();
     }
 }

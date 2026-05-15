@@ -5,6 +5,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\VacancyPipelineController;
@@ -44,4 +45,8 @@ Route::middleware('auth')->group(function () {
         ->parameters(['lowongan' => 'lowongan'])
         ->except(['show']);
     Route::get('/lowongan/{lowongan}/pipeline', [VacancyPipelineController::class, 'show'])->name('lowongan.pipeline');
+
+    Route::get('/pengaturan/template-email', [EmailTemplateController::class, 'index'])->name('template-email.index');
+    Route::get('/pengaturan/template-email/{templateEmail}/edit', [EmailTemplateController::class, 'edit'])->name('template-email.edit');
+    Route::put('/pengaturan/template-email/{templateEmail}', [EmailTemplateController::class, 'update'])->name('template-email.update');
 });

@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             StageSeeder::class,
             WorkflowTemplateSeeder::class,
             UnitSeeder::class,
+            EmailTemplateSeeder::class,
         ]);
     }
 }
