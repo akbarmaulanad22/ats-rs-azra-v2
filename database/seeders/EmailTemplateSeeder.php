@@ -70,12 +70,6 @@ class EmailTemplateSeeder extends Seeder
                 'subjek' => 'Tindakan Diperlukan — {judul_lowongan}',
                 'isi' => "Yth. {nama_penerima},\n\nTerdapat kandidat yang memerlukan tindakan Anda untuk posisi {judul_lowongan}.\n\nSilakan masuk ke sistem untuk meninjau dan mengambil tindakan yang diperlukan.\n\nSalam,\nSistem Rekrutmen RS Azra",
             ],
-            [
-                'key' => 'pengingat_kandidat_reserved',
-                'deskripsi' => 'Dikirim ke Admin HR sebelum tenggat lowongan, berisi daftar kandidat reserved',
-                'subjek' => 'Pengingat: Kandidat Reserved Menjelang Tenggat — {judul_lowongan}',
-                'isi' => "Yth. Admin HR,\n\nLowongan {judul_lowongan} akan mencapai tenggat lamaran pada {tanggal_tenggat}.\n\nTerdapat kandidat dengan status reserved yang belum mendapat keputusan akhir. Kandidat-kandidat ini akan otomatis ditolak apabila tidak ada tindakan sebelum tenggat.\n\nSilakan masuk ke sistem untuk meninjau kandidat reserved.\n\nSalam,\nSistem Rekrutmen RS Azra",
-            ],
         ];
 
         foreach ($templates as $template) {
