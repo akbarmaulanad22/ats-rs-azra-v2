@@ -48,7 +48,7 @@ class ApplicationController extends Controller
 
         try {
             $application = DB::transaction(function () use ($request, $vacancy, $cvPath): Application {
-                $candidate = Candidate::firstOrCreate(
+                $candidate = Candidate::updateOrCreate(
                     ['email' => $request->validated('email')],
                     [
                         'nama_lengkap' => $request->validated('nama_lengkap'),
@@ -91,6 +91,10 @@ class ApplicationController extends Controller
             return back()->withErrors([
                 'email' => 'Anda sudah pernah melamar lowongan ini.',
             ])->withInput();
+        } catch (\Throwable $e) {
+            Storage::disk('local')->delete($cvPath);
+
+            throw $e;
         }
 
         return redirect()->route('karier.lamaran.konfirmasi', ['token' => $application->token]);

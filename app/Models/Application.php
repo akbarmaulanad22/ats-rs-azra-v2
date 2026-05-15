@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ApplicationStageStatus;
 use Database\Factories\ApplicationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,9 +38,9 @@ class Application extends Model
 
     public function currentStage(): ?ApplicationStage
     {
-        return $this->stages()
-            ->whereIn('status', ['aktif', 'pending'])
-            ->orderBy('position')
+        return $this->stages
+            ->whereIn('status', [ApplicationStageStatus::Aktif, ApplicationStageStatus::Pending])
+            ->sortBy('position')
             ->first();
     }
 }

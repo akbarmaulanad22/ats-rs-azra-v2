@@ -19,7 +19,7 @@ Route::get('/', fn () => auth()->check()
 Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
 Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
 Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])->name('karier.lamar');
-Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])->name('karier.lamar.store');
+Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])->name('karier.lamar.store')->middleware('throttle:5,1');
 Route::get('/karier/lamaran/{token}', [ApplicationController::class, 'confirmation'])->name('karier.lamaran.konfirmasi');
 
 Route::middleware('auth')->group(function () {
