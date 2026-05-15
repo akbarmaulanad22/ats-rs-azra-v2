@@ -164,8 +164,8 @@
 
             {{-- Right: CTA + hamburger --}}
             <div class="flex items-center gap-3 ml-auto">
-                <a href="{{ route('karier.index') }}" class="hidden lg:inline-flex items-center px-4 py-2 text-white text-sm font-semibold rounded-lg transition-colors" style="background:rgb(0,119,116)" onmouseover="this.style.background='rgb(0,88,85)'" onmouseout="this.style.background='rgb(0,119,116)'">
-                    Lamar Sekarang
+                <a href="{{ route('login') }}" class="hidden lg:inline-flex items-center" style="padding:11px 20px; border:1px solid #0d1614; background:white; color:#0d1614; font-size:13px; font-weight:600; cursor:pointer; font-family:'IBM Plex Sans',system-ui,sans-serif; transition:background 0.15s; border-radius:0;" onmouseover="this.style.background='#efede5'" onmouseout="this.style.background='white'">
+                    Login
                 </a>
                 <button
                     @click="menuOpen = !menuOpen"
@@ -202,8 +202,8 @@
                 <a href="{{ route('karier.index') }}" class="mobile-nav-link font-semibold" style="color:rgb(0,119,116)">Karir</a>
                 <a href="https://rsazra.co.id/promo" class="mobile-nav-link">Promo</a>
                 <div class="pt-4">
-                    <a href="{{ route('karier.index') }}" class="inline-flex items-center px-5 py-2.5 text-white text-sm font-semibold rounded-lg" style="background:rgb(0,119,116)">
-                        Lamar Sekarang
+                    <a href="{{ route('login') }}" class="inline-flex items-center" style="padding:11px 20px; border:1px solid #0d1614; background:white; color:#0d1614; font-size:13px; font-weight:600; cursor:pointer; font-family:'IBM Plex Sans',system-ui,sans-serif; transition:background 0.15s; border-radius:0;" onmouseover="this.style.background='#efede5'" onmouseout="this.style.background='white'">
+                        Login
                     </a>
                 </div>
             </nav>
