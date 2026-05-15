@@ -725,18 +725,18 @@ class ApplicationSubmissionTest extends TestCase
         Mail::fake();
         $this->seedStages();
 
-        EmailTemplate::create([
+        EmailTemplate::unguarded(fn () => EmailTemplate::create([
             'key' => 'lamaran_diterima',
             'deskripsi' => 'Test',
             'subjek' => 'Konfirmasi {judul_lowongan}',
             'isi' => 'Halo {nama_kandidat}, lamaran Anda untuk {judul_lowongan} diterima. Status: {link_status}',
-        ]);
+        ]));
 
         $vacancy = $this->createPublishedVacancyWithStages();
 
         $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
-        Mail::assertSent(TemplatedMail::class, function (TemplatedMail $mail) {
+        Mail::assertQueued(TemplatedMail::class, function (TemplatedMail $mail) {
             return $mail->hasTo('budi@example.com')
                 && $mail->key === 'lamaran_diterima'
                 && str_contains($mail->body, 'Budi Santoso');

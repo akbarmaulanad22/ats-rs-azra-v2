@@ -19,12 +19,12 @@ class KirimPengingatKandidatReservedTest extends TestCase
 
     private function seedTemplate(): void
     {
-        EmailTemplate::create([
+        EmailTemplate::unguarded(fn () => EmailTemplate::create([
             'key' => 'pengingat_kandidat_reserved',
             'deskripsi' => 'Pengingat reserved',
             'subjek' => 'Pengingat: {judul_lowongan}',
             'isi' => 'Lowongan {judul_lowongan} tenggat {tanggal_tenggat}.',
-        ]);
+        ]));
     }
 
     public function test_sends_reminder_to_hr_admins_for_vacancies_expiring_in_n_days(): void
@@ -45,7 +45,7 @@ class KirimPengingatKandidatReservedTest extends TestCase
 
         $this->artisan('email:kirim-pengingat-reserved')->assertSuccessful();
 
-        Mail::assertSent(TemplatedMail::class, fn ($mail) => $mail->hasTo('admin@rsazra.id')
+        Mail::assertQueued(TemplatedMail::class, fn ($mail) => $mail->hasTo('admin@rsazra.id')
             && $mail->key === 'pengingat_kandidat_reserved');
     }
 
@@ -92,7 +92,7 @@ class KirimPengingatKandidatReservedTest extends TestCase
 
         $this->artisan('email:kirim-pengingat-reserved --days=5')->assertSuccessful();
 
-        Mail::assertSent(TemplatedMail::class, fn ($mail) => $mail->hasTo('admin@rsazra.id'));
+        Mail::assertQueued(TemplatedMail::class, fn ($mail) => $mail->hasTo('admin@rsazra.id'));
     }
 
     public function test_sends_to_multiple_hr_admins(): void
@@ -110,7 +110,7 @@ class KirimPengingatKandidatReservedTest extends TestCase
 
         $this->artisan('email:kirim-pengingat-reserved')->assertSuccessful();
 
-        Mail::assertSent(TemplatedMail::class, fn ($mail) => $mail->hasTo('admin1@rsazra.id'));
-        Mail::assertSent(TemplatedMail::class, fn ($mail) => $mail->hasTo('admin2@rsazra.id'));
+        Mail::assertQueued(TemplatedMail::class, fn ($mail) => $mail->hasTo('admin1@rsazra.id'));
+        Mail::assertQueued(TemplatedMail::class, fn ($mail) => $mail->hasTo('admin2@rsazra.id'));
     }
 }

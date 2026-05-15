@@ -26,7 +26,7 @@ class EmailNotificationService
         $subject = $this->render($template->subjek, $payload);
         $body = $this->render($template->isi, $payload);
 
-        Mail::to($toEmail)->send(new TemplatedMail($subject, $body, $key));
+        Mail::to($toEmail)->queue(new TemplatedMail($subject, $body, $key));
     }
 
     /**
@@ -36,9 +36,6 @@ class EmailNotificationService
      */
     public function render(string $text, array $payload): string
     {
-        $search = array_map(fn (string $k) => '{'.$k.'}', array_keys($payload));
-        $replace = array_values($payload);
-
-        return str_replace($search, $replace, $text);
+        return preg_replace_callback('/\{(\w+)\}/', fn (array $m) => $payload[$m[1]] ?? $m[0], $text);
     }
 }

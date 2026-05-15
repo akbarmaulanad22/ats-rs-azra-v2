@@ -17,7 +17,7 @@ class UpdateEmailTemplateRequest extends FormRequest
     {
         return [
             'subjek' => ['required', 'string', 'max:255'],
-            'isi' => ['required', 'string'],
+            'isi' => ['required', 'string', 'max:65535'],
         ];
     }
 }

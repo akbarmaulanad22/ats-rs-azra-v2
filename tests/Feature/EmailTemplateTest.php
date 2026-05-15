@@ -14,12 +14,12 @@ class EmailTemplateTest extends TestCase
 
     private function makeTemplate(array $overrides = []): EmailTemplate
     {
-        return EmailTemplate::create(array_merge([
+        return EmailTemplate::unguarded(fn () => EmailTemplate::create(array_merge([
             'key' => 'test_template',
             'deskripsi' => 'Template untuk pengujian',
             'subjek' => 'Subjek Test {nama_kandidat}',
             'isi' => 'Halo {nama_kandidat}, ini adalah isi email.',
-        ], $overrides));
+        ], $overrides)));
     }
 
     // ── Index ──────────────────────────────────────────────────────────────────

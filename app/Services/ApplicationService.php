@@ -56,15 +56,6 @@ class ApplicationService
 
                 return $application;
             });
-
-            $application->load(['candidate', 'vacancy']);
-            $this->emailNotificationService->dispatch('lamaran_diterima', $application->candidate->email, [
-                'nama_kandidat' => $application->candidate->nama_lengkap,
-                'judul_lowongan' => $application->vacancy->judul_posisi,
-                'link_status' => route('karier.lamaran.konfirmasi', $application->token),
-            ]);
-
-            return $application;
         } catch (\Throwable $e) {
             Storage::disk('local')->delete($cvPath);
             if ($strSipPath) {
@@ -72,6 +63,19 @@ class ApplicationService
             }
             throw $e;
         }
+
+        try {
+            $application->load(['candidate', 'vacancy']);
+            $this->emailNotificationService->dispatch('lamaran_diterima', $application->candidate->email, [
+                'nama_kandidat' => $application->candidate->nama_lengkap,
+                'judul_lowongan' => $application->vacancy->judul_posisi,
+                'link_status' => route('karier.lamaran.konfirmasi', $application->token),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return $application;
     }
 
     /** @return array<string, mixed> */

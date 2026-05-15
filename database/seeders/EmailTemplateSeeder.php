@@ -79,7 +79,9 @@ class EmailTemplateSeeder extends Seeder
         ];
 
         foreach ($templates as $template) {
-            EmailTemplate::firstOrCreate(['key' => $template['key']], $template);
+            $key = $template['key'];
+            unset($template['key']);
+            EmailTemplate::unguarded(fn () => EmailTemplate::firstOrCreate(['key' => $key], ['key' => $key, ...$template]));
         }
     }
 }

@@ -52,10 +52,16 @@ class KirimPengingatKandidatReserved extends Command
 
         foreach ($vacancies as $vacancy) {
             foreach ($hrAdmins as $hrAdmin) {
-                $this->emailNotificationService->dispatch('pengingat_kandidat_reserved', $hrAdmin->email, [
-                    'judul_lowongan' => $vacancy->judul_posisi,
-                    'tanggal_tenggat' => $vacancy->tenggat_lamaran->format('d/m/Y'),
-                ]);
+                try {
+                    $this->emailNotificationService->dispatch('pengingat_kandidat_reserved', $hrAdmin->email, [
+                        'judul_lowongan' => $vacancy->judul_posisi,
+                        'tanggal_tenggat' => $vacancy->tenggat_lamaran->format('d/m/Y'),
+                    ]);
+                } catch (\Throwable $e) {
+                    $this->error("Gagal kirim ke {$hrAdmin->email}: {$e->getMessage()}");
+
+                    continue;
+                }
             }
 
             $this->info("Pengingat terkirim untuk lowongan: {$vacancy->judul_posisi}");
