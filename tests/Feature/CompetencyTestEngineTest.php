@@ -227,7 +227,7 @@ class CompetencyTestEngineTest extends TestCase
         $response = $this->get(route('tes.show', $submission->token));
 
         $response->assertOk();
-        $response->assertViewIs('test.selesai');
+        $response->assertViewIs('test.show');
     }
 
     public function test_mc_questions_are_auto_scored_on_submission(): void

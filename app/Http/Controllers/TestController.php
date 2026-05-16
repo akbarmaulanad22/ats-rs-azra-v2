@@ -19,7 +19,9 @@ class TestController extends Controller
         ])->where('token', $token)->firstOrFail();
 
         if ($submission->isSubmitted()) {
-            return view('test.selesai', compact('submission'));
+            $questions = $submission->vacancyTest->questions;
+
+            return view('test.show', compact('submission', 'questions'));
         }
 
         if ($submission->started_at === null) {
