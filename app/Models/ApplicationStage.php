@@ -19,6 +19,7 @@ class ApplicationStage extends Model
         'key',
         'nama',
         'status',
+        'catatan',
     ];
 
     protected function casts(): array
