@@ -242,6 +242,8 @@
         font-size: 14px; font-weight: 500;
         letter-spacing: 0; text-transform: none; margin: 0 2px;
     }
+    .pagination-wrap nav a[rel="next"],
+    .pagination-wrap nav span[aria-disabled="true"] > span { padding-right: 12px; }
 
     /* ── Responsive ──────────────────────────────────────── */
     @media (max-width: 1100px) {
