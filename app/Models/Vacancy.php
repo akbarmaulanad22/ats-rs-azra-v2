@@ -59,6 +59,11 @@ class Vacancy extends Model
         return $this->hasOne(VacancyTest::class);
     }
 
+    public function interviewCriteria(): HasMany
+    {
+        return $this->hasMany(VacancyInterviewCriteria::class)->orderBy('stage_key')->orderBy('urutan');
+    }
+
     public function scopePublished(Builder $query): void
     {
         $query->where('status', VacancyStatus::Published)

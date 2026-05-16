@@ -9,11 +9,14 @@ use App\Http\Controllers\CvScreeningController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\InterviewController;
+use App\Http\Controllers\InterviewCriteriaController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestReviewController;
 use App\Http\Controllers\VacancyController;
+use App\Http\Controllers\VacancyInterviewCriteriaController;
 use App\Http\Controllers\VacancyPipelineController;
 use App\Http\Controllers\VacancyTestController;
 use App\Http\Controllers\WorkflowTemplateController;
@@ -78,4 +81,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/tes/ulasan', [TestReviewController::class, 'index'])->name('lowongan.tes.ulasan.index');
     Route::get('/lowongan/{lowongan}/tes/ulasan/{submission}', [TestReviewController::class, 'show'])->scopeBindings()->name('lowongan.tes.ulasan.show');
     Route::post('/lowongan/{lowongan}/tes/ulasan/jawaban/{answer}/skor', [TestReviewController::class, 'scoreEssay'])->name('lowongan.tes.ulasan.skor');
+
+    Route::get('/pengaturan/kriteria-wawancara', [InterviewCriteriaController::class, 'index'])->name('kriteria-wawancara.index');
+    Route::post('/pengaturan/kriteria-wawancara', [InterviewCriteriaController::class, 'store'])->name('kriteria-wawancara.store');
+    Route::put('/pengaturan/kriteria-wawancara/{kriteria_wawancara}', [InterviewCriteriaController::class, 'update'])->name('kriteria-wawancara.update');
+    Route::delete('/pengaturan/kriteria-wawancara/{kriteria_wawancara}', [InterviewCriteriaController::class, 'destroy'])->name('kriteria-wawancara.destroy');
+
+    Route::get('/lowongan/{lowongan}/kriteria-wawancara', [VacancyInterviewCriteriaController::class, 'show'])->name('lowongan.kriteria-wawancara.show');
+    Route::post('/lowongan/{lowongan}/kriteria-wawancara', [VacancyInterviewCriteriaController::class, 'save'])->name('lowongan.kriteria-wawancara.save');
+
+    Route::get('/lowongan/{lowongan}/wawancara', [InterviewController::class, 'index'])->name('lowongan.wawancara.index');
+    Route::get('/lowongan/{lowongan}/wawancara/{application}', [InterviewController::class, 'show'])->scopeBindings()->name('lowongan.wawancara.show');
+    Route::post('/lowongan/{lowongan}/wawancara/{application}/keputusan', [InterviewController::class, 'decide'])->scopeBindings()->name('lowongan.wawancara.keputusan');
 });

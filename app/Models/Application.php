@@ -79,4 +79,9 @@ class Application extends Model
     {
         return $this->hasMany(ApplicationSocialMediaAccount::class);
     }
+
+    public function interviewResults(): HasMany
+    {
+        return $this->hasMany(InterviewResult::class);
+    }
 }
