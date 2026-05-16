@@ -73,6 +73,7 @@ class InterviewController extends Controller
             'candidate.achievements',
             'stages.interviewResult.ratings',
             'testSubmission.answers.question',
+            'discSubmission.result',
         ]);
 
         $interviewStage = $application->stages->firstWhere('key', $stageKey);

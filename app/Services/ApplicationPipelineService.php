@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ApplicationStageStatus;
 use App\Models\Application;
+use App\Models\DiscSubmission;
 use App\Models\TestSubmission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -73,6 +74,26 @@ class ApplicationPipelineService
 
                 return;
             }
+        }
+
+        if ($nextStage?->key === 'tes_disc') {
+            $token = Str::uuid()->toString();
+            DiscSubmission::create([
+                'application_id' => $application->id,
+                'token' => $token,
+            ]);
+
+            try {
+                $this->emailNotificationService->dispatch('tes_tersedia', $application->candidate->email, [
+                    'nama_kandidat' => $application->candidate->nama_lengkap,
+                    'judul_lowongan' => $application->vacancy->judul_posisi,
+                    'link_tes' => route('tes-disc.show', $token),
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            return;
         }
 
         try {

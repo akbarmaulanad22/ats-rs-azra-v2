@@ -75,6 +75,11 @@ class Application extends Model
         return $this->hasOne(TestSubmission::class);
     }
 
+    public function discSubmission(): HasOne
+    {
+        return $this->hasOne(DiscSubmission::class);
+    }
+
     public function socialMediaAccounts(): HasMany
     {
         return $this->hasMany(ApplicationSocialMediaAccount::class);

@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CvScreeningController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiscTestController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InterviewController;
@@ -29,6 +30,9 @@ Route::get('/', fn () => auth()->check()
 
 Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show');
 Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:5,1');
+
+Route::get('/tes-disc/{token}', [DiscTestController::class, 'show'])->name('tes-disc.show');
+Route::post('/tes-disc/{token}', [DiscTestController::class, 'submit'])->name('tes-disc.submit')->middleware('throttle:5,1');
 
 Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
 Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
