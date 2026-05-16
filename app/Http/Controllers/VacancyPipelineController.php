@@ -17,6 +17,8 @@ class VacancyPipelineController extends Controller
             'workflowTemplateSnapshot.stages',
             'applications.candidate',
             'applications.stages',
+            'applications.testSubmission',
+            'vacancyTest',
         ]);
 
         $snapshotStages = $lowongan->workflowTemplateSnapshot->stages;

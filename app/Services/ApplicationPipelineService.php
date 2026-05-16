@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Enums\ApplicationStageStatus;
 use App\Models\Application;
+use App\Models\TestSubmission;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ApplicationPipelineService
 {
@@ -41,6 +43,38 @@ class ApplicationPipelineService
             }
         });
 
+        $application->load(['stages', 'candidate', 'vacancy.vacancyTest']);
+
+        $nextStage = $application->stages
+            ->where('status', ApplicationStageStatus::Aktif)
+            ->first();
+
+        if ($nextStage?->key === 'tes_kompetensi') {
+            $vacancyTest = $application->vacancy->vacancyTest;
+
+            if ($vacancyTest) {
+                $token = Str::uuid()->toString();
+                TestSubmission::create([
+                    'application_id' => $application->id,
+                    'vacancy_test_id' => $vacancyTest->id,
+                    'token' => $token,
+                ]);
+
+                try {
+                    $this->emailNotificationService->dispatch('undangan_tes_kompetensi', $application->candidate->email, [
+                        'nama_kandidat' => $application->candidate->nama_lengkap,
+                        'judul_lowongan' => $application->vacancy->judul_posisi,
+                        'link_tes' => route('tes.show', $token),
+                        'batas_waktu' => $vacancyTest->batas_waktu_menit.' menit',
+                    ]);
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+
+                return;
+            }
+        }
+
         try {
             $this->emailNotificationService->dispatch('transisi_tahap', $application->candidate->email, [
                 'nama_kandidat' => $application->candidate->nama_lengkap,
@@ -50,6 +84,14 @@ class ApplicationPipelineService
         } catch (\Throwable $e) {
             report($e);
         }
+    }
+
+    /**
+     * Advance application from test submission (auto-advance after submit).
+     */
+    public function advanceFromTest(Application $application): void
+    {
+        $this->advance($application);
     }
 
     /**
