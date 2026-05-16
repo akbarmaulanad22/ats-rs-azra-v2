@@ -118,7 +118,7 @@
         margin-bottom: 6px;
     }
     .field label .req { color: #b54327; }
-    .field input, .field select, .field textarea {
+    .field input:not([type="checkbox"]):not([type="radio"]), .field select, .field textarea {
         width: 100%;
         border: 1px solid #d9ddd9;
         background: #fafaf9;
@@ -130,6 +130,7 @@
         border-radius: 0;
         appearance: none;
     }
+    .field input[type="checkbox"], .field input[type="radio"] { appearance: auto; }
     .field input:focus, .field select:focus, .field textarea:focus {
         border-color: rgb(0,119,116);
         background: #fff;
@@ -255,6 +256,7 @@
         .form-row.cols-2, .form-row.cols-3 { grid-template-columns: 1fr; }
         .step-progress { gap: 0; }
         .step-circle { width: 26px; height: 26px; font-size: 10px; }
+        .step-counter { display: none; }
     }
 </style>
 
@@ -1025,7 +1027,7 @@
                     </button>
                     <div x-show="step < 1" style="flex:1;"></div>
 
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a948f;text-transform:uppercase;letter-spacing:.06em;">
+                    <div class="step-counter" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a948f;text-transform:uppercase;letter-spacing:.06em;">
                         Langkah <span x-text="step"></span> dari 8
                     </div>
 
@@ -1034,7 +1036,7 @@
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
                     </button>
                     <button type="button" class="btn-submit" x-show="step === 8" @click="submitForm()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
                         Kirim Lamaran
                     </button>
                 </div>
