@@ -8,6 +8,7 @@ use App\Http\Controllers\CareerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\VacancyPipelineController;
 use App\Http\Controllers\WorkflowTemplateController;
@@ -52,4 +53,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengaturan/template-email', [EmailTemplateController::class, 'index'])->name('template-email.index');
     Route::get('/pengaturan/template-email/{templateEmail}/edit', [EmailTemplateController::class, 'edit'])->name('template-email.edit');
     Route::put('/pengaturan/template-email/{templateEmail}', [EmailTemplateController::class, 'update'])->name('template-email.update');
+
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
 });
