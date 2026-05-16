@@ -382,13 +382,39 @@ class CvScreeningTest extends TestCase
         $application = $this->makeApplication($vacancy);
 
         // candidate only has skrining_cv_hr active; unit head's stageKey is skrining_cv_kepala_unit
-        // skrining_cv_kepala_unit stage exists but is Pending → 403
+        // skrining_cv_kepala_unit stage exists but is Pending → not advanceable
         $response = $this->actingAs($unitHead)->post(
             route('lowongan.skrining.keputusan', [$vacancy, $application]),
             ['keputusan' => 'lulus']
         );
 
+        $response->assertSessionHasErrors('screening');
+    }
+
+    public function test_unit_head_cannot_decide_on_other_unit_vacancy_application(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $otherUnit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($otherUnit);
+        $application = $this->makeApplication($vacancy, [
+            0 => ApplicationStageStatus::Selesai,
+            1 => ApplicationStageStatus::Selesai,
+            2 => ApplicationStageStatus::Aktif,
+            3 => ApplicationStageStatus::Pending,
+        ]);
+
+        $response = $this->actingAs($unitHead)->post(
+            route('lowongan.skrining.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'catatan' => 'Should not work.']
+        );
+
         $response->assertForbidden();
+
+        $application->load('stages');
+        $stage = $application->stages->firstWhere('key', 'skrining_cv_kepala_unit');
+        $this->assertEquals(ApplicationStageStatus::Aktif, $stage->status);
     }
 
     // ── Sequential access ─────────────────────────────────────────────────────

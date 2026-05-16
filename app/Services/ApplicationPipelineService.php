@@ -59,6 +59,8 @@ class ApplicationPipelineService
      */
     public function reserve(Application $application): void
     {
+        $application->load(['candidate', 'vacancy']);
+
         DB::transaction(function () use ($application): void {
             $stages = $application->stages()->lockForUpdate()->orderBy('position')->get();
 

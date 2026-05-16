@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ApplicationStageStatus;
 use App\Enums\Role;
 use App\Http\Requests\CvScreeningDecisionRequest;
 use App\Models\Application;
@@ -10,6 +9,7 @@ use App\Models\Vacancy;
 use App\Services\ApplicationPipelineService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -56,6 +56,8 @@ class CvScreeningController extends Controller
     {
         Gate::authorize('viewScreeningDetail', $application);
 
+        abort_if($application->vacancy_id !== $lowongan->id, 404);
+
         $user = $request->user();
         $stageKey = $this->resolveStageKey($user->role);
 
@@ -83,6 +85,8 @@ class CvScreeningController extends Controller
     {
         Gate::authorize('decide', $application);
 
+        abort_if($application->vacancy_id !== $lowongan->id, 404);
+
         $user = $request->user();
         $stageKey = $this->resolveStageKey($user->role);
 
@@ -91,25 +95,23 @@ class CvScreeningController extends Controller
 
         abort_if(! $screeningStage, 404);
 
-        if ($screeningStage->status === ApplicationStageStatus::Pending) {
-            abort(403, 'Tahap skrining ini belum aktif untuk kandidat tersebut.');
-        }
-
         if (! $screeningStage->status->isAdvanceable()) {
-            return back()->withErrors(['screening' => 'Keputusan sudah diberikan untuk tahap ini.']);
+            return back()->withErrors(['screening' => 'Keputusan tidak dapat diberikan untuk tahap ini.']);
         }
 
         $catatan = $request->input('catatan');
         $keputusan = $request->input('keputusan');
 
-        $screeningStage->update(['catatan' => $catatan]);
-
         try {
-            match ($keputusan) {
-                'lulus' => $this->pipelineService->advance($application),
-                'gagal' => $this->pipelineService->fail($application),
-                'reserved' => $this->pipelineService->reserve($application),
-            };
+            DB::transaction(function () use ($screeningStage, $catatan, $keputusan, $application): void {
+                $screeningStage->update(['catatan' => $catatan]);
+
+                match ($keputusan) {
+                    'lulus' => $this->pipelineService->advance($application),
+                    'gagal' => $this->pipelineService->fail($application),
+                    'reserved' => $this->pipelineService->reserve($application),
+                };
+            });
         } catch (\RuntimeException $e) {
             return back()->withErrors(['screening' => $e->getMessage()]);
         }
