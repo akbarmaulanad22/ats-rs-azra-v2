@@ -138,6 +138,27 @@ class PengingatKandidatReservedTest extends TestCase
         Notification::assertNotSentTo($hrAdmin, PengingatKandidatReserved::class);
     }
 
+    public function test_idempotency_query_works_against_real_database(): void
+    {
+        $vacancy = $this->vacancyApproachingDeadline();
+        $this->attachReservedStage($vacancy);
+
+        $hrAdmin = User::factory()->hrAdmin()->create();
+
+        $this->artisan('notifikasi:pengingat-kandidat-reserved')->assertSuccessful();
+
+        $this->assertDatabaseHas('notifications', [
+            'type' => PengingatKandidatReserved::class,
+            'notifiable_id' => $hrAdmin->id,
+        ]);
+
+        $countBefore = DB::table('notifications')->count();
+
+        $this->artisan('notifikasi:pengingat-kandidat-reserved')->assertSuccessful();
+
+        $this->assertEquals($countBefore, DB::table('notifications')->count());
+    }
+
     public function test_notification_data_contains_vacancy_info(): void
     {
         Notification::fake();

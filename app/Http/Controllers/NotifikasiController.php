@@ -11,7 +11,13 @@ class NotifikasiController extends Controller
     {
         $notifikasi = $request->user()->notifications()->paginate(15);
 
-        $request->user()->unreadNotifications()->update(['read_at' => now()]);
+        $unreadIds = $notifikasi->whereNull('read_at')->pluck('id');
+
+        if ($unreadIds->isNotEmpty()) {
+            $request->user()->unreadNotifications()
+                ->whereIn('id', $unreadIds)
+                ->update(['read_at' => now()]);
+        }
 
         return view('notifikasi.index', compact('notifikasi'));
     }

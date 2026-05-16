@@ -28,9 +28,9 @@
                                 Pengingat: Lowongan Mendekati Tenggat
                             </p>
                             <p class="text-sm text-gray-600 mt-0.5">
-                                Lowongan <span class="font-medium">{{ $item->data['judul_posisi'] }}</span>
+                                Lowongan <span class="font-medium">{{ $item->data['judul_posisi'] ?? '-' }}</span>
                                 memiliki kandidat ditangguhkan dan akan berakhir pada
-                                <span class="font-medium">{{ \Carbon\Carbon::parse($item->data['tenggat_lamaran'])->translatedFormat('d F Y') }}</span>.
+                                <span class="font-medium">{{ isset($item->data['tenggat_lamaran']) ? \Carbon\Carbon::parse($item->data['tenggat_lamaran'])->translatedFormat('d F Y') : '-' }}</span>.
                             </p>
                             <p class="text-xs text-gray-400 mt-1">{{ $item->created_at->diffForHumans() }}</p>
                         </div>
