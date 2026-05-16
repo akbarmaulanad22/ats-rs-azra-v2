@@ -63,19 +63,16 @@
                         </div>
                     </div>
 
-                    <div class="px-4 py-3 border-t border-gray-100 flex justify-end gap-2">
-                        <a
-                            href="{{ route('template-email.index') }}"
-                            class="px-3.5 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors ease-out duration-150"
-                        >
-                            Batal
-                        </a>
+                    <div class="flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-gray-200/90 rounded-b-md">
                         <button
                             type="submit"
-                            class="px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
+                            class="px-4 py-1.5 bg-primary text-white text-xs font-medium rounded hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer"
                         >
                             Simpan Perubahan
                         </button>
+                        <a href="{{ route('template-email.index') }}" class="px-4 py-1.5 text-xs text-gray-500 border border-gray-300 rounded bg-white hover:bg-gray-50 transition-colors ease-out duration-150">
+                            Batal
+                        </a>
                     </div>
                 </form>
             </div>
