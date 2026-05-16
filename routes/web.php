@@ -5,6 +5,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationPipelineController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\CareerController;
+use App\Http\Controllers\CvScreeningController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
@@ -49,6 +50,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/pipeline', [VacancyPipelineController::class, 'show'])->name('lowongan.pipeline');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/lanjut', [ApplicationPipelineController::class, 'advance'])->scopeBindings()->name('lowongan.lamaran.lanjut');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/gagal', [ApplicationPipelineController::class, 'fail'])->scopeBindings()->name('lowongan.lamaran.gagal');
+
+    Route::get('/lowongan/{lowongan}/skrining', [CvScreeningController::class, 'index'])->name('lowongan.skrining.index');
+    Route::get('/lowongan/{lowongan}/skrining/{application}', [CvScreeningController::class, 'show'])->scopeBindings()->name('lowongan.skrining.show');
+    Route::post('/lowongan/{lowongan}/skrining/{application}/keputusan', [CvScreeningController::class, 'decide'])->scopeBindings()->name('lowongan.skrining.keputusan');
 
     Route::get('/pengaturan/template-email', [EmailTemplateController::class, 'index'])->name('template-email.index');
     Route::get('/pengaturan/template-email/{templateEmail}/edit', [EmailTemplateController::class, 'edit'])->name('template-email.edit');

@@ -53,6 +53,30 @@ class ApplicationPipelineService
     }
 
     /**
+     * Park the application at the current stage (reserved) without advancing or failing.
+     *
+     * @throws \RuntimeException when no active stage exists
+     */
+    public function reserve(Application $application): void
+    {
+        $application->load(['candidate', 'vacancy']);
+
+        DB::transaction(function () use ($application): void {
+            $stages = $application->stages()->lockForUpdate()->orderBy('position')->get();
+
+            $currentStage = $stages->first(
+                fn ($s) => $s->status === ApplicationStageStatus::Aktif
+            );
+
+            if (! $currentStage) {
+                throw new \RuntimeException('Tidak ada tahap aktif yang dapat ditangguhkan.');
+            }
+
+            $currentStage->update(['status' => ApplicationStageStatus::Reserved]);
+        });
+    }
+
+    /**
      * Fail/reject the application at the current stage.
      *
      * @throws \RuntimeException when no active stage exists

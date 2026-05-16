@@ -12,10 +12,23 @@
                 <h1 class="text-xl font-semibold text-gray-900">Pipeline Kandidat</h1>
                 <p class="text-xs text-gray-500 mt-0.5">{{ $lowongan->judul_posisi }} &mdash; {{ $lowongan->unit->nama }}</p>
             </div>
+            <div class="flex items-center gap-2">
+            @can('viewScreening', $lowongan)
+                <a
+                    href="{{ route('lowongan.skrining.index', $lowongan) }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-primary/30 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors ease-out duration-150"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    Skrining CV
+                </a>
+            @endcan
             <span class="text-xs font-medium px-2.5 py-1 rounded-full
                 {{ $lowongan->status->value === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                 {{ $lowongan->status->label() }}
             </span>
+            </div>
         </div>
     </div>
 
