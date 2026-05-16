@@ -553,11 +553,7 @@ class InterviewManagementTest extends TestCase
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
-
-        $ratings = [
-            ['nama_kriteria' => 'Komunikasi', 'nilai' => 4],
-            ['nama_kriteria' => 'Teknis', 'nilai' => 3],
-        ];
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
         $this->actingAs($unitHead)->post(
             route('lowongan.wawancara.keputusan', [$vacancy, $application]),
@@ -569,15 +565,11 @@ class InterviewManagementTest extends TestCase
         $result = InterviewResult::where('application_stage_id', $stage->id)->first();
 
         $this->assertNotNull($result);
+        $this->assertEquals(count($ratings), $result->ratings()->count());
         $this->assertDatabaseHas('interview_result_ratings', [
             'interview_result_id' => $result->id,
-            'nama_kriteria' => 'Komunikasi',
-            'nilai' => 4,
-        ]);
-        $this->assertDatabaseHas('interview_result_ratings', [
-            'interview_result_id' => $result->id,
-            'nama_kriteria' => 'Teknis',
-            'nilai' => 3,
+            'nama_kriteria' => $ratings[0]['nama_kriteria'],
+            'nilai' => $ratings[0]['nilai'],
         ]);
     }
 
@@ -590,7 +582,7 @@ class InterviewManagementTest extends TestCase
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_manajer_hr');
-        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_manajer_hr');
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
         // Unit head resolves to wawancara_kepala_unit, which is Selesai here
         $response = $this->actingAs($unitHead)->post(
@@ -609,7 +601,7 @@ class InterviewManagementTest extends TestCase
         $hrManager = $this->makeHrManager();
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
-        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_manajer_hr');
 
         // HR Manager resolves to wawancara_manajer_hr, which is Pending here
         $response = $this->actingAs($hrManager)->post(
