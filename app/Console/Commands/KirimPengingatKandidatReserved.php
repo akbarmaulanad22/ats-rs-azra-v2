@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Notifications\PengingatKandidatReserved;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
 class KirimPengingatKandidatReserved extends Command
@@ -43,11 +44,23 @@ class KirimPengingatKandidatReserved extends Command
             return Command::SUCCESS;
         }
 
+        $terkirim = 0;
+
         foreach ($lowonganList as $lowongan) {
+            $sudahDikirim = DB::table('notifications')
+                ->where('type', PengingatKandidatReserved::class)
+                ->where('data->vacancy_id', $lowongan->id)
+                ->exists();
+
+            if ($sudahDikirim) {
+                continue;
+            }
+
             Notification::send($hrAdmins, new PengingatKandidatReserved($lowongan));
+            $terkirim++;
         }
 
-        $this->info("Notifikasi terkirim: {$lowonganList->count()} lowongan ke {$hrAdmins->count()} HR Admin.");
+        $this->info("Notifikasi terkirim: {$terkirim} lowongan ke {$hrAdmins->count()} HR Admin.");
 
         return Command::SUCCESS;
     }

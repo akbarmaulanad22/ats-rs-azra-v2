@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Notifications\PengingatKandidatReserved;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class PengingatKandidatReservedTest extends TestCase
@@ -108,6 +110,32 @@ class PengingatKandidatReservedTest extends TestCase
         $this->artisan('notifikasi:pengingat-kandidat-reserved', ['--hari' => 7])->assertSuccessful();
 
         Notification::assertSentTo($hrAdmin, PengingatKandidatReserved::class);
+    }
+
+    public function test_does_not_send_duplicate_notification_for_same_vacancy(): void
+    {
+        Notification::fake();
+
+        $vacancy = $this->vacancyApproachingDeadline();
+        $this->attachReservedStage($vacancy);
+
+        $hrAdmin = User::factory()->hrAdmin()->create();
+
+        // Simulate a previously sent notification for this vacancy
+        DB::table('notifications')->insert([
+            'id' => Str::uuid(),
+            'type' => PengingatKandidatReserved::class,
+            'notifiable_type' => User::class,
+            'notifiable_id' => $hrAdmin->id,
+            'data' => json_encode(['vacancy_id' => $vacancy->id]),
+            'read_at' => null,
+            'created_at' => now()->subDay(),
+            'updated_at' => now()->subDay(),
+        ]);
+
+        $this->artisan('notifikasi:pengingat-kandidat-reserved')->assertSuccessful();
+
+        Notification::assertNotSentTo($hrAdmin, PengingatKandidatReserved::class);
     }
 
     public function test_notification_data_contains_vacancy_info(): void
