@@ -246,6 +246,34 @@
                 </div>
             @endif
 
+            {{-- DiSC result --}}
+            @if ($application->discSubmission && $application->discSubmission->result)
+                @php $discResult = $application->discSubmission->result; @endphp
+                <div class="bg-white rounded-xl border border-gray-100 p-5">
+                    <h2 class="text-sm font-semibold text-gray-800 mb-3">Hasil Tes DiSC</h2>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="px-3 py-1 bg-primary/10 text-primary text-sm font-bold rounded-full">
+                            {{ $discResult->tipe_primer->value }}
+                        </span>
+                        <div class="text-sm text-gray-700">
+                            <span class="font-medium">Tipe Primer:</span> {{ $discResult->tipe_primer->shortLabel() }}
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            <span class="font-medium">Sekunder:</span> {{ $discResult->tipe_sekunder->shortLabel() }}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        @foreach ([['D', $discResult->skor_d, 'bg-red-50 text-red-600'], ['I', $discResult->skor_i, 'bg-yellow-50 text-yellow-600'], ['S', $discResult->skor_s, 'bg-green-50 text-green-600'], ['C', $discResult->skor_c, 'bg-blue-50 text-blue-600']] as [$dim, $score, $color])
+                            <div class="text-center p-2 rounded-lg {{ $color }}">
+                                <p class="text-lg font-bold">{{ $score }}</p>
+                                <p class="text-[10px] font-semibold uppercase tracking-wide">{{ $dim }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3">Diselesaikan: {{ $application->discSubmission->submitted_at->format('d M Y, H:i') }}</p>
+                </div>
+            @endif
+
             {{-- Prior interviews --}}
             @if ($priorInterviews->isNotEmpty())
                 <div class="bg-white rounded-xl border border-gray-100 p-5">
