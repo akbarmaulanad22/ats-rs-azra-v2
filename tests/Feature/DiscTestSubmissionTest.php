@@ -303,6 +303,25 @@ class DiscTestSubmissionTest extends TestCase
         $response->assertSee('Dominan'); // tipe_primer = D → shortLabel = Dominan
     }
 
+    public function test_empty_submission_is_rejected_by_validation(): void
+    {
+        $vacancy = $this->createVacancyWithDiscStage();
+        $application = $this->makeApplicationAtDiscStage($vacancy);
+        $token = Str::uuid()->toString();
+        DiscSubmission::create([
+            'application_id' => $application->id,
+            'token' => $token,
+        ]);
+
+        $response = $this->post(route('tes-disc.submit', $token), [
+            'most' => [],
+            'least' => [],
+        ]);
+
+        $response->assertSessionHasErrors(['most', 'least']);
+        $this->assertDatabaseMissing('disc_answers', ['disc_submission_id' => $application->id]);
+    }
+
     public function test_candidate_status_page_does_not_show_disc_result(): void
     {
         $vacancy = $this->createVacancyWithDiscStage();

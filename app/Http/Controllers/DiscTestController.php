@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SubmitDiscTestRequest;
 use App\Models\DiscQuestion;
 use App\Models\DiscSubmission;
 use App\Services\ApplicationPipelineService;
 use App\Services\DiscScoringService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -37,7 +37,7 @@ class DiscTestController extends Controller
         return view('disc.show', compact('submission', 'questions'));
     }
 
-    public function submit(Request $request, string $token): RedirectResponse
+    public function submit(SubmitDiscTestRequest $request, string $token): RedirectResponse
     {
         $submission = DiscSubmission::with([
             'application.candidate',
@@ -48,8 +48,8 @@ class DiscTestController extends Controller
             return redirect()->route('tes-disc.show', $token);
         }
 
-        $most = $request->input('most', []);
-        $least = $request->input('least', []);
+        $most = $request->validated('most');
+        $least = $request->validated('least');
 
         return $this->doSubmit($submission, $most, $least);
     }
@@ -83,20 +83,20 @@ class DiscTestController extends Controller
                     continue;
                 }
 
-                $submission->answers()->create([
+                $locked->answers()->create([
                     'disc_question_id' => $question->id,
                     'most_disc_word_id' => $mostWordId,
                     'least_disc_word_id' => $leastWordId,
                 ]);
             }
 
-            $submission->update(['submitted_at' => now()]);
+            $locked->update(['submitted_at' => now()]);
 
-            $this->scoringService->calculate($submission);
+            $this->scoringService->calculate($locked);
+
+            $locked->load('application');
+            $this->pipelineService->advance($locked->application);
         });
-
-        $submission->load('application');
-        $this->pipelineService->advance($submission->application);
 
         return redirect()->route('tes-disc.show', $submission->token);
     }

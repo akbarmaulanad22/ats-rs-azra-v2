@@ -9,14 +9,14 @@ use App\Models\DiscSubmission;
 class DiscScoringService
 {
     /**
-     * Calculate DiSC scores from submitted answers and persist a DiscResult.
-     *
-     * Scoring method: count "most" selections per dimension.
-     * Primary type = dimension with highest M count.
-     * Secondary type = dimension with second highest M count.
+     * Scoring: count "most" selections per dimension.
+     * Primary = highest count; secondary = second highest.
+     * Ties broken by D > I > S > C priority order.
      */
     public function calculate(DiscSubmission $submission): DiscResult
     {
+        $priorityOrder = [DiscDimension::D, DiscDimension::I, DiscDimension::S, DiscDimension::C];
+
         $scores = [
             DiscDimension::D->value => 0,
             DiscDimension::I->value => 0,
@@ -31,8 +31,7 @@ class DiscScoringService
             $scores[$dim]++;
         }
 
-        arsort($scores);
-        $keys = array_keys($scores);
+        $sorted = collect($priorityOrder)->sortByDesc(fn (DiscDimension $d) => $scores[$d->value])->values();
 
         return DiscResult::create([
             'disc_submission_id' => $submission->id,
@@ -40,8 +39,8 @@ class DiscScoringService
             'skor_i' => $scores[DiscDimension::I->value],
             'skor_s' => $scores[DiscDimension::S->value],
             'skor_c' => $scores[DiscDimension::C->value],
-            'tipe_primer' => $keys[0],
-            'tipe_sekunder' => $keys[1],
+            'tipe_primer' => $sorted[0]->value,
+            'tipe_sekunder' => $sorted[1]->value,
         ]);
     }
 }
