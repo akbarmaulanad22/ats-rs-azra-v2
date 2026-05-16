@@ -10,8 +10,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\TestReviewController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\VacancyPipelineController;
+use App\Http\Controllers\VacancyTestController;
 use App\Http\Controllers\WorkflowTemplateController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +23,9 @@ Route::get('/', fn () => auth()->check()
     ? redirect()->route('dashboard')
     : redirect()->route('login')
 );
+
+Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show');
+Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:5,1');
 
 Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
 Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
@@ -60,4 +67,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/pengaturan/template-email/{templateEmail}', [EmailTemplateController::class, 'update'])->name('template-email.update');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+
+    Route::resource('bank-soal', QuestionController::class)
+        ->parameters(['bank-soal' => 'bankSoal'])
+        ->except(['show']);
+
+    Route::get('/lowongan/{lowongan}/tes', [VacancyTestController::class, 'show'])->name('lowongan.tes.show');
+    Route::post('/lowongan/{lowongan}/tes', [VacancyTestController::class, 'save'])->name('lowongan.tes.save');
+
+    Route::get('/lowongan/{lowongan}/tes/ulasan', [TestReviewController::class, 'index'])->name('lowongan.tes.ulasan.index');
+    Route::get('/lowongan/{lowongan}/tes/ulasan/{submission}', [TestReviewController::class, 'show'])->scopeBindings()->name('lowongan.tes.ulasan.show');
+    Route::post('/lowongan/{lowongan}/tes/ulasan/jawaban/{answer}/skor', [TestReviewController::class, 'scoreEssay'])->name('lowongan.tes.ulasan.skor');
 });

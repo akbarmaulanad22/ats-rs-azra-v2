@@ -24,6 +24,14 @@
                     Skrining CV
                 </a>
             @endcan
+            @can('create', \App\Models\VacancyTest::class)
+                <a
+                    href="{{ route('lowongan.tes.show', $lowongan) }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-primary/30 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors ease-out duration-150"
+                >
+                    Tes Kompetensi
+                </a>
+            @endcan
             <span class="text-xs font-medium px-2.5 py-1 rounded-full
                 {{ $lowongan->status->value === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                 {{ $lowongan->status->label() }}
@@ -65,6 +73,7 @@
                                     <th class="text-left text-xs font-medium text-gray-400 px-5 py-2.5">Nama</th>
                                     <th class="text-left text-xs font-medium text-gray-400 px-5 py-2.5">Email</th>
                                     <th class="text-left text-xs font-medium text-gray-400 px-5 py-2.5">No. Telepon</th>
+                                    <th class="text-left text-xs font-medium text-gray-400 px-5 py-2.5">Skor Tes</th>
                                     <th class="text-left text-xs font-medium text-gray-400 px-5 py-2.5">Tanggal Melamar</th>
                                 </tr>
                             </thead>
@@ -76,6 +85,19 @@
                                         </td>
                                         <td class="px-5 py-3 text-gray-600">{{ $application->candidate->email }}</td>
                                         <td class="px-5 py-3 text-gray-600">{{ $application->candidate->no_telepon }}</td>
+                                        <td class="px-5 py-3 text-gray-600 text-xs">
+                                            @php
+                                                $testSubmission = $application->testSubmission;
+                                            @endphp
+                                            @if ($testSubmission?->submitted_at)
+                                                <span class="font-medium">{{ $testSubmission->total_skor ?? '-' }}</span>
+                                                @if ($lowongan->vacancyTest)
+                                                    <span class="text-gray-400">/ {{ $lowongan->vacancyTest->totalNilaiMaksimal() }}</span>
+                                                @endif
+                                            @else
+                                                <span class="text-gray-300">—</span>
+                                            @endif
+                                        </td>
                                         <td class="px-5 py-3 text-gray-400 text-xs">
                                             {{ $application->created_at->format('d M Y') }}
                                         </td>
