@@ -7,6 +7,7 @@ use Database\Factories\ApplicationStageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ApplicationStage extends Model
 {
@@ -33,5 +34,10 @@ class ApplicationStage extends Model
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
+    }
+
+    public function interviewResult(): HasOne
+    {
+        return $this->hasOne(InterviewResult::class);
     }
 }
