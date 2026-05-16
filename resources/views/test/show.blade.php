@@ -94,6 +94,7 @@
                 timeLeft: initialSeconds,
                 timer: null,
                 submitted: false,
+                csrfInterval: null,
 
                 init() {
                     this.timer = setInterval(() => {
@@ -103,6 +104,22 @@
                         }
                         this.timeLeft--;
                     }, 1000);
+
+                    this.csrfInterval = setInterval(() => this.refreshCsrf(), 60 * 60 * 1000);
+                },
+
+                async refreshCsrf() {
+                    try {
+                        const resp = await fetch('{{ route("tes.show", $submission->token) }}', {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            credentials: 'same-origin',
+                        });
+                        const html = await resp.text();
+                        const match = html.match(/name="_token"[^>]*value="([^"]+)"/);
+                        if (match) {
+                            document.querySelector('#test-form input[name="_token"]').value = match[1];
+                        }
+                    } catch (e) {}
                 },
 
                 formatTime(seconds) {

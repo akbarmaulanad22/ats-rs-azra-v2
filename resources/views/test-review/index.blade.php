@@ -50,7 +50,7 @@
                                 {{ $submission->submitted_at->format('d M Y, H:i') }}
                             </td>
                             <td class="px-5 py-3 text-gray-600">
-                                {{ $submission->answers->where('is_reviewed', true)->whereNull('question_id', false)->sum('skor') }}
+                                {{ $submission->answers->filter(fn($a) => $a->is_reviewed && $a->question?->tipe?->value === 'mc')->sum('skor') }}
                             </td>
                             <td class="px-5 py-3">
                                 @if ($essayAnswers->isEmpty())

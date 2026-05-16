@@ -301,7 +301,7 @@ class CompetencyTestEngineTest extends TestCase
         ]);
     }
 
-    public function test_pipeline_auto_advances_after_test_submission(): void
+    public function test_pipeline_does_not_auto_advance_after_test_submission(): void
     {
         $this->seedStages();
         $unit = Unit::factory()->create();
@@ -331,7 +331,7 @@ class CompetencyTestEngineTest extends TestCase
             ->where('key', 'tes_kompetensi')
             ->first();
 
-        $this->assertEquals(ApplicationStageStatus::Selesai, $testStage->status);
+        $this->assertEquals(ApplicationStageStatus::Aktif, $testStage->status);
     }
 
     public function test_double_submit_is_idempotent(): void

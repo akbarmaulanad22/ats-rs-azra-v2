@@ -57,7 +57,7 @@ class TestSubmission extends Model
             return false;
         }
 
-        return now()->diffInMinutes($this->started_at, false) >= $this->vacancyTest->batas_waktu_menit;
+        return $this->started_at->diffInMinutes(now()) >= $this->vacancyTest->batas_waktu_menit;
     }
 
     public function remainingSeconds(): int
@@ -66,9 +66,9 @@ class TestSubmission extends Model
             return $this->vacancyTest->batas_waktu_menit * 60;
         }
 
-        $elapsed = now()->diffInSeconds($this->started_at, false);
+        $elapsed = $this->started_at->diffInSeconds(now());
         $total = $this->vacancyTest->batas_waktu_menit * 60;
 
-        return max(0, $total - $elapsed);
+        return max(0, $total - (int) $elapsed);
     }
 }

@@ -87,14 +87,6 @@ class ApplicationPipelineService
     }
 
     /**
-     * Advance application from test submission (auto-advance after submit).
-     */
-    public function advanceFromTest(Application $application): void
-    {
-        $this->advance($application);
-    }
-
-    /**
      * Park the application at the current stage (reserved) without advancing or failing.
      *
      * @throws \RuntimeException when no active stage exists

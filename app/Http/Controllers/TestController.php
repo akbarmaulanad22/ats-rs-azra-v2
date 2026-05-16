@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\QuestionType;
 use App\Models\TestSubmission;
-use App\Services\ApplicationPipelineService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +11,6 @@ use Illuminate\View\View;
 
 class TestController extends Controller
 {
-    public function __construct(private readonly ApplicationPipelineService $pipelineService) {}
-
     public function show(string $token): View|RedirectResponse
     {
         $submission = TestSubmission::with([
@@ -103,14 +100,6 @@ class TestController extends Controller
                 'total_skor' => $totalSkor,
             ]);
         });
-
-        $submission->refresh();
-
-        try {
-            $this->pipelineService->advanceFromTest($submission->application);
-        } catch (\Throwable $e) {
-            report($e);
-        }
 
         return redirect()->route('tes.show', $submission->token);
     }
