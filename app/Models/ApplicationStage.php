@@ -21,6 +21,8 @@ class ApplicationStage extends Model
         'nama',
         'status',
         'catatan',
+        'jadwal_interview',
+        'lokasi_interview',
     ];
 
     protected function casts(): array
@@ -28,6 +30,7 @@ class ApplicationStage extends Model
         return [
             'status' => ApplicationStageStatus::class,
             'position' => 'integer',
+            'jadwal_interview' => 'datetime',
         ];
     }
 

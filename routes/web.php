@@ -15,6 +15,7 @@ use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewCriteriaController;
+use App\Http\Controllers\InterviewScheduleController;
 use App\Http\Controllers\MbtiTestController;
 use App\Http\Controllers\McuController;
 use App\Http\Controllers\NotifikasiController;
@@ -111,6 +112,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/wawancara', [InterviewController::class, 'index'])->name('lowongan.wawancara.index');
     Route::get('/lowongan/{lowongan}/wawancara/{application}', [InterviewController::class, 'show'])->scopeBindings()->name('lowongan.wawancara.show');
     Route::post('/lowongan/{lowongan}/wawancara/{application}/keputusan', [InterviewController::class, 'decide'])->scopeBindings()->name('lowongan.wawancara.keputusan');
+    Route::post('/lowongan/{lowongan}/wawancara/{application}/jadwal', [InterviewScheduleController::class, 'store'])->scopeBindings()->name('lowongan.wawancara.jadwal');
 
     Route::get('/lowongan/{lowongan}/surat-penawaran/{application}', [OfferingLetterController::class, 'show'])->scopeBindings()->name('lowongan.surat-penawaran.show');
     Route::post('/lowongan/{lowongan}/surat-penawaran/{application}/kirim', [OfferingLetterController::class, 'send'])->scopeBindings()->name('lowongan.surat-penawaran.kirim');

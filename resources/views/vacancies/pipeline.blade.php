@@ -134,6 +134,12 @@
                             </thead>
                             <tbody class="divide-y divide-gray-50">
                                 @foreach ($data['applications'] as $application)
+                                    @php
+                                        $isWawancara = in_array($stageKey, ['wawancara_kepala_unit', 'wawancara_manajer_hr', 'wawancara_direktur']);
+                                        $currentStage = $application->stages->firstWhere('key', $stageKey);
+                                        $canSchedule = $isWawancara && $currentStage?->status === \App\Enums\ApplicationStageStatus::Aktif && !$currentStage->jadwal_interview;
+                                        $hasSchedule = $isWawancara && $currentStage?->jadwal_interview;
+                                    @endphp
                                     <tr class="hover:bg-gray-50/50 transition-colors">
                                         <td class="px-5 py-3 font-medium text-gray-800">
                                             {{ $application->candidate->nama_lengkap }}
@@ -158,16 +164,69 @@
                                         </td>
                                         @can('export', $lowongan)
                                             <td class="px-5 py-3">
-                                                <a
-                                                    href="{{ route('lowongan.kandidat.pdf', ['lowongan' => $lowongan, 'application' => $application]) }}"
-                                                    class="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-700 transition-colors"
-                                                    title="Unduh PDF Profil"
-                                                >
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                                    </svg>
-                                                    PDF
-                                                </a>
+                                                <div class="flex items-center gap-2">
+                                                    @if ($canSchedule)
+                                                        @can('scheduleInterview', $application)
+                                                            <div x-data="{ open: false }">
+                                                                <button
+                                                                    @click="open = true"
+                                                                    class="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+                                                                    title="Jadwalkan Wawancara"
+                                                                >
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                                    </svg>
+                                                                    Jadwalkan
+                                                                </button>
+                                                                <div
+                                                                    x-show="open"
+                                                                    x-transition
+                                                                    @click.self="open = false"
+                                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+                                                                    style="display: none"
+                                                                >
+                                                                    <div @click.stop class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+                                                                        <h3 class="text-sm font-semibold text-gray-900 mb-4">Jadwalkan Wawancara — {{ $application->candidate->nama_lengkap }}</h3>
+                                                                        <form action="{{ route('lowongan.wawancara.jadwal', [$lowongan, $application]) }}" method="POST">
+                                                                            @csrf
+                                                                            <div class="space-y-3">
+                                                                                <div>
+                                                                                    <label class="block text-xs font-medium text-gray-700 mb-1">Tanggal & Waktu</label>
+                                                                                    <input type="datetime-local" name="jadwal_interview" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary">
+                                                                                </div>
+                                                                                <div>
+                                                                                    <label class="block text-xs font-medium text-gray-700 mb-1">Lokasi</label>
+                                                                                    <input type="text" name="lokasi_interview" required placeholder="Ruang Meeting Lt. 3 / Link Google Meet" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="flex justify-end gap-2 mt-5">
+                                                                                <button type="button" @click="open = false" class="px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Batal</button>
+                                                                                <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-primary rounded-lg hover:bg-primary/90">Simpan & Kirim Undangan</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endcan
+                                                    @elseif ($hasSchedule)
+                                                        <span class="inline-flex items-center gap-1 text-xs text-green-600" title="{{ $currentStage->jadwal_interview->translatedFormat('d M Y H:i') }} — {{ $currentStage->lokasi_interview }}">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                            </svg>
+                                                            {{ $currentStage->jadwal_interview->translatedFormat('d M Y H:i') }}
+                                                        </span>
+                                                    @endif
+                                                    <a
+                                                        href="{{ route('lowongan.kandidat.pdf', ['lowongan' => $lowongan, 'application' => $application]) }}"
+                                                        class="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-700 transition-colors"
+                                                        title="Unduh PDF Profil"
+                                                    >
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                        </svg>
+                                                        PDF
+                                                    </a>
+                                                </div>
                                             </td>
                                         @endcan
                                     </tr>

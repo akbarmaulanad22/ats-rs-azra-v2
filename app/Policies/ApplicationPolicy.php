@@ -73,6 +73,11 @@ class ApplicationPolicy
         return $user->hasRole(Role::HrAdmin);
     }
 
+    public function scheduleInterview(User $user, Application $application): bool
+    {
+        return $user->hasRole(Role::HrAdmin, Role::HrManager);
+    }
+
     private function canManagePipeline(User $user): bool
     {
         return $user->hasRole(Role::HrAdmin, Role::HrManager, Role::UnitHead, Role::Director);
