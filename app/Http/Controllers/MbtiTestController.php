@@ -66,15 +66,9 @@ class MbtiTestController extends Controller
             $questions = MbtiQuestion::orderBy('urutan')->get();
 
             foreach ($questions as $question) {
-                $pilihan = isset($jawaban[$question->id]) ? strtoupper($jawaban[$question->id]) : null;
-
-                if ($pilihan === null || ! in_array($pilihan, ['A', 'B'])) {
-                    continue;
-                }
-
                 $locked->answers()->create([
                     'mbti_question_id' => $question->id,
-                    'pilihan' => $pilihan,
+                    'pilihan' => strtoupper($jawaban[$question->id]),
                 ]);
             }
 

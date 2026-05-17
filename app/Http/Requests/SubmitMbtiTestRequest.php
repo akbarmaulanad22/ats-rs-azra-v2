@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\MbtiQuestion;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SubmitMbtiTestRequest extends FormRequest
@@ -13,8 +14,10 @@ class SubmitMbtiTestRequest extends FormRequest
 
     public function rules(): array
     {
+        $totalQuestions = MbtiQuestion::count();
+
         return [
-            'jawaban' => ['required', 'array', 'min:1'],
+            'jawaban' => ['required', 'array', 'size:'.$totalQuestions],
             'jawaban.*' => ['required', 'in:A,B'],
         ];
     }
