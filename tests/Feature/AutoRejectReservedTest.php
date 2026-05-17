@@ -168,6 +168,47 @@ class AutoRejectReservedTest extends TestCase
         ]);
     }
 
+    public function test_only_rejects_reserved_stage_in_multi_stage_application(): void
+    {
+        $vacancy = Vacancy::factory()->expired()->create();
+        $application = Application::factory()->create(['vacancy_id' => $vacancy->id]);
+
+        $completedStage = ApplicationStage::factory()->create([
+            'application_id' => $application->id,
+            'position' => 1,
+            'key' => 'skrining',
+            'nama' => 'Skrining',
+            'status' => ApplicationStageStatus::Selesai,
+        ]);
+        $reservedStage = ApplicationStage::factory()->reserved()->create([
+            'application_id' => $application->id,
+            'position' => 2,
+            'key' => 'wawancara',
+            'nama' => 'Wawancara',
+        ]);
+        $pendingStage = ApplicationStage::factory()->pending()->create([
+            'application_id' => $application->id,
+            'position' => 3,
+            'key' => 'mcu',
+            'nama' => 'MCU',
+        ]);
+
+        $this->artisan('pipeline:auto-reject-reserved')->assertSuccessful();
+
+        $this->assertDatabaseHas('application_stages', [
+            'id' => $completedStage->id,
+            'status' => ApplicationStageStatus::Selesai->value,
+        ]);
+        $this->assertDatabaseHas('application_stages', [
+            'id' => $reservedStage->id,
+            'status' => ApplicationStageStatus::Gagal->value,
+        ]);
+        $this->assertDatabaseHas('application_stages', [
+            'id' => $pendingStage->id,
+            'status' => ApplicationStageStatus::Pending->value,
+        ]);
+    }
+
     public function test_idempotency_running_twice_does_not_double_reject(): void
     {
         $this->createExpiredVacancyWithReservedApplication();

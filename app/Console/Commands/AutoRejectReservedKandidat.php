@@ -25,7 +25,7 @@ class AutoRejectReservedKandidat extends Command
             ->whereIn('status', [VacancyStatus::Published, VacancyStatus::Closed])
             ->where('tenggat_lamaran', '<', now()->toDateString())
             ->whereHas('applications', fn ($q) => $q->whereHas('stages', fn ($sq) => $sq->where('status', ApplicationStageStatus::Reserved)))
-            ->with(['applications' => fn ($q) => $q->whereHas('stages', fn ($sq) => $sq->where('status', ApplicationStageStatus::Reserved))])
+            ->with(['applications' => fn ($q) => $q->whereHas('stages', fn ($sq) => $sq->where('status', ApplicationStageStatus::Reserved))->with(['candidate', 'vacancy'])])
             ->get();
 
         if ($lowonganList->isEmpty()) {
