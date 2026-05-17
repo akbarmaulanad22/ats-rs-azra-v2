@@ -25,6 +25,8 @@ class WawancaraDijadwalkan extends Notification
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
+        $this->application->loadMissing(['vacancy', 'candidate']);
+
         return [
             'application_id' => $this->application->id,
             'vacancy_id' => $this->application->vacancy_id,

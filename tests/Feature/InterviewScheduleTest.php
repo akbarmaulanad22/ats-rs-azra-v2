@@ -243,4 +243,25 @@ class InterviewScheduleTest extends TestCase
 
         $response->assertSessionHasErrors('jadwal_interview');
     }
+
+    public function test_returns_404_for_mismatched_vacancy(): void
+    {
+        $this->seedStages();
+
+        $admin = User::factory()->hrAdmin()->create();
+
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'wawancara_kepala_unit', 'onboarding']);
+        $otherVacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'wawancara_kepala_unit', 'onboarding']);
+        $application = $this->makeApplicationAtStage($vacancy, 'wawancara_kepala_unit');
+
+        $response = $this->actingAs($admin)->post(
+            route('lowongan.wawancara.jadwal', [$otherVacancy, $application]),
+            [
+                'jadwal_interview' => now()->addDays(3)->format('Y-m-d\TH:i'),
+                'lokasi_interview' => 'Ruang Meeting',
+            ]
+        );
+
+        $response->assertStatus(404);
+    }
 }

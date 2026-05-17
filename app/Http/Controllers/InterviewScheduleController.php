@@ -63,11 +63,14 @@ class InterviewScheduleController extends Controller
             'wawancara_kepala_unit' => Role::UnitHead,
             'wawancara_manajer_hr' => Role::HrManager,
             'wawancara_direktur' => Role::Director,
+            default => null,
         };
 
-        $interviewers = User::where('role', $interviewerRole)->where('is_active', true)->get();
+        if ($interviewerRole) {
+            $interviewers = User::where('role', $interviewerRole)->where('is_active', true)->get();
 
-        Notification::send($interviewers, new WawancaraDijadwalkan($application, $stage));
+            Notification::send($interviewers, new WawancaraDijadwalkan($application, $stage));
+        }
 
         return redirect()
             ->route('lowongan.pipeline', $lowongan)
