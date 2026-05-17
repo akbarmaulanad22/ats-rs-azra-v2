@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationPipelineController;
 use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\CandidateExportController;
 use App\Http\Controllers\CandidateMcuController;
 use App\Http\Controllers\CandidateStatusController;
 use App\Http\Controllers\CareerController;
@@ -121,4 +122,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/onboarding/{application}', [OnboardingController::class, 'show'])->scopeBindings()->name('lowongan.onboarding.show');
     Route::post('/lowongan/{lowongan}/onboarding/{application}/undangan', [OnboardingController::class, 'sendInvitation'])->scopeBindings()->name('lowongan.onboarding.undangan');
     Route::post('/lowongan/{lowongan}/onboarding/{application}/selesai', [OnboardingController::class, 'complete'])->scopeBindings()->name('lowongan.onboarding.selesai');
+
+    Route::get('/lowongan/{lowongan}/export', [CandidateExportController::class, 'list'])->name('lowongan.export.list');
+    Route::get('/lowongan/{lowongan}/kandidat/{application}/pdf', [CandidateExportController::class, 'profile'])->scopeBindings()->name('lowongan.kandidat.pdf');
 });

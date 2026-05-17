@@ -70,4 +70,9 @@ class VacancyPolicy
     {
         return $user->role === Role::HrAdmin;
     }
+
+    public function export(User $user, Vacancy $vacancy): bool
+    {
+        return $user->isHrAdmin();
+    }
 }
