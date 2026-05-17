@@ -131,8 +131,8 @@ class ApplicationPipelineService
             return;
         }
 
-        // No email when onboarding activates — HR Admin sends invitation explicitly with join date.
-        if ($nextStage?->key === 'onboarding' || $nextStage === null) {
+        $silentStages = ['onboarding'];
+        if ($nextStage === null || in_array($nextStage->key, $silentStages, true)) {
             return;
         }
 

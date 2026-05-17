@@ -6,6 +6,7 @@ use App\Enums\ApplicationStageStatus;
 use App\Http\Requests\UploadMcuDocumentRequest;
 use App\Models\Application;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -36,13 +37,15 @@ class CandidateMcuController extends Controller
 
         $path = $request->file('dokumen')->store('mcu-documents', 'public');
 
-        $mcuResult = $application->mcuResult()->firstOrNew(['application_id' => $application->id]);
+        DB::transaction(function () use ($application, $path): void {
+            $mcuResult = $application->mcuResult()->lockForUpdate()->firstOrNew(['application_id' => $application->id]);
 
-        if ($mcuResult->dokumen_path) {
-            Storage::disk('public')->delete($mcuResult->dokumen_path);
-        }
+            if ($mcuResult->dokumen_path) {
+                Storage::disk('public')->delete($mcuResult->dokumen_path);
+            }
 
-        $mcuResult->fill(['dokumen_path' => $path])->save();
+            $mcuResult->fill(['dokumen_path' => $path])->save();
+        });
 
         return redirect()
             ->route('kandidat.mcu.upload', $token)
