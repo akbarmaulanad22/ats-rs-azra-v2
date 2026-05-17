@@ -856,8 +856,8 @@
                     <div class="form-row cols-2">
                         <div class="field">
                             <label for="gaji_diharapkan">Gaji yang Diharapkan (Nett) <span class="req">*</span></label>
-                            <input id="gaji_diharapkan" name="gaji_diharapkan" type="text"
-                                   value="{{ old('gaji_diharapkan') }}" placeholder="mis. 6.000.000"
+                            <input id="gaji_diharapkan" name="gaji_diharapkan" type="number" min="0"
+                                   value="{{ old('gaji_diharapkan') }}" placeholder="mis. 6000000"
                                    class="{{ $errors->has('gaji_diharapkan') ? 'error' : '' }}">
                             @error('gaji_diharapkan')<p class="field-error">{{ $message }}</p>@enderror
                         </div>
