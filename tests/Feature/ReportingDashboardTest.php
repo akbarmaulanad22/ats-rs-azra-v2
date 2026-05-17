@@ -157,7 +157,7 @@ class ReportingDashboardTest extends TestCase
         $response = $this->actingAs($admin)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertSee('3'); // total applications
+        $response->assertSeeInOrder(['Total Lamaran', '3']);
     }
 
     public function test_in_process_counts_only_applications_with_active_or_reserved_stage(): void
@@ -254,7 +254,7 @@ class ReportingDashboardTest extends TestCase
         $response = $this->actingAs($admin)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertSee('10'); // 10.0 days
+        $response->assertSeeInOrder(['Waktu Rekrutmen', '10']);
     }
 
     public function test_time_to_hire_averages_multiple_completed_applications(): void
@@ -279,7 +279,7 @@ class ReportingDashboardTest extends TestCase
         $response = $this->actingAs($admin)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertSee('15'); // avg of 10 and 20 = 15.0
+        $response->assertSeeInOrder(['Waktu Rekrutmen', '15']);
     }
 
     public function test_time_to_hire_placeholder_when_no_completed_onboarding(): void
@@ -342,7 +342,7 @@ class ReportingDashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Hambatan Tahap');
-        $response->assertSee('hr'); // "hr" (hari) unit label
+        $response->assertSeeInOrder(['Hambatan Tahap', 'hr']);
     }
 
     public function test_vacancy_summary_shows_applicant_count_and_filled_positions(): void
@@ -386,7 +386,7 @@ class ReportingDashboardTest extends TestCase
         $response = $this->actingAs($admin)->get(route('dashboard', ['date_from' => '2026-01-01']));
 
         $response->assertOk();
-        $response->assertSee('1'); // only the 2026 application
+        $response->assertSeeInOrder(['Total Lamaran', '1']);
     }
 
     public function test_date_to_filter_excludes_later_applications(): void
@@ -401,7 +401,7 @@ class ReportingDashboardTest extends TestCase
         $response = $this->actingAs($admin)->get(route('dashboard', ['date_to' => '2025-12-31']));
 
         $response->assertOk();
-        $response->assertSee('1'); // only the 2025 application
+        $response->assertSeeInOrder(['Total Lamaran', '1']);
     }
 
     public function test_unit_filter_scopes_metrics_to_selected_unit(): void
@@ -421,7 +421,7 @@ class ReportingDashboardTest extends TestCase
         $response = $this->actingAs($admin)->get(route('dashboard', ['unit_id' => $unitA->id]));
 
         $response->assertOk();
-        $response->assertSee('2'); // only Unit A applications
+        $response->assertSeeInOrder(['Total Lamaran', '2']);
     }
 
     public function test_vacancy_filter_scopes_metrics_to_selected_vacancy(): void
@@ -438,7 +438,7 @@ class ReportingDashboardTest extends TestCase
         $response = $this->actingAs($admin)->get(route('dashboard', ['vacancy_id' => $vacancyA->id]));
 
         $response->assertOk();
-        $response->assertSee('2'); // only vacancyA applications
+        $response->assertSeeInOrder(['Total Lamaran', '2']);
     }
 
     public function test_invalid_unit_id_returns_validation_error(): void

@@ -1,6 +1,6 @@
 <x-layouts.app title="Dashboard - ATS RS Azra">
 
-@if(auth()->user()->isHrAdmin())
+@if($isHrAdmin ?? false)
 
     {{-- Page header --}}
     <div class="flex items-start justify-between mb-6">
@@ -68,7 +68,7 @@
             >
                 Terapkan
             </button>
-            @if(array_filter($filters))
+            @if(array_filter($filters, fn ($v) => $v !== null && $v !== ''))
             <a
                 href="{{ route('dashboard') }}"
                 class="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors"
