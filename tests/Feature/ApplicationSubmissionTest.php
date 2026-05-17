@@ -29,7 +29,7 @@ class ApplicationSubmissionTest extends TestCase
         $this->artisan('db:seed', ['--class' => 'StageSeeder']);
     }
 
-    private function createPublishedVacancyWithStages(array $stageKeys = ['aplikasi', 'skrining_cv_hr', 'onboarding']): Vacancy
+    private function createPublishedVacancyWithStages(array $stageKeys = ['lamaran', 'skrining_cv_hr', 'onboarding']): Vacancy
     {
         $template = WorkflowTemplate::factory()->create();
 
@@ -232,7 +232,7 @@ class ApplicationSubmissionTest extends TestCase
     public function test_pipeline_initialized_from_workflow_snapshot(): void
     {
         $this->seedStages();
-        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createPublishedVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
@@ -243,12 +243,12 @@ class ApplicationSubmissionTest extends TestCase
     public function test_first_stage_is_selesai_on_submission(): void
     {
         $this->seedStages();
-        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createPublishedVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
         $application = Application::first();
-        $firstStage = $application->stages->firstWhere('key', 'aplikasi');
+        $firstStage = $application->stages->firstWhere('key', 'lamaran');
 
         $this->assertEquals(ApplicationStageStatus::Selesai, $firstStage->status);
     }
@@ -256,7 +256,7 @@ class ApplicationSubmissionTest extends TestCase
     public function test_second_stage_is_aktif_on_submission(): void
     {
         $this->seedStages();
-        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createPublishedVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
@@ -269,7 +269,7 @@ class ApplicationSubmissionTest extends TestCase
     public function test_remaining_stages_are_pending_on_submission(): void
     {
         $this->seedStages();
-        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createPublishedVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
@@ -282,7 +282,7 @@ class ApplicationSubmissionTest extends TestCase
     public function test_stages_preserve_position_ordering(): void
     {
         $this->seedStages();
-        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createPublishedVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
@@ -459,7 +459,7 @@ class ApplicationSubmissionTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createPublishedVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
@@ -686,7 +686,7 @@ class ApplicationSubmissionTest extends TestCase
     public function test_current_stage_returns_failed_stage_when_candidate_fails(): void
     {
         $this->seedStages();
-        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createPublishedVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 
@@ -704,7 +704,7 @@ class ApplicationSubmissionTest extends TestCase
     public function test_current_stage_returns_last_stage_when_all_selesai(): void
     {
         $this->seedStages();
-        $vacancy = $this->createPublishedVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createPublishedVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
 

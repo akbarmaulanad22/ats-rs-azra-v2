@@ -97,7 +97,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
 
         $response = $this->actingAs($admin)->get(route('lowongan.surat-penawaran.show', [$vacancy, $application]));
@@ -110,7 +110,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         $user = $this->makeNonAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
 
         $response = $this->actingAs($user)->get(route('lowongan.surat-penawaran.show', [$vacancy, $application]));
@@ -123,7 +123,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Mail::fake();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
 
         $response = $this->actingAs($admin)->post(route('lowongan.surat-penawaran.kirim', [$vacancy, $application]), [
@@ -159,7 +159,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Mail::fake();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
 
         $this->actingAs($admin)->post(route('lowongan.surat-penawaran.kirim', [$vacancy, $application]), [
@@ -177,7 +177,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Mail::fake();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
 
         $payload = [
@@ -198,7 +198,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
 
         $response = $this->actingAs($admin)->post(route('lowongan.surat-penawaran.kirim', [$vacancy, $application]), []);
@@ -212,7 +212,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $response = $this->actingAs($admin)->get(route('lowongan.mcu.show', [$vacancy, $application]));
@@ -225,7 +225,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         $user = $this->makeNonAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $response = $this->actingAs($user)->get(route('lowongan.mcu.show', [$vacancy, $application]));
@@ -237,7 +237,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $response = $this->actingAs($admin)->post(route('lowongan.mcu.status', [$vacancy, $application]), [
@@ -264,7 +264,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Mail::fake();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $this->actingAs($admin)->post(route('lowongan.mcu.status', [$vacancy, $application]), [
@@ -289,7 +289,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Mail::fake();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $this->actingAs($admin)->post(route('lowongan.mcu.status', [$vacancy, $application]), [
@@ -308,7 +308,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Storage::fake('public');
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $file = UploadedFile::fake()->create('mcu-result.pdf', 500, 'application/pdf');
@@ -330,7 +330,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Storage::fake('public');
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $file = UploadedFile::fake()->create('mcu-result.docx', 200, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
@@ -347,7 +347,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Storage::fake('public');
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $file = UploadedFile::fake()->create('mcu-result.pdf', 4096, 'application/pdf');
@@ -363,7 +363,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         Storage::fake('public');
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $file = UploadedFile::fake()->create('my-mcu.pdf', 1024, 'application/pdf');
@@ -383,7 +383,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         Storage::fake('public');
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
 
         $file = UploadedFile::fake()->create('my-mcu.pdf', 500, 'application/pdf');
@@ -399,7 +399,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         Storage::fake('public');
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
         $firstFile = UploadedFile::fake()->create('first.pdf', 500, 'application/pdf');
@@ -421,7 +421,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
 
         $response = $this->actingAs($admin)->get(route('lowongan.onboarding.show', [$vacancy, $application]));
@@ -434,7 +434,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         $user = $this->makeNonAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
 
         $response = $this->actingAs($user)->get(route('lowongan.onboarding.show', [$vacancy, $application]));
@@ -447,7 +447,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Mail::fake();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
 
         $tanggalBergabung = now()->addDays(30)->toDateString();
@@ -478,7 +478,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Mail::fake();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
 
         $this->actingAs($admin)->post(route('lowongan.onboarding.undangan', [$vacancy, $application]), [
@@ -501,7 +501,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->seedStages();
         Mail::fake();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
 
         $this->actingAs($admin)->post(route('lowongan.onboarding.selesai', [$vacancy, $application]));
@@ -514,7 +514,7 @@ class OfferingMcuOnboardingTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['aplikasi', 'surat_penawaran', 'mcu', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
 
         $response = $this->actingAs($admin)->post(route('lowongan.onboarding.undangan', [$vacancy, $application]), [

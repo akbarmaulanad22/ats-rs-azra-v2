@@ -109,7 +109,7 @@ class WorkflowTemplateController extends Controller
 
         if (! $firstStage || ! $firstStage->is_locked_first) {
             throw ValidationException::withMessages([
-                'stages' => 'Tahap pertama harus berupa "Aplikasi".',
+                'stages' => 'Tahap pertama harus berupa "Lamaran".',
             ]);
         }
 
@@ -122,7 +122,7 @@ class WorkflowTemplateController extends Controller
         foreach ($stages as $stage) {
             if ($stage->is_locked_first && $firstId !== $stage->id) {
                 throw ValidationException::withMessages([
-                    'stages' => 'Tahap "Aplikasi" harus selalu berada di posisi pertama.',
+                    'stages' => 'Tahap "Lamaran" harus selalu berada di posisi pertama.',
                 ]);
             }
             if ($stage->is_locked_last && $lastId !== $stage->id) {

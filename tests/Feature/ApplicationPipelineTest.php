@@ -31,7 +31,7 @@ class ApplicationPipelineTest extends TestCase
         $this->artisan('db:seed', ['--class' => 'EmailTemplateSeeder']);
     }
 
-    private function createVacancyWithStages(array $stageKeys = ['aplikasi', 'skrining_cv_hr', 'onboarding']): Vacancy
+    private function createVacancyWithStages(array $stageKeys = ['lamaran', 'skrining_cv_hr', 'onboarding']): Vacancy
     {
         $template = WorkflowTemplate::factory()->create();
 
@@ -83,7 +83,7 @@ class ApplicationPipelineTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy);
 
         $response = $this->actingAs($admin)->post(
@@ -108,7 +108,7 @@ class ApplicationPipelineTest extends TestCase
 
         $admin = User::factory()->hrAdmin()->create();
         // Use a non-onboarding next stage so generic transisi_tahap fires
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'skrining_cv_kepala_unit', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'skrining_cv_kepala_unit', 'onboarding']);
         $application = $this->makeApplication($vacancy);
 
         $this->actingAs($admin)->post(
@@ -125,7 +125,7 @@ class ApplicationPipelineTest extends TestCase
         $this->seedEmailTemplates();
 
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy);
 
         $this->actingAs($admin)->post(
@@ -140,7 +140,7 @@ class ApplicationPipelineTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy, [
             0 => ApplicationStageStatus::Selesai,
             1 => ApplicationStageStatus::Reserved,
@@ -165,7 +165,7 @@ class ApplicationPipelineTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy, [
             0 => ApplicationStageStatus::Selesai,
             1 => ApplicationStageStatus::Selesai,
@@ -187,7 +187,7 @@ class ApplicationPipelineTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy, [
             0 => ApplicationStageStatus::Selesai,
             1 => ApplicationStageStatus::Selesai,
@@ -207,7 +207,7 @@ class ApplicationPipelineTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy);
 
         $response = $this->actingAs($admin)->post(
@@ -228,7 +228,7 @@ class ApplicationPipelineTest extends TestCase
         $this->seedEmailTemplates();
 
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy);
 
         $this->actingAs($admin)->post(
@@ -242,7 +242,7 @@ class ApplicationPipelineTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy, [
             0 => ApplicationStageStatus::Selesai,
             1 => ApplicationStageStatus::Reserved,
@@ -264,7 +264,7 @@ class ApplicationPipelineTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy, [
             0 => ApplicationStageStatus::Selesai,
             1 => ApplicationStageStatus::Gagal,
@@ -324,8 +324,8 @@ class ApplicationPipelineTest extends TestCase
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
 
-        $vacancy1 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
-        $vacancy2 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy1 = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
+        $vacancy2 = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy1);
 
         $response = $this->actingAs($admin)->post(
@@ -340,8 +340,8 @@ class ApplicationPipelineTest extends TestCase
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
 
-        $vacancy1 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
-        $vacancy2 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy1 = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
+        $vacancy2 = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy1);
 
         $response = $this->actingAs($admin)->post(
@@ -355,7 +355,7 @@ class ApplicationPipelineTest extends TestCase
     {
         $this->seedStages();
         $manager = User::factory()->withRole(Role::HrManager)->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy);
 
         $response = $this->actingAs($manager)->post(

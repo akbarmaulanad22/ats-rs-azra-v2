@@ -148,7 +148,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->makeApplication($vacancy);
         $this->makeApplication($vacancy);
@@ -164,7 +164,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         // active
         $this->makeApplication($vacancy);
@@ -190,7 +190,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->makeApplication($vacancy, [
             0 => ApplicationStageStatus::Selesai,
@@ -209,7 +209,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         // Reached onboarding
         $this->makeApplication($vacancy, [
@@ -229,7 +229,7 @@ class ReportingDashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Corong Pipeline');
-        $response->assertSee('Aplikasi');
+        $response->assertSee('Lamaran');
         $response->assertSee('Skrining CV HR');
         $response->assertSee('Onboarding');
     }
@@ -238,7 +238,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
 
         $appliedAt = Carbon::parse('2026-01-01 08:00:00');
         $app = $this->makeApplication($vacancy, [
@@ -261,7 +261,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
 
         $base = Carbon::parse('2026-01-01 08:00:00');
 
@@ -286,7 +286,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
 
         $this->makeApplication($vacancy);
 
@@ -300,7 +300,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->makeApplication($vacancy, [0 => ApplicationStageStatus::Selesai, 1 => ApplicationStageStatus::Selesai, 2 => ApplicationStageStatus::Aktif]);
         $this->makeApplication($vacancy, [0 => ApplicationStageStatus::Selesai, 1 => ApplicationStageStatus::Gagal]);
@@ -317,7 +317,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $base = Carbon::parse('2026-01-01 08:00:00');
         $app = $this->makeApplication($vacancy, [
@@ -327,7 +327,7 @@ class ReportingDashboardTest extends TestCase
         ], $base);
 
         DB::table('application_stages')
-            ->where('application_id', $app->id)->where('key', 'aplikasi')
+            ->where('application_id', $app->id)->where('key', 'lamaran')
             ->update(['created_at' => $base, 'updated_at' => $base]);
 
         DB::table('application_stages')
@@ -349,7 +349,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'onboarding']);
 
         $this->makeApplication($vacancy, [0 => ApplicationStageStatus::Selesai, 1 => ApplicationStageStatus::Selesai]);
         $this->makeApplication($vacancy);
@@ -378,7 +378,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->makeApplication($vacancy, [], Carbon::parse('2025-01-15'));
         $this->makeApplication($vacancy, [], Carbon::parse('2026-03-01'));
@@ -393,7 +393,7 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->makeApplication($vacancy, [], Carbon::parse('2025-06-01'));
         $this->makeApplication($vacancy, [], Carbon::parse('2026-03-01'));
@@ -411,8 +411,8 @@ class ReportingDashboardTest extends TestCase
         $unitA = Unit::factory()->create(['nama' => 'Unit Alpha Test']);
         $unitB = Unit::factory()->create(['nama' => 'Unit Beta Test']);
 
-        $vacancyA = $this->createVacancyWithStages(['aplikasi', 'onboarding'], $unitA);
-        $vacancyB = $this->createVacancyWithStages(['aplikasi', 'onboarding'], $unitB);
+        $vacancyA = $this->createVacancyWithStages(['lamaran', 'onboarding'], $unitA);
+        $vacancyB = $this->createVacancyWithStages(['lamaran', 'onboarding'], $unitB);
 
         $this->makeApplication($vacancyA);
         $this->makeApplication($vacancyA);
@@ -428,8 +428,8 @@ class ReportingDashboardTest extends TestCase
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
-        $vacancyA = $this->createVacancyWithStages(['aplikasi', 'onboarding']);
-        $vacancyB = $this->createVacancyWithStages(['aplikasi', 'onboarding']);
+        $vacancyA = $this->createVacancyWithStages(['lamaran', 'onboarding']);
+        $vacancyB = $this->createVacancyWithStages(['lamaran', 'onboarding']);
 
         $this->makeApplication($vacancyA);
         $this->makeApplication($vacancyA);

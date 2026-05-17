@@ -17,8 +17,8 @@ class ApplicationStageFactory extends Factory
         return [
             'application_id' => Application::factory(),
             'position' => 1,
-            'key' => 'aplikasi',
-            'nama' => 'Aplikasi',
+            'key' => 'lamaran',
+            'nama' => 'Lamaran',
             'status' => ApplicationStageStatus::Selesai,
         ];
     }

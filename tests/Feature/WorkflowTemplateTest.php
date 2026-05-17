@@ -32,7 +32,7 @@ class WorkflowTemplateTest extends TestCase
     private function allStageIds(): array
     {
         $keys = [
-            'aplikasi', 'formulir_data_pribadi', 'skrining_cv_hr', 'skrining_cv_kepala_unit',
+            'lamaran', 'skrining_cv_hr', 'skrining_cv_kepala_unit',
             'email_undangan', 'tes_kompetensi', 'wawancara_kepala_unit', 'wawancara_manajer_hr',
             'wawancara_direktur', 'tes_disc', 'tes_mbti', 'surat_penawaran', 'mcu', 'onboarding',
         ];
@@ -124,7 +124,7 @@ class WorkflowTemplateTest extends TestCase
         $this->assertDatabaseHas('workflow_templates', ['nama' => 'Template Baru']);
 
         $template = WorkflowTemplate::where('nama', 'Template Baru')->first();
-        $this->assertCount(14, $template->stages);
+        $this->assertCount(13, $template->stages);
     }
 
     public function test_store_validates_nama_required(): void
@@ -154,7 +154,7 @@ class WorkflowTemplateTest extends TestCase
         $response->assertSessionHasErrors('stages');
     }
 
-    public function test_store_rejects_when_first_stage_is_not_aplikasi(): void
+    public function test_store_rejects_when_first_stage_is_not_lamaran(): void
     {
         $admin = User::factory()->hrAdmin()->create();
         $this->seedStages();
@@ -195,13 +195,13 @@ class WorkflowTemplateTest extends TestCase
         $admin = User::factory()->hrAdmin()->create();
         $this->seedStages();
 
-        $aplikasiId = Stage::where('key', 'aplikasi')->value('id');
+        $lamaranId = Stage::where('key', 'lamaran')->value('id');
         $onboardingId = Stage::where('key', 'onboarding')->value('id');
         $hrSkriningId = Stage::where('key', 'skrining_cv_hr')->value('id');
 
         $response = $this->actingAs($admin)->post(route('template-alur.store'), [
             'nama' => 'Template Minimal',
-            'stages' => [$aplikasiId, $hrSkriningId, $onboardingId],
+            'stages' => [$lamaranId, $hrSkriningId, $onboardingId],
         ]);
 
         $response->assertRedirect(route('template-alur.index'));
@@ -261,18 +261,18 @@ class WorkflowTemplateTest extends TestCase
         $this->seedStages();
         $template = WorkflowTemplate::factory()->create();
 
-        $aplikasiId = Stage::where('key', 'aplikasi')->value('id');
+        $lamaranId = Stage::where('key', 'lamaran')->value('id');
         $hrSkriningId = Stage::where('key', 'skrining_cv_hr')->value('id');
         $tesKompetensiId = Stage::where('key', 'tes_kompetensi')->value('id');
         $onboardingId = Stage::where('key', 'onboarding')->value('id');
 
         $this->actingAs($admin)->put(route('template-alur.update', $template), [
             'nama' => $template->nama,
-            'stages' => [$aplikasiId, $tesKompetensiId, $hrSkriningId, $onboardingId],
+            'stages' => [$lamaranId, $tesKompetensiId, $hrSkriningId, $onboardingId],
         ]);
 
         $stages = $template->fresh()->stages;
-        $this->assertEquals($aplikasiId, $stages[0]->id);
+        $this->assertEquals($lamaranId, $stages[0]->id);
         $this->assertEquals($tesKompetensiId, $stages[1]->id);
         $this->assertEquals($hrSkriningId, $stages[2]->id);
         $this->assertEquals($onboardingId, $stages[3]->id);

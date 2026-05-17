@@ -27,7 +27,7 @@ class CandidateListExportTest extends TestCase
         $this->artisan('db:seed', ['--class' => 'StageSeeder']);
     }
 
-    private function createVacancy(array $stageKeys = ['aplikasi', 'skrining_cv_hr', 'onboarding']): Vacancy
+    private function createVacancy(array $stageKeys = ['lamaran', 'skrining_cv_hr', 'onboarding']): Vacancy
     {
         $template = WorkflowTemplate::factory()->create();
 
@@ -166,7 +166,7 @@ class CandidateListExportTest extends TestCase
     {
         $this->seedStages();
 
-        $vacancy = $this->createVacancy(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancy(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $appInHrScreening = $this->makeApplication($vacancy, [
             ApplicationStageStatus::Selesai,

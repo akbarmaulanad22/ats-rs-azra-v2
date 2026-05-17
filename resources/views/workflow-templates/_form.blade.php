@@ -23,7 +23,7 @@
 {{-- Stage Builder --}}
 <div class="px-4 py-5">
     <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Tahapan Rekrutmen</p>
-    <p class="text-xs text-gray-400 mb-4">Aktifkan tahap yang diperlukan dan atur urutannya dengan drag. Tahap <strong>Aplikasi</strong> dan <strong>Onboarding</strong> selalu ada dan tidak dapat dipindahkan.</p>
+    <p class="text-xs text-gray-400 mb-4">Aktifkan tahap yang diperlukan dan atur urutannya dengan drag. Tahap <strong>Lamaran</strong> dan <strong>Onboarding</strong> selalu ada dan tidak dapat dipindahkan.</p>
 
     @error('stages')
         <p class="mb-3 text-xs text-red-500">{{ $message }}</p>
