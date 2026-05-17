@@ -12,7 +12,7 @@ class WorkflowTemplateSeeder extends Seeder
     {
         $allKeys = [
             'lamaran', 'skrining_cv_hr', 'skrining_cv_kepala_unit',
-            'email_undangan', 'tes_kompetensi', 'wawancara_kepala_unit', 'wawancara_manajer_hr',
+            'tes_kompetensi', 'wawancara_kepala_unit', 'wawancara_manajer_hr',
             'wawancara_direktur', 'tes_disc', 'tes_mbti', 'surat_penawaran', 'mcu', 'onboarding',
         ];
 

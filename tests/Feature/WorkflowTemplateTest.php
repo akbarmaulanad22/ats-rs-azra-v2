@@ -33,7 +33,7 @@ class WorkflowTemplateTest extends TestCase
     {
         $keys = [
             'lamaran', 'skrining_cv_hr', 'skrining_cv_kepala_unit',
-            'email_undangan', 'tes_kompetensi', 'wawancara_kepala_unit', 'wawancara_manajer_hr',
+            'tes_kompetensi', 'wawancara_kepala_unit', 'wawancara_manajer_hr',
             'wawancara_direktur', 'tes_disc', 'tes_mbti', 'surat_penawaran', 'mcu', 'onboarding',
         ];
 
@@ -124,7 +124,7 @@ class WorkflowTemplateTest extends TestCase
         $this->assertDatabaseHas('workflow_templates', ['nama' => 'Template Baru']);
 
         $template = WorkflowTemplate::where('nama', 'Template Baru')->first();
-        $this->assertCount(13, $template->stages);
+        $this->assertCount(12, $template->stages);
     }
 
     public function test_store_validates_nama_required(): void

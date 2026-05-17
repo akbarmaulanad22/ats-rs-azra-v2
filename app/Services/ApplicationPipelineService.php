@@ -131,8 +131,33 @@ class ApplicationPipelineService
             return;
         }
 
-        $silentStages = ['onboarding'];
+        $wawancaraStages = ['wawancara_kepala_unit', 'wawancara_manajer_hr', 'wawancara_direktur'];
+        $silentStages = ['onboarding', ...$wawancaraStages];
+
         if ($nextStage === null || in_array($nextStage->key, $silentStages, true)) {
+            return;
+        }
+
+        $currentStage = $application->stages
+            ->where('status', ApplicationStageStatus::Selesai)
+            ->sortByDesc('position')
+            ->first();
+
+        $skriningStages = ['skrining_cv_hr', 'skrining_cv_kepala_unit'];
+        $isFromSkrining = $currentStage && in_array($currentStage->key, $skriningStages, true);
+        $nextIsNotSkrining = ! in_array($nextStage->key, $skriningStages, true);
+
+        if ($isFromSkrining && $nextIsNotSkrining) {
+            try {
+                $this->emailNotificationService->dispatch('lolos_skrining_cv', $application->candidate->email, [
+                    'nama_kandidat' => $application->candidate->nama_lengkap,
+                    'judul_lowongan' => $application->vacancy->judul_posisi,
+                    'link_status' => route('karier.lamaran.konfirmasi', $application->token),
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
             return;
         }
 
