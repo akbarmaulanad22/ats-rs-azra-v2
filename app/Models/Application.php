@@ -15,6 +15,13 @@ class Application extends Model
     /** @use HasFactory<ApplicationFactory> */
     use HasFactory;
 
+    protected function casts(): array
+    {
+        return [
+            'gaji_diharapkan' => 'integer',
+        ];
+    }
+
     protected $fillable = [
         'candidate_id',
         'vacancy_id',
