@@ -50,7 +50,7 @@ class EmailTemplateSeeder extends Seeder
                 'key' => 'surat_penawaran',
                 'deskripsi' => 'Dikirim ke kandidat bersama surat penawaran kerja',
                 'subjek' => 'Surat Penawaran Kerja — {judul_lowongan}',
-                'isi' => "Yth. {nama_kandidat},\n\nSelamat! Kami dengan bangga menawarkan posisi {judul_lowongan} di RS Azra kepada Anda.\n\nSilakan tinjau detail penawaran yang terlampir. Jika ada pertanyaan, jangan ragu untuk menghubungi tim HR kami.\n\nSalam,\nTim HR RS Azra",
+                'isi' => "Yth. {nama_kandidat},\n\nSelamat! Kami dengan bangga menawarkan posisi {jabatan_ditawarkan} di RS Azra kepada Anda.\n\nDetail Penawaran:\nPosisi: {jabatan_ditawarkan}\nGaji: {gaji}\nTanggal Mulai: {tanggal_mulai}\n\nJika ada pertanyaan, jangan ragu untuk menghubungi tim HR kami.\n\nSalam,\nTim HR RS Azra",
             ],
             [
                 'key' => 'instruksi_mcu',
