@@ -12,6 +12,7 @@ use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewCriteriaController;
+use App\Http\Controllers\MbtiTestController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\TestController;
@@ -33,6 +34,9 @@ Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit
 
 Route::get('/tes-disc/{token}', [DiscTestController::class, 'show'])->name('tes-disc.show');
 Route::post('/tes-disc/{token}', [DiscTestController::class, 'submit'])->name('tes-disc.submit')->middleware('throttle:5,1');
+
+Route::get('/tes-mbti/{token}', [MbtiTestController::class, 'show'])->name('tes-mbti.show');
+Route::post('/tes-mbti/{token}', [MbtiTestController::class, 'submit'])->name('tes-mbti.submit')->middleware('throttle:5,1');
 
 Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
 Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');

@@ -80,6 +80,11 @@ class Application extends Model
         return $this->hasOne(DiscSubmission::class);
     }
 
+    public function mbtiSubmission(): HasOne
+    {
+        return $this->hasOne(MbtiSubmission::class);
+    }
+
     public function socialMediaAccounts(): HasMany
     {
         return $this->hasMany(ApplicationSocialMediaAccount::class);
