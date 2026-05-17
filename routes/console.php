@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('notifikasi:pengingat-kandidat-reserved')->dailyAt('08:00');
+Schedule::command('pipeline:auto-reject-reserved')->dailyAt('00:05');
