@@ -74,9 +74,12 @@
             </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between gap-4">
             <a href="{{ route('karier.index') }}" class="text-sm text-primary hover:underline">
                 &larr; Lihat lowongan lainnya
+            </a>
+            <a href="{{ route('karier.lamaran.status', $application->token) }}" class="text-sm text-primary hover:underline font-medium">
+                Cek status lamaran &rarr;
             </a>
         </div>
     </div>

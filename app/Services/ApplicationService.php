@@ -69,7 +69,7 @@ class ApplicationService
             $this->emailNotificationService->dispatch('lamaran_diterima', $application->candidate->email, [
                 'nama_kandidat' => $application->candidate->nama_lengkap,
                 'judul_lowongan' => $application->vacancy->judul_posisi,
-                'link_status' => route('karier.lamaran.konfirmasi', $application->token),
+                'link_status' => route('karier.lamaran.status', $application->token),
             ]);
         } catch (\Throwable $e) {
             report($e);

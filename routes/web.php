@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationPipelineController;
 use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\CandidateStatusController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CvScreeningController;
 use App\Http\Controllers\DashboardController;
@@ -43,6 +44,7 @@ Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier
 Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])->name('karier.lamar');
 Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])->name('karier.lamar.store')->middleware('throttle:5,1');
 Route::get('/karier/lamaran/{token}', [ApplicationController::class, 'confirmation'])->name('karier.lamaran.konfirmasi');
+Route::get('/lamaran/{token}', [CandidateStatusController::class, 'show'])->name('karier.lamaran.status');
 
 Route::middleware('auth')->group(function () {
     Route::get('/ubah-password', [PasswordChangeController::class, 'show'])->name('password.change');
