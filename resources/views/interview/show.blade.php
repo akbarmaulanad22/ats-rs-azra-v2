@@ -246,6 +246,43 @@
                 </div>
             @endif
 
+            {{-- MBTI result --}}
+            @if ($application->mbtiSubmission && $application->mbtiSubmission->result)
+                @php $mbtiResult = $application->mbtiSubmission->result; @endphp
+                <div class="bg-white rounded-xl border border-gray-100 p-5">
+                    <h2 class="text-sm font-semibold text-gray-800 mb-3">Hasil Tes MBTI</h2>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="px-3 py-1 bg-primary/10 text-primary text-sm font-bold rounded-full">
+                            {{ $mbtiResult->tipe }}
+                        </span>
+                        <div class="text-sm text-gray-700">
+                            <span class="font-medium">Tipe Kepribadian:</span> {{ $mbtiResult->tipe }}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        @foreach ([
+                            ['EI', $mbtiResult->skor_e, $mbtiResult->skor_i, 'E', 'I', 'Ekstrovert', 'Introvert', $mbtiResult->kekuatan_ei],
+                            ['SN', $mbtiResult->skor_s, $mbtiResult->skor_n, 'S', 'N', 'Penginderaan', 'Intuisi', $mbtiResult->kekuatan_sn],
+                            ['TF', $mbtiResult->skor_t, $mbtiResult->skor_f, 'T', 'F', 'Pemikiran', 'Perasaan', $mbtiResult->kekuatan_tf],
+                            ['JP', $mbtiResult->skor_j, $mbtiResult->skor_p, 'J', 'P', 'Terstruktur', 'Fleksibel', $mbtiResult->kekuatan_jp],
+                        ] as [$dim, $scoreA, $scoreB, $poleA, $poleB, $labelA, $labelB, $strength])
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs font-semibold text-gray-600">{{ $dim }}</span>
+                                    <span class="text-xs text-gray-400">Kekuatan: {{ $strength }}%</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-700">
+                                    <span :class="'font-semibold'">{{ $poleA }}: {{ $scoreA }}</span>
+                                    <span>{{ $poleB }}: {{ $scoreB }}</span>
+                                </div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">{{ $scoreA >= $scoreB ? $labelA : $labelB }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="text-xs text-gray-400">Diselesaikan: {{ $application->mbtiSubmission->submitted_at->format('d M Y, H:i') }}</p>
+                </div>
+            @endif
+
             {{-- DiSC result --}}
             @if ($application->discSubmission && $application->discSubmission->result)
                 @php $discResult = $application->discSubmission->result; @endphp
