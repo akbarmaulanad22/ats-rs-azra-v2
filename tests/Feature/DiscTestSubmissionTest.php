@@ -35,7 +35,7 @@ class DiscTestSubmissionTest extends TestCase
 
     private function createVacancyWithDiscStage(): Vacancy
     {
-        $stageKeys = ['aplikasi', 'tes_disc', 'onboarding'];
+        $stageKeys = ['lamaran', 'tes_disc', 'onboarding'];
         $template = WorkflowTemplate::factory()->create();
 
         collect($stageKeys)->each(function (string $key, int $index) use ($template) {
@@ -63,7 +63,7 @@ class DiscTestSubmissionTest extends TestCase
 
         foreach ($stages as $index => $stage) {
             $status = match ($stage->key) {
-                'aplikasi' => ApplicationStageStatus::Selesai,
+                'lamaran' => ApplicationStageStatus::Selesai,
                 'tes_disc' => ApplicationStageStatus::Aktif,
                 default => ApplicationStageStatus::Pending,
             };
@@ -210,7 +210,7 @@ class DiscTestSubmissionTest extends TestCase
             'token' => Str::uuid()->toString(),
         ]);
 
-        // Setup: aplikasi=Aktif
+        // Setup: lamaran=Aktif
         $stages = $vacancy->workflowTemplateSnapshot->stages()->orderBy('position')->get();
         foreach ($stages as $index => $stage) {
             ApplicationStage::create([
@@ -218,7 +218,7 @@ class DiscTestSubmissionTest extends TestCase
                 'position' => $index + 1,
                 'key' => $stage->key,
                 'nama' => $stage->nama,
-                'status' => $stage->key === 'aplikasi' ? ApplicationStageStatus::Aktif : ApplicationStageStatus::Pending,
+                'status' => $stage->key === 'lamaran' ? ApplicationStageStatus::Aktif : ApplicationStageStatus::Pending,
             ]);
         }
 
@@ -237,7 +237,7 @@ class DiscTestSubmissionTest extends TestCase
         $vacancy = $this->createVacancyWithDiscStage();
         $unit = $vacancy->unit;
 
-        $stageKeys = ['aplikasi', 'tes_disc', 'wawancara_kepala_unit', 'onboarding'];
+        $stageKeys = ['lamaran', 'tes_disc', 'wawancara_kepala_unit', 'onboarding'];
         $template = WorkflowTemplate::factory()->create();
         collect($stageKeys)->each(function (string $key, int $index) use ($template) {
             $stage = Stage::where('key', $key)->firstOrFail();
@@ -259,7 +259,7 @@ class DiscTestSubmissionTest extends TestCase
         foreach ($stages as $index => $stage) {
             $status = match ($stage->key) {
                 'wawancara_kepala_unit' => ApplicationStageStatus::Aktif,
-                'aplikasi', 'tes_disc' => ApplicationStageStatus::Selesai,
+                'lamaran', 'tes_disc' => ApplicationStageStatus::Selesai,
                 default => ApplicationStageStatus::Pending,
             };
             ApplicationStage::create([

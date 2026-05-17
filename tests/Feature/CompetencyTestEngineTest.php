@@ -38,7 +38,7 @@ class CompetencyTestEngineTest extends TestCase
 
     private function createVacancyWithTest(Unit $unit): array
     {
-        $stageKeys = ['aplikasi', 'tes_kompetensi', 'onboarding'];
+        $stageKeys = ['lamaran', 'tes_kompetensi', 'onboarding'];
         $template = WorkflowTemplate::factory()->create();
 
         collect($stageKeys)->each(function (string $key, int $index) use ($template) {
@@ -77,7 +77,7 @@ class CompetencyTestEngineTest extends TestCase
         $stages = $vacancy->workflowTemplateSnapshot->stages()->orderBy('position')->get();
         foreach ($stages as $index => $stage) {
             $status = match ($stage->key) {
-                'aplikasi' => ApplicationStageStatus::Selesai,
+                'lamaran' => ApplicationStageStatus::Selesai,
                 'tes_kompetensi' => ApplicationStageStatus::Aktif,
                 default => ApplicationStageStatus::Pending,
             };

@@ -31,7 +31,7 @@ class InterviewManagementTest extends TestCase
         $this->artisan('db:seed', ['--class' => 'InterviewCriteriaSeeder']);
     }
 
-    private function createVacancy(Unit $unit, array $stageKeys = ['aplikasi', 'skrining_cv_hr', 'wawancara_kepala_unit', 'wawancara_manajer_hr', 'wawancara_direktur', 'onboarding']): Vacancy
+    private function createVacancy(Unit $unit, array $stageKeys = ['lamaran', 'skrining_cv_hr', 'wawancara_kepala_unit', 'wawancara_manajer_hr', 'wawancara_direktur', 'onboarding']): Vacancy
     {
         $template = WorkflowTemplate::factory()->create();
 

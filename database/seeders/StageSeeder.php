@@ -10,8 +10,7 @@ class StageSeeder extends Seeder
     public function run(): void
     {
         $stages = [
-            ['key' => 'aplikasi', 'nama' => 'Aplikasi', 'is_locked_first' => true, 'is_locked_last' => false],
-            ['key' => 'formulir_data_pribadi', 'nama' => 'Formulir Data Pribadi', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'lamaran', 'nama' => 'Lamaran', 'is_locked_first' => true, 'is_locked_last' => false],
             ['key' => 'skrining_cv_hr', 'nama' => 'Skrining CV HR', 'is_locked_first' => false, 'is_locked_last' => false],
             ['key' => 'skrining_cv_kepala_unit', 'nama' => 'Skrining CV Kepala Unit', 'is_locked_first' => false, 'is_locked_last' => false],
             ['key' => 'email_undangan', 'nama' => 'Email Undangan', 'is_locked_first' => false, 'is_locked_last' => false],

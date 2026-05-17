@@ -34,7 +34,7 @@ class MbtiTestSubmissionTest extends TestCase
 
     private function createVacancyWithMbtiStage(): Vacancy
     {
-        $stageKeys = ['aplikasi', 'tes_mbti', 'onboarding'];
+        $stageKeys = ['lamaran', 'tes_mbti', 'onboarding'];
         $template = WorkflowTemplate::factory()->create();
 
         collect($stageKeys)->each(function (string $key, int $index) use ($template) {
@@ -62,7 +62,7 @@ class MbtiTestSubmissionTest extends TestCase
 
         foreach ($stages as $index => $stage) {
             $status = match ($stage->key) {
-                'aplikasi' => ApplicationStageStatus::Selesai,
+                'lamaran' => ApplicationStageStatus::Selesai,
                 'tes_mbti' => ApplicationStageStatus::Aktif,
                 default => ApplicationStageStatus::Pending,
             };
@@ -203,7 +203,7 @@ class MbtiTestSubmissionTest extends TestCase
                 'position' => $index + 1,
                 'key' => $stage->key,
                 'nama' => $stage->nama,
-                'status' => $stage->key === 'aplikasi' ? ApplicationStageStatus::Aktif : ApplicationStageStatus::Pending,
+                'status' => $stage->key === 'lamaran' ? ApplicationStageStatus::Aktif : ApplicationStageStatus::Pending,
             ]);
         }
 
@@ -222,7 +222,7 @@ class MbtiTestSubmissionTest extends TestCase
         $vacancy = $this->createVacancyWithMbtiStage();
         $unit = $vacancy->unit;
 
-        $stageKeys = ['aplikasi', 'tes_mbti', 'wawancara_kepala_unit', 'onboarding'];
+        $stageKeys = ['lamaran', 'tes_mbti', 'wawancara_kepala_unit', 'onboarding'];
         $template = WorkflowTemplate::factory()->create();
         collect($stageKeys)->each(function (string $key, int $index) use ($template) {
             $stage = Stage::where('key', $key)->firstOrFail();
@@ -244,7 +244,7 @@ class MbtiTestSubmissionTest extends TestCase
         foreach ($stages as $index => $stage) {
             $status = match ($stage->key) {
                 'wawancara_kepala_unit' => ApplicationStageStatus::Aktif,
-                'aplikasi', 'tes_mbti' => ApplicationStageStatus::Selesai,
+                'lamaran', 'tes_mbti' => ApplicationStageStatus::Selesai,
                 default => ApplicationStageStatus::Pending,
             };
             ApplicationStage::create([

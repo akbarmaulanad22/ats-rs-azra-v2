@@ -27,7 +27,7 @@ class CvScreeningTest extends TestCase
         $this->artisan('db:seed', ['--class' => 'EmailTemplateSeeder']);
     }
 
-    private function createVacancy(Unit $unit, array $stageKeys = ['aplikasi', 'skrining_cv_hr', 'skrining_cv_kepala_unit', 'onboarding']): Vacancy
+    private function createVacancy(Unit $unit, array $stageKeys = ['lamaran', 'skrining_cv_hr', 'skrining_cv_kepala_unit', 'onboarding']): Vacancy
     {
         $template = WorkflowTemplate::factory()->create();
 

@@ -10,7 +10,7 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
-use App\Models\WorkflowTemplateSnapshotStage;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,7 +23,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $this->artisan('db:seed', ['--class' => 'StageSeeder']);
     }
 
-    private function createTemplateWithStages(string $name = 'Template A', array $stageKeys = ['aplikasi', 'skrining_cv_hr', 'onboarding']): WorkflowTemplate
+    private function createTemplateWithStages(string $name = 'Template A', array $stageKeys = ['lamaran', 'skrining_cv_hr', 'onboarding']): WorkflowTemplate
     {
         $template = WorkflowTemplate::factory()->create(['nama' => $name]);
         $stages = Stage::whereIn('key', $stageKeys)->get();
@@ -65,16 +65,16 @@ class WorkflowTemplateSnapshotTest extends TestCase
     public function test_snapshot_captures_all_stages_with_correct_data(): void
     {
         $this->seedStages();
-        $template = $this->createTemplateWithStages('Template B', ['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $template = $this->createTemplateWithStages('Template B', ['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
         $stages = $snapshot->fresh()->stages;
 
         $this->assertCount(3, $stages);
 
-        $first = $stages->firstWhere('key', 'aplikasi');
+        $first = $stages->firstWhere('key', 'lamaran');
         $this->assertNotNull($first);
-        $this->assertEquals('Aplikasi', $first->nama);
+        $this->assertEquals('Lamaran', $first->nama);
         $this->assertTrue($first->is_locked_first);
         $this->assertFalse($first->is_locked_last);
 
@@ -123,15 +123,15 @@ class WorkflowTemplateSnapshotTest extends TestCase
     public function test_deleting_master_stage_does_not_affect_snapshot_stages(): void
     {
         $this->seedStages();
-        $template = $this->createTemplateWithStages('T', ['aplikasi', 'skrining_cv_hr']);
+        $template = $this->createTemplateWithStages('T', ['lamaran', 'skrining_cv_hr']);
 
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
 
-        Stage::where('key', 'aplikasi')->first()->delete();
+        Stage::where('key', 'lamaran')->first()->delete();
 
         $snapshotStages = $snapshot->fresh()->stages;
         $this->assertCount(2, $snapshotStages);
-        $this->assertEquals('aplikasi', $snapshotStages->first()->key);
+        $this->assertEquals('lamaran', $snapshotStages->first()->key);
     }
 
     // ── Editing master template does NOT affect snapshot ──────────────────
@@ -151,19 +151,19 @@ class WorkflowTemplateSnapshotTest extends TestCase
     public function test_editing_master_stage_does_not_change_snapshot_stage(): void
     {
         $this->seedStages();
-        $template = $this->createTemplateWithStages('T', ['aplikasi']);
+        $template = $this->createTemplateWithStages('T', ['lamaran']);
 
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
 
-        Stage::where('key', 'aplikasi')->update(['nama' => 'Application (Renamed)']);
+        Stage::where('key', 'lamaran')->update(['nama' => 'Application (Renamed)']);
 
-        $this->assertEquals('Aplikasi', $snapshot->fresh()->stages->first()->nama);
+        $this->assertEquals('Lamaran', $snapshot->fresh()->stages->first()->nama);
     }
 
     public function test_adding_stage_to_template_does_not_affect_existing_snapshot(): void
     {
         $this->seedStages();
-        $template = $this->createTemplateWithStages('T', ['aplikasi', 'onboarding']);
+        $template = $this->createTemplateWithStages('T', ['lamaran', 'onboarding']);
 
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
         $this->assertCount(2, $snapshot->stages);
@@ -177,7 +177,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
     public function test_removing_stage_from_template_does_not_affect_existing_snapshot(): void
     {
         $this->seedStages();
-        $template = $this->createTemplateWithStages('T', ['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $template = $this->createTemplateWithStages('T', ['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
         $this->assertCount(3, $snapshot->stages);
@@ -194,7 +194,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
         $unit = Unit::factory()->create();
-        $template = $this->createTemplateWithStages('Alur Dokter', ['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $template = $this->createTemplateWithStages('Alur Dokter', ['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->assertDatabaseCount('workflow_template_snapshots', 0);
 
@@ -213,8 +213,8 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
         $unit = Unit::factory()->create();
-        $templateA = $this->createTemplateWithStages('Template A', ['aplikasi', 'onboarding']);
-        $templateB = $this->createTemplateWithStages('Template B', ['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $templateA = $this->createTemplateWithStages('Template A', ['lamaran', 'onboarding']);
+        $templateB = $this->createTemplateWithStages('Template B', ['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->actingAs($admin)->post(route('lowongan.store'), $this->vacancyPayload($unit, $templateA));
         $vacancy = Vacancy::first();
@@ -234,8 +234,8 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
         $unit = Unit::factory()->create();
-        $templateA = $this->createTemplateWithStages('Template A', ['aplikasi', 'onboarding']);
-        $templateB = $this->createTemplateWithStages('Template B', ['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $templateA = $this->createTemplateWithStages('Template A', ['lamaran', 'onboarding']);
+        $templateB = $this->createTemplateWithStages('Template B', ['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $this->actingAs($admin)->post(route('lowongan.store'), $this->vacancyPayload($unit, $templateA));
         $vacancy = Vacancy::first();
@@ -279,7 +279,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $vacancy = Vacancy::first();
         $snapshot = $vacancy->workflowTemplateSnapshot;
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
         $snapshot->delete();
     }
 
@@ -290,7 +290,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
         $unit = Unit::factory()->create();
-        $template = $this->createTemplateWithStages('Shared Template', ['aplikasi', 'onboarding']);
+        $template = $this->createTemplateWithStages('Shared Template', ['lamaran', 'onboarding']);
 
         $this->actingAs($admin)->post(route('lowongan.store'), $this->vacancyPayload($unit, $template));
         $payload2 = $this->vacancyPayload($unit, $template);
@@ -309,7 +309,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
     public function test_modifying_template_after_two_snapshots_affects_neither(): void
     {
         $this->seedStages();
-        $template = $this->createTemplateWithStages('Original', ['aplikasi', 'skrining_cv_hr']);
+        $template = $this->createTemplateWithStages('Original', ['lamaran', 'skrining_cv_hr']);
 
         $snapshot1 = WorkflowTemplateSnapshot::createFromTemplate($template);
         $snapshot2 = WorkflowTemplateSnapshot::createFromTemplate($template);
@@ -328,7 +328,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
     public function test_deleting_snapshot_cascades_to_its_stages(): void
     {
         $this->seedStages();
-        $template = $this->createTemplateWithStages('T', ['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $template = $this->createTemplateWithStages('T', ['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
         $snapshotId = $snapshot->id;

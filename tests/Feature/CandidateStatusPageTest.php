@@ -22,7 +22,7 @@ class CandidateStatusPageTest extends TestCase
         $this->artisan('db:seed', ['--class' => 'StageSeeder']);
     }
 
-    private function createVacancyWithStages(array $stageKeys = ['aplikasi', 'skrining_cv_hr', 'onboarding']): Vacancy
+    private function createVacancyWithStages(array $stageKeys = ['lamaran', 'skrining_cv_hr', 'onboarding']): Vacancy
     {
         $template = WorkflowTemplate::factory()->create();
 
@@ -91,7 +91,7 @@ class CandidateStatusPageTest extends TestCase
     public function test_status_page_shows_all_stages(): void
     {
         $this->seedStages();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
         $application = $this->makeApplication($vacancy);
         $application->load('stages');
 
@@ -205,8 +205,8 @@ class CandidateStatusPageTest extends TestCase
     {
         $this->seedStages();
 
-        $vacancy1 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
-        $vacancy2 = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $vacancy1 = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
+        $vacancy2 = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
 
         $candidate = Candidate::factory()->create();
 
