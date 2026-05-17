@@ -42,8 +42,10 @@ class CandidateListExport implements FromQuery, ShouldAutoSize, WithHeadings, Wi
         if (! empty($this->filters['search'])) {
             $search = '%'.mb_strtolower($this->filters['search']).'%';
             $query->whereHas('candidate', fn ($q) => $q
-                ->whereRaw('lower(nama_lengkap) like ?', [$search])
-                ->orWhereRaw('lower(email) like ?', [$search])
+                ->where(fn ($sub) => $sub
+                    ->whereRaw('lower(nama_lengkap) like ?', [$search])
+                    ->orWhereRaw('lower(email) like ?', [$search])
+                )
             );
         }
 

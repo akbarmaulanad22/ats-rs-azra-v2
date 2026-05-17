@@ -64,7 +64,7 @@
                         class="absolute right-0 mt-1 w-44 bg-white border border-gray-100 rounded-lg shadow-lg z-10"
                     >
                         <a
-                            href="{{ route('lowongan.export.list', ['lowongan' => $lowongan, 'format' => 'xlsx']) }}"
+                            href="{{ route('lowongan.export.list', array_merge(request()->only(['stage', 'status', 'search']), ['lowongan' => $lowongan, 'format' => 'xlsx'])) }}"
                             class="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 rounded-t-lg"
                         >
                             <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -73,7 +73,7 @@
                             Ekspor Excel (.xlsx)
                         </a>
                         <a
-                            href="{{ route('lowongan.export.list', ['lowongan' => $lowongan, 'format' => 'csv']) }}"
+                            href="{{ route('lowongan.export.list', array_merge(request()->only(['stage', 'status', 'search']), ['lowongan' => $lowongan, 'format' => 'csv'])) }}"
                             class="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 rounded-b-lg"
                         >
                             <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

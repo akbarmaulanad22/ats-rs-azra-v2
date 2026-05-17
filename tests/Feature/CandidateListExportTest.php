@@ -205,6 +205,23 @@ class CandidateListExportTest extends TestCase
         $this->assertNotContains($otherApp->id, $ids);
     }
 
+    public function test_search_filter_does_not_leak_across_vacancies(): void
+    {
+        $this->seedStages();
+
+        $vacancy1 = $this->createVacancy();
+        $vacancy2 = $this->createVacancy();
+
+        $this->makeApplication($vacancy1, [], 'Budi Santoso');
+        $this->makeApplication($vacancy2, [], 'Budi Wijaya');
+
+        $export = new CandidateListExport($vacancy1, ['search' => 'budi']);
+        $results = $export->query()->get();
+
+        $this->assertCount(1, $results);
+        $this->assertEquals('Budi Santoso', $results->first()->candidate->nama_lengkap);
+    }
+
     public function test_non_hr_admin_cannot_export(): void
     {
         $this->seedStages();
