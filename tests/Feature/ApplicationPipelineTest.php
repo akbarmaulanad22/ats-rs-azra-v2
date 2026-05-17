@@ -107,7 +107,8 @@ class ApplicationPipelineTest extends TestCase
         $this->seedEmailTemplates();
 
         $admin = User::factory()->hrAdmin()->create();
-        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        // Use a non-onboarding next stage so generic transisi_tahap fires
+        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'skrining_cv_kepala_unit', 'onboarding']);
         $application = $this->makeApplication($vacancy);
 
         $this->actingAs($admin)->post(
@@ -115,6 +116,24 @@ class ApplicationPipelineTest extends TestCase
         );
 
         Mail::assertQueued(TemplatedMail::class, fn ($mail) => $mail->key === 'transisi_tahap');
+    }
+
+    public function test_advance_to_onboarding_does_not_send_generic_transition_email(): void
+    {
+        Mail::fake();
+        $this->seedStages();
+        $this->seedEmailTemplates();
+
+        $admin = User::factory()->hrAdmin()->create();
+        $vacancy = $this->createVacancyWithStages(['aplikasi', 'skrining_cv_hr', 'onboarding']);
+        $application = $this->makeApplication($vacancy);
+
+        $this->actingAs($admin)->post(
+            route('lowongan.lamaran.lanjut', [$vacancy, $application])
+        );
+
+        // onboarding invitation is sent explicitly by HR Admin, not on stage activation
+        Mail::assertNotQueued(TemplatedMail::class, fn ($mail) => $mail->key === 'transisi_tahap');
     }
 
     public function test_reserved_candidate_can_be_advanced(): void

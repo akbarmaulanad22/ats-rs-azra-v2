@@ -58,6 +58,21 @@ class ApplicationPolicy
         return $this->viewInterview($user, $application);
     }
 
+    public function manageOffering(User $user, Application $application): bool
+    {
+        return $user->hasRole(Role::HrAdmin);
+    }
+
+    public function manageMcu(User $user, Application $application): bool
+    {
+        return $user->hasRole(Role::HrAdmin);
+    }
+
+    public function manageOnboarding(User $user, Application $application): bool
+    {
+        return $user->hasRole(Role::HrAdmin);
+    }
+
     private function canManagePipeline(User $user): bool
     {
         return $user->hasRole(Role::HrAdmin, Role::HrManager, Role::UnitHead, Role::Director);

@@ -94,4 +94,19 @@ class Application extends Model
     {
         return $this->hasMany(InterviewResult::class);
     }
+
+    public function offeringLetter(): HasOne
+    {
+        return $this->hasOne(OfferingLetter::class);
+    }
+
+    public function mcuResult(): HasOne
+    {
+        return $this->hasOne(McuResult::class);
+    }
+
+    public function onboardingResult(): HasOne
+    {
+        return $this->hasOne(OnboardingResult::class);
+    }
 }

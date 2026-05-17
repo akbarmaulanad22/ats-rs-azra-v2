@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationPipelineController;
 use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\CandidateMcuController;
 use App\Http\Controllers\CandidateStatusController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CvScreeningController;
@@ -14,7 +15,10 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewCriteriaController;
 use App\Http\Controllers\MbtiTestController;
+use App\Http\Controllers\McuController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\OfferingLetterController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestReviewController;
@@ -29,6 +33,9 @@ Route::get('/', fn () => auth()->check()
     ? redirect()->route('dashboard')
     : redirect()->route('login')
 );
+
+Route::get('/lamaran/{token}/mcu', [CandidateMcuController::class, 'show'])->name('kandidat.mcu.upload');
+Route::post('/lamaran/{token}/mcu', [CandidateMcuController::class, 'upload'])->name('kandidat.mcu.upload.store')->middleware('throttle:10,1');
 
 Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show');
 Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:5,1');
@@ -103,4 +110,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/wawancara', [InterviewController::class, 'index'])->name('lowongan.wawancara.index');
     Route::get('/lowongan/{lowongan}/wawancara/{application}', [InterviewController::class, 'show'])->scopeBindings()->name('lowongan.wawancara.show');
     Route::post('/lowongan/{lowongan}/wawancara/{application}/keputusan', [InterviewController::class, 'decide'])->scopeBindings()->name('lowongan.wawancara.keputusan');
+
+    Route::get('/lowongan/{lowongan}/surat-penawaran/{application}', [OfferingLetterController::class, 'show'])->scopeBindings()->name('lowongan.surat-penawaran.show');
+    Route::post('/lowongan/{lowongan}/surat-penawaran/{application}/kirim', [OfferingLetterController::class, 'send'])->scopeBindings()->name('lowongan.surat-penawaran.kirim');
+
+    Route::get('/lowongan/{lowongan}/mcu/{application}', [McuController::class, 'show'])->scopeBindings()->name('lowongan.mcu.show');
+    Route::post('/lowongan/{lowongan}/mcu/{application}/status', [McuController::class, 'updateStatus'])->scopeBindings()->name('lowongan.mcu.status');
+    Route::post('/lowongan/{lowongan}/mcu/{application}/dokumen', [McuController::class, 'uploadDocument'])->scopeBindings()->name('lowongan.mcu.dokumen');
+
+    Route::get('/lowongan/{lowongan}/onboarding/{application}', [OnboardingController::class, 'show'])->scopeBindings()->name('lowongan.onboarding.show');
+    Route::post('/lowongan/{lowongan}/onboarding/{application}/undangan', [OnboardingController::class, 'sendInvitation'])->scopeBindings()->name('lowongan.onboarding.undangan');
+    Route::post('/lowongan/{lowongan}/onboarding/{application}/selesai', [OnboardingController::class, 'complete'])->scopeBindings()->name('lowongan.onboarding.selesai');
 });

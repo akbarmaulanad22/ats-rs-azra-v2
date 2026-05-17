@@ -117,6 +117,25 @@ class ApplicationPipelineService
             return;
         }
 
+        if ($nextStage?->key === 'mcu') {
+            try {
+                $this->emailNotificationService->dispatch('instruksi_mcu', $application->candidate->email, [
+                    'nama_kandidat' => $application->candidate->nama_lengkap,
+                    'judul_lowongan' => $application->vacancy->judul_posisi,
+                    'link_status' => route('karier.lamaran.status', $application->token),
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            return;
+        }
+
+        $silentStages = ['onboarding'];
+        if ($nextStage === null || in_array($nextStage->key, $silentStages, true)) {
+            return;
+        }
+
         try {
             $this->emailNotificationService->dispatch('transisi_tahap', $application->candidate->email, [
                 'nama_kandidat' => $application->candidate->nama_lengkap,
