@@ -101,7 +101,7 @@ class ApplicationSubmissionTest extends TestCase
             ],
             // Step 6
             'alasan_melamar' => 'Tertarik berkarir di bidang kesehatan dan berkontribusi untuk RS Azra.',
-            'gaji_diharapkan' => '6000000',
+            'gaji_diharapkan' => 6000000,
             // Step 8
             'pernah_sakit_serius' => 'tidak',
             'kesiapan_kerja' => 'Siap bekerja segera, saat ini tidak sedang bekerja.',
@@ -223,7 +223,7 @@ class ApplicationSubmissionTest extends TestCase
 
         $this->assertDatabaseHas('applications', [
             'alasan_melamar' => 'Tertarik berkarir di bidang kesehatan dan berkontribusi untuk RS Azra.',
-            'gaji_diharapkan' => '6000000',
+            'gaji_diharapkan' => 6000000,
         ]);
     }
 
