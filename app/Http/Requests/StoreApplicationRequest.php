@@ -129,7 +129,7 @@ class StoreApplicationRequest extends FormRequest
 
             // Step 6 — Minat
             'alasan_melamar' => ['required', 'string', 'max:2000'],
-            'gaji_diharapkan' => ['required', 'integer', 'min:0'],
+            'gaji_diharapkan' => ['required', 'integer', 'min:0', 'max:2147483647'],
             'fasilitas_diharapkan' => ['nullable', 'string', 'max:1000'],
 
             // Step 7 — Referensi

@@ -314,7 +314,7 @@
                     @if ($application->gaji_diharapkan)
                         <div>
                             <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide mb-1">Gaji Diharapkan</dt>
-                            <dd class="text-sm text-gray-700">{{ $application->gaji_diharapkan }}</dd>
+                            <dd class="text-sm text-gray-700">Rp {{ number_format($application->gaji_diharapkan, 0, ',', '.') }}</dd>
                         </div>
                     @endif
                 </div>
