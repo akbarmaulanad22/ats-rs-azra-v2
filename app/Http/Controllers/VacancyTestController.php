@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Question;
-use App\Models\Unit;
 use App\Models\Vacancy;
 use App\Models\VacancyTest;
 use App\Models\VacancyTestSnapshot;
@@ -18,12 +17,11 @@ class VacancyTestController extends Controller
     {
         Gate::authorize('create', VacancyTest::class);
 
-        $vacancyTest = $lowongan->vacancyTest()->with(['questions.options', 'questions.unit'])->first();
+        $vacancyTest = $lowongan->vacancyTest()->with(['questions.options'])->first();
 
-        $units = Unit::orderBy('nama')->get();
-        $allQuestions = Question::with(['unit', 'options'])->orderBy('unit_id')->orderBy('id')->get();
+        $allQuestions = Question::with(['options'])->orderBy('id')->get();
 
-        return view('vacancy-test.show', compact('lowongan', 'vacancyTest', 'units', 'allQuestions'));
+        return view('vacancy-test.show', compact('lowongan', 'vacancyTest', 'allQuestions'));
     }
 
     public function save(Request $request, Vacancy $lowongan): RedirectResponse
