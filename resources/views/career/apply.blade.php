@@ -139,7 +139,9 @@
     .field-error {
         font-size: 12px; color: #b54327; margin-top: 4px;
     }
-    .field input.error, .field select.error, .field textarea.error {
+    .field input:not([type="checkbox"]):not([type="radio"]).error,
+    .field select.error,
+    .field textarea.error {
         border-color: #b54327; background: #fdf4f2;
     }
 
@@ -504,31 +506,36 @@
                                 <button type="button" class="adj-remove" @click="remove(idx)" title="Hapus">&times;</button>
                                 <div class="form-row cols-3">
                                     <div class="field"><label>Nama</label>
-                                        <input :name="`siblings[${idx}][nama]`" type="text" x-model="item.nama">
+                                        <input :name="`siblings[${idx}][nama]`" type="text" x-model="item.nama" :class="{ error: hasFieldError('siblings', idx, 'nama') }">
+                                        <p class="field-error" x-show="hasFieldError('siblings', idx, 'nama')" x-text="fieldError('siblings', idx, 'nama')"></p>
                                     </div>
                                     <div class="field"><label>Usia</label>
-                                        <input :name="`siblings[${idx}][usia]`" type="number" min="0" x-model="item.usia">
+                                        <input :name="`siblings[${idx}][usia]`" type="number" min="0" x-model="item.usia" :class="{ error: hasFieldError('siblings', idx, 'usia') }">
+                                        <p class="field-error" x-show="hasFieldError('siblings', idx, 'usia')" x-text="fieldError('siblings', idx, 'usia')"></p>
                                     </div>
                                     <div class="field"><label>Jenis Kelamin</label>
-                                        <select :name="`siblings[${idx}][jenis_kelamin]`" x-model="item.jenis_kelamin">
+                                        <select :name="`siblings[${idx}][jenis_kelamin]`" x-model="item.jenis_kelamin" :class="{ error: hasFieldError('siblings', idx, 'jenis_kelamin') }">
                                             <option value="">-- Pilih --</option>
                                             @foreach ($jenisKelaminOptions as $opt)
                                                 <option value="{{ $opt->value }}">{{ $opt->label() }}</option>
                                             @endforeach
                                         </select>
+                                        <p class="field-error" x-show="hasFieldError('siblings', idx, 'jenis_kelamin')" x-text="fieldError('siblings', idx, 'jenis_kelamin')"></p>
                                     </div>
                                 </div>
                                 <div class="form-row cols-2">
                                     <div class="field"><label>Pendidikan Terakhir</label>
-                                        <select :name="`siblings[${idx}][pendidikan_terakhir]`" x-model="item.pendidikan_terakhir">
+                                        <select :name="`siblings[${idx}][pendidikan_terakhir]`" x-model="item.pendidikan_terakhir" :class="{ error: hasFieldError('siblings', idx, 'pendidikan_terakhir') }">
                                             <option value="">-- Pilih --</option>
                                             @foreach ($jenisPendidikanOptions as $opt)
                                                 <option value="{{ $opt->value }}">{{ $opt->label() }}</option>
                                             @endforeach
                                         </select>
+                                        <p class="field-error" x-show="hasFieldError('siblings', idx, 'pendidikan_terakhir')" x-text="fieldError('siblings', idx, 'pendidikan_terakhir')"></p>
                                     </div>
                                     <div class="field"><label>Pekerjaan / Jabatan</label>
-                                        <input :name="`siblings[${idx}][pekerjaan_jabatan]`" type="text" x-model="item.pekerjaan_jabatan">
+                                        <input :name="`siblings[${idx}][pekerjaan_jabatan]`" type="text" x-model="item.pekerjaan_jabatan" :class="{ error: hasFieldError('siblings', idx, 'pekerjaan_jabatan') }">
+                                        <p class="field-error" x-show="hasFieldError('siblings', idx, 'pekerjaan_jabatan')" x-text="fieldError('siblings', idx, 'pekerjaan_jabatan')"></p>
                                     </div>
                                 </div>
                             </div>
@@ -547,23 +554,34 @@
                                 <div class="adj-item-num">Suami/Istri <span x-text="idx+1"></span></div>
                                 <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
                                 <div class="form-row cols-3">
-                                    <div class="field"><label>Nama</label><input :name="`spouses[${idx}][nama]`" type="text" x-model="item.nama"></div>
-                                    <div class="field"><label>Usia</label><input :name="`spouses[${idx}][usia]`" type="number" min="0" x-model="item.usia"></div>
+                                    <div class="field"><label>Nama</label>
+                                        <input :name="`spouses[${idx}][nama]`" type="text" x-model="item.nama" :class="{ error: hasFieldError('spouses', idx, 'nama') }">
+                                        <p class="field-error" x-show="hasFieldError('spouses', idx, 'nama')" x-text="fieldError('spouses', idx, 'nama')"></p>
+                                    </div>
+                                    <div class="field"><label>Usia</label>
+                                        <input :name="`spouses[${idx}][usia]`" type="number" min="0" x-model="item.usia" :class="{ error: hasFieldError('spouses', idx, 'usia') }">
+                                        <p class="field-error" x-show="hasFieldError('spouses', idx, 'usia')" x-text="fieldError('spouses', idx, 'usia')"></p>
+                                    </div>
                                     <div class="field"><label>Jenis Kelamin</label>
-                                        <select :name="`spouses[${idx}][jenis_kelamin]`" x-model="item.jenis_kelamin">
+                                        <select :name="`spouses[${idx}][jenis_kelamin]`" x-model="item.jenis_kelamin" :class="{ error: hasFieldError('spouses', idx, 'jenis_kelamin') }">
                                             <option value="">-- Pilih --</option>
                                             @foreach ($jenisKelaminOptions as $opt)<option value="{{ $opt->value }}">{{ $opt->label() }}</option>@endforeach
                                         </select>
+                                        <p class="field-error" x-show="hasFieldError('spouses', idx, 'jenis_kelamin')" x-text="fieldError('spouses', idx, 'jenis_kelamin')"></p>
                                     </div>
                                 </div>
                                 <div class="form-row cols-2">
                                     <div class="field"><label>Pendidikan Terakhir</label>
-                                        <select :name="`spouses[${idx}][pendidikan_terakhir]`" x-model="item.pendidikan_terakhir">
+                                        <select :name="`spouses[${idx}][pendidikan_terakhir]`" x-model="item.pendidikan_terakhir" :class="{ error: hasFieldError('spouses', idx, 'pendidikan_terakhir') }">
                                             <option value="">-- Pilih --</option>
                                             @foreach ($jenisPendidikanOptions as $opt)<option value="{{ $opt->value }}">{{ $opt->label() }}</option>@endforeach
                                         </select>
+                                        <p class="field-error" x-show="hasFieldError('spouses', idx, 'pendidikan_terakhir')" x-text="fieldError('spouses', idx, 'pendidikan_terakhir')"></p>
                                     </div>
-                                    <div class="field"><label>Pekerjaan / Jabatan</label><input :name="`spouses[${idx}][pekerjaan_jabatan]`" type="text" x-model="item.pekerjaan_jabatan"></div>
+                                    <div class="field"><label>Pekerjaan / Jabatan</label>
+                                        <input :name="`spouses[${idx}][pekerjaan_jabatan]`" type="text" x-model="item.pekerjaan_jabatan" :class="{ error: hasFieldError('spouses', idx, 'pekerjaan_jabatan') }">
+                                        <p class="field-error" x-show="hasFieldError('spouses', idx, 'pekerjaan_jabatan')" x-text="fieldError('spouses', idx, 'pekerjaan_jabatan')"></p>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -581,23 +599,34 @@
                                 <div class="adj-item-num">Anak <span x-text="idx+1"></span></div>
                                 <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
                                 <div class="form-row cols-3">
-                                    <div class="field"><label>Nama</label><input :name="`children[${idx}][nama]`" type="text" x-model="item.nama"></div>
-                                    <div class="field"><label>Usia</label><input :name="`children[${idx}][usia]`" type="number" min="0" x-model="item.usia"></div>
+                                    <div class="field"><label>Nama</label>
+                                        <input :name="`children[${idx}][nama]`" type="text" x-model="item.nama" :class="{ error: hasFieldError('children', idx, 'nama') }">
+                                        <p class="field-error" x-show="hasFieldError('children', idx, 'nama')" x-text="fieldError('children', idx, 'nama')"></p>
+                                    </div>
+                                    <div class="field"><label>Usia</label>
+                                        <input :name="`children[${idx}][usia]`" type="number" min="0" x-model="item.usia" :class="{ error: hasFieldError('children', idx, 'usia') }">
+                                        <p class="field-error" x-show="hasFieldError('children', idx, 'usia')" x-text="fieldError('children', idx, 'usia')"></p>
+                                    </div>
                                     <div class="field"><label>Jenis Kelamin</label>
-                                        <select :name="`children[${idx}][jenis_kelamin]`" x-model="item.jenis_kelamin">
+                                        <select :name="`children[${idx}][jenis_kelamin]`" x-model="item.jenis_kelamin" :class="{ error: hasFieldError('children', idx, 'jenis_kelamin') }">
                                             <option value="">-- Pilih --</option>
                                             @foreach ($jenisKelaminOptions as $opt)<option value="{{ $opt->value }}">{{ $opt->label() }}</option>@endforeach
                                         </select>
+                                        <p class="field-error" x-show="hasFieldError('children', idx, 'jenis_kelamin')" x-text="fieldError('children', idx, 'jenis_kelamin')"></p>
                                     </div>
                                 </div>
                                 <div class="form-row cols-2">
                                     <div class="field"><label>Pendidikan Terakhir</label>
-                                        <select :name="`children[${idx}][pendidikan_terakhir]`" x-model="item.pendidikan_terakhir">
+                                        <select :name="`children[${idx}][pendidikan_terakhir]`" x-model="item.pendidikan_terakhir" :class="{ error: hasFieldError('children', idx, 'pendidikan_terakhir') }">
                                             <option value="">-- Pilih --</option>
                                             @foreach ($jenisPendidikanOptions as $opt)<option value="{{ $opt->value }}">{{ $opt->label() }}</option>@endforeach
                                         </select>
+                                        <p class="field-error" x-show="hasFieldError('children', idx, 'pendidikan_terakhir')" x-text="fieldError('children', idx, 'pendidikan_terakhir')"></p>
                                     </div>
-                                    <div class="field"><label>Pekerjaan / Jabatan</label><input :name="`children[${idx}][pekerjaan_jabatan]`" type="text" x-model="item.pekerjaan_jabatan"></div>
+                                    <div class="field"><label>Pekerjaan / Jabatan</label>
+                                        <input :name="`children[${idx}][pekerjaan_jabatan]`" type="text" x-model="item.pekerjaan_jabatan" :class="{ error: hasFieldError('children', idx, 'pekerjaan_jabatan') }">
+                                        <p class="field-error" x-show="hasFieldError('children', idx, 'pekerjaan_jabatan')" x-text="fieldError('children', idx, 'pekerjaan_jabatan')"></p>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -622,27 +651,33 @@
                                 <button type="button" class="adj-remove" x-show="items.length > 1" @click="remove(idx)">&times;</button>
                                 <div class="form-row cols-3">
                                     <div class="field"><label>Jenis Pendidikan <span class="req">*</span></label>
-                                        <select :name="`formal_educations[${idx}][jenis_pendidikan]`" x-model="item.jenis_pendidikan">
+                                        <select :name="`formal_educations[${idx}][jenis_pendidikan]`" x-model="item.jenis_pendidikan" :class="{ error: hasFieldError('formal_educations', idx, 'jenis_pendidikan') }">
                                             <option value="">-- Pilih --</option>
                                             @foreach ($jenisPendidikanOptions as $opt)<option value="{{ $opt->value }}">{{ $opt->label() }}</option>@endforeach
                                         </select>
+                                        <p class="field-error" x-show="hasFieldError('formal_educations', idx, 'jenis_pendidikan')" x-text="fieldError('formal_educations', idx, 'jenis_pendidikan')"></p>
                                     </div>
                                     <div class="field"><label>Nama Sekolah/Institusi <span class="req">*</span></label>
-                                        <input :name="`formal_educations[${idx}][nama_sekolah]`" type="text" x-model="item.nama_sekolah">
+                                        <input :name="`formal_educations[${idx}][nama_sekolah]`" type="text" x-model="item.nama_sekolah" :class="{ error: hasFieldError('formal_educations', idx, 'nama_sekolah') }">
+                                        <p class="field-error" x-show="hasFieldError('formal_educations', idx, 'nama_sekolah')" x-text="fieldError('formal_educations', idx, 'nama_sekolah')"></p>
                                     </div>
                                     <div class="field"><label>Kota <span class="req">*</span></label>
-                                        <input :name="`formal_educations[${idx}][kota]`" type="text" x-model="item.kota">
+                                        <input :name="`formal_educations[${idx}][kota]`" type="text" x-model="item.kota" :class="{ error: hasFieldError('formal_educations', idx, 'kota') }">
+                                        <p class="field-error" x-show="hasFieldError('formal_educations', idx, 'kota')" x-text="fieldError('formal_educations', idx, 'kota')"></p>
                                     </div>
                                 </div>
                                 <div class="form-row cols-3">
                                     <div class="field"><label>Tahun Lulus <span class="req">*</span></label>
-                                        <input :name="`formal_educations[${idx}][tahun_lulus]`" type="number" min="1900" max="2100" x-model="item.tahun_lulus">
+                                        <input :name="`formal_educations[${idx}][tahun_lulus]`" type="number" min="1900" max="2100" x-model="item.tahun_lulus" :class="{ error: hasFieldError('formal_educations', idx, 'tahun_lulus') }">
+                                        <p class="field-error" x-show="hasFieldError('formal_educations', idx, 'tahun_lulus')" x-text="fieldError('formal_educations', idx, 'tahun_lulus')"></p>
                                     </div>
                                     <div class="field"><label>IP/Nilai</label>
-                                        <input :name="`formal_educations[${idx}][ip_nilai]`" type="text" x-model="item.ip_nilai" placeholder="mis. 3.75">
+                                        <input :name="`formal_educations[${idx}][ip_nilai]`" type="text" x-model="item.ip_nilai" placeholder="mis. 3.75" :class="{ error: hasFieldError('formal_educations', idx, 'ip_nilai') }">
+                                        <p class="field-error" x-show="hasFieldError('formal_educations', idx, 'ip_nilai')" x-text="fieldError('formal_educations', idx, 'ip_nilai')"></p>
                                     </div>
                                     <div class="field"><label>Jurusan</label>
-                                        <input :name="`formal_educations[${idx}][jurusan]`" type="text" x-model="item.jurusan">
+                                        <input :name="`formal_educations[${idx}][jurusan]`" type="text" x-model="item.jurusan" :class="{ error: hasFieldError('formal_educations', idx, 'jurusan') }">
+                                        <p class="field-error" x-show="hasFieldError('formal_educations', idx, 'jurusan')" x-text="fieldError('formal_educations', idx, 'jurusan')"></p>
                                     </div>
                                 </div>
                             </div>
@@ -662,10 +697,12 @@
                                 <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
                                 <div class="form-row cols-2">
                                     <div class="field"><label>Nama Prestasi</label>
-                                        <input :name="`achievements[${idx}][nama_prestasi]`" type="text" x-model="item.nama_prestasi">
+                                        <input :name="`achievements[${idx}][nama_prestasi]`" type="text" x-model="item.nama_prestasi" :class="{ error: hasFieldError('achievements', idx, 'nama_prestasi') }">
+                                        <p class="field-error" x-show="hasFieldError('achievements', idx, 'nama_prestasi')" x-text="fieldError('achievements', idx, 'nama_prestasi')"></p>
                                     </div>
                                     <div class="field"><label>Tahun</label>
-                                        <input :name="`achievements[${idx}][tahun]`" type="number" min="1900" max="2100" x-model="item.tahun">
+                                        <input :name="`achievements[${idx}][tahun]`" type="number" min="1900" max="2100" x-model="item.tahun" :class="{ error: hasFieldError('achievements', idx, 'tahun') }">
+                                        <p class="field-error" x-show="hasFieldError('achievements', idx, 'tahun')" x-text="fieldError('achievements', idx, 'tahun')"></p>
                                     </div>
                                 </div>
                             </div>
@@ -686,21 +723,26 @@
                                 <button type="button" class="adj-remove" x-show="items.length > 1" @click="remove(idx)">&times;</button>
                                 <div class="form-row cols-2">
                                     <div class="field"><label>Nama Pendidikan <span class="req">*</span></label>
-                                        <input :name="`informal_educations[${idx}][nama]`" type="text" x-model="item.nama">
+                                        <input :name="`informal_educations[${idx}][nama]`" type="text" x-model="item.nama" :class="{ error: hasFieldError('informal_educations', idx, 'nama') }">
+                                        <p class="field-error" x-show="hasFieldError('informal_educations', idx, 'nama')" x-text="fieldError('informal_educations', idx, 'nama')"></p>
                                     </div>
                                     <div class="field"><label>Topik <span class="req">*</span></label>
-                                        <input :name="`informal_educations[${idx}][topik]`" type="text" x-model="item.topik">
+                                        <input :name="`informal_educations[${idx}][topik]`" type="text" x-model="item.topik" :class="{ error: hasFieldError('informal_educations', idx, 'topik') }">
+                                        <p class="field-error" x-show="hasFieldError('informal_educations', idx, 'topik')" x-text="fieldError('informal_educations', idx, 'topik')"></p>
                                     </div>
                                 </div>
                                 <div class="form-row cols-3">
                                     <div class="field"><label>Periode Mulai <span class="req">*</span></label>
-                                        <input :name="`informal_educations[${idx}][periode_mulai]`" type="date" x-model="item.periode_mulai">
+                                        <input :name="`informal_educations[${idx}][periode_mulai]`" type="date" x-model="item.periode_mulai" :class="{ error: hasFieldError('informal_educations', idx, 'periode_mulai') }">
+                                        <p class="field-error" x-show="hasFieldError('informal_educations', idx, 'periode_mulai')" x-text="fieldError('informal_educations', idx, 'periode_mulai')"></p>
                                     </div>
                                     <div class="field"><label>Periode Selesai <span class="req">*</span></label>
-                                        <input :name="`informal_educations[${idx}][periode_selesai]`" type="date" x-model="item.periode_selesai">
+                                        <input :name="`informal_educations[${idx}][periode_selesai]`" type="date" x-model="item.periode_selesai" :class="{ error: hasFieldError('informal_educations', idx, 'periode_selesai') }">
+                                        <p class="field-error" x-show="hasFieldError('informal_educations', idx, 'periode_selesai')" x-text="fieldError('informal_educations', idx, 'periode_selesai')"></p>
                                     </div>
                                     <div class="field"><label>Penyelenggara <span class="req">*</span></label>
-                                        <input :name="`informal_educations[${idx}][penyelenggara]`" type="text" x-model="item.penyelenggara">
+                                        <input :name="`informal_educations[${idx}][penyelenggara]`" type="text" x-model="item.penyelenggara" :class="{ error: hasFieldError('informal_educations', idx, 'penyelenggara') }">
+                                        <p class="field-error" x-show="hasFieldError('informal_educations', idx, 'penyelenggara')" x-text="fieldError('informal_educations', idx, 'penyelenggara')"></p>
                                     </div>
                                 </div>
                             </div>
@@ -720,14 +762,16 @@
                                 <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
                                 <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr;">
                                     <div class="field"><label>Nama Bahasa</label>
-                                        <input :name="`language_skills[${idx}][nama_bahasa]`" type="text" x-model="item.nama_bahasa">
+                                        <input :name="`language_skills[${idx}][nama_bahasa]`" type="text" x-model="item.nama_bahasa" :class="{ error: hasFieldError('language_skills', idx, 'nama_bahasa') }">
+                                        <p class="field-error" x-show="hasFieldError('language_skills', idx, 'nama_bahasa')" x-text="fieldError('language_skills', idx, 'nama_bahasa')"></p>
                                     </div>
                                     @foreach (['berbicara' => 'Berbicara', 'menulis' => 'Menulis', 'membaca' => 'Membaca'] as $field => $lbl)
                                     <div class="field"><label>{{ $lbl }}</label>
-                                        <select :name="`language_skills[${idx}][{{ $field }}]`" x-model="item.{{ $field }}">
+                                        <select :name="`language_skills[${idx}][{{ $field }}]`" x-model="item.{{ $field }}" :class="{ error: hasFieldError('language_skills', idx, '{{ $field }}') }">
                                             <option value="">--</option>
                                             @foreach ($tingkatBahasaOptions as $opt)<option value="{{ $opt->value }}">{{ $opt->label() }}</option>@endforeach
                                         </select>
+                                        <p class="field-error" x-show="hasFieldError('language_skills', idx, '{{ $field }}')" x-text="fieldError('language_skills', idx, '{{ $field }}')"></p>
                                     </div>
                                     @endforeach
                                 </div>
@@ -751,21 +795,26 @@
                                 <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
                                 <div class="form-row cols-2">
                                     <div class="field"><label>Nama Organisasi</label>
-                                        <input :name="`organization_experiences[${idx}][nama_organisasi]`" type="text" x-model="item.nama_organisasi">
+                                        <input :name="`organization_experiences[${idx}][nama_organisasi]`" type="text" x-model="item.nama_organisasi" :class="{ error: hasFieldError('organization_experiences', idx, 'nama_organisasi') }">
+                                        <p class="field-error" x-show="hasFieldError('organization_experiences', idx, 'nama_organisasi')" x-text="fieldError('organization_experiences', idx, 'nama_organisasi')"></p>
                                     </div>
                                     <div class="field"><label>Jabatan</label>
-                                        <input :name="`organization_experiences[${idx}][jabatan]`" type="text" x-model="item.jabatan">
+                                        <input :name="`organization_experiences[${idx}][jabatan]`" type="text" x-model="item.jabatan" :class="{ error: hasFieldError('organization_experiences', idx, 'jabatan') }">
+                                        <p class="field-error" x-show="hasFieldError('organization_experiences', idx, 'jabatan')" x-text="fieldError('organization_experiences', idx, 'jabatan')"></p>
                                     </div>
                                 </div>
                                 <div class="form-row cols-3">
                                     <div class="field"><label>Periode Mulai</label>
-                                        <input :name="`organization_experiences[${idx}][periode_mulai]`" type="date" x-model="item.periode_mulai">
+                                        <input :name="`organization_experiences[${idx}][periode_mulai]`" type="date" x-model="item.periode_mulai" :class="{ error: hasFieldError('organization_experiences', idx, 'periode_mulai') }">
+                                        <p class="field-error" x-show="hasFieldError('organization_experiences', idx, 'periode_mulai')" x-text="fieldError('organization_experiences', idx, 'periode_mulai')"></p>
                                     </div>
                                     <div class="field"><label>Periode Selesai</label>
-                                        <input :name="`organization_experiences[${idx}][periode_selesai]`" type="date" x-model="item.periode_selesai">
+                                        <input :name="`organization_experiences[${idx}][periode_selesai]`" type="date" x-model="item.periode_selesai" :class="{ error: hasFieldError('organization_experiences', idx, 'periode_selesai') }">
+                                        <p class="field-error" x-show="hasFieldError('organization_experiences', idx, 'periode_selesai')" x-text="fieldError('organization_experiences', idx, 'periode_selesai')"></p>
                                     </div>
                                     <div class="field"><label>Keterangan</label>
-                                        <input :name="`organization_experiences[${idx}][keterangan]`" type="text" x-model="item.keterangan">
+                                        <input :name="`organization_experiences[${idx}][keterangan]`" type="text" x-model="item.keterangan" :class="{ error: hasFieldError('organization_experiences', idx, 'keterangan') }">
+                                        <p class="field-error" x-show="hasFieldError('organization_experiences', idx, 'keterangan')" x-text="fieldError('organization_experiences', idx, 'keterangan')"></p>
                                     </div>
                                 </div>
                             </div>
@@ -789,6 +838,7 @@
                     </div>
 
                     <div x-show="!isFreshGraduate">
+                        @error('work_experiences')<p class="field-error" style="margin-bottom:12px;">{{ $message }}</p>@enderror
                         <p class="form-section-sub">Dimulai dari pengalaman kerja terakhir. Jika diisi sebagian, wajib lengkapi semua kolom.</p>
                         <div class="adj-section" x-data="adjSection('work_experiences', @js(old('work_experiences', [])))">
                             <template x-for="(item, idx) in items" :key="idx">
@@ -797,36 +847,44 @@
                                     <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
                                     <div class="form-row cols-2">
                                         <div class="field"><label>Nama Perusahaan</label>
-                                            <input :name="`work_experiences[${idx}][nama_perusahaan]`" type="text" x-model="item.nama_perusahaan">
+                                            <input :name="`work_experiences[${idx}][nama_perusahaan]`" type="text" x-model="item.nama_perusahaan" :class="{ error: hasFieldError('work_experiences', idx, 'nama_perusahaan') }">
+                                            <p class="field-error" x-show="hasFieldError('work_experiences', idx, 'nama_perusahaan')" x-text="fieldError('work_experiences', idx, 'nama_perusahaan')"></p>
                                         </div>
                                         <div class="field"><label>Jabatan</label>
-                                            <input :name="`work_experiences[${idx}][jabatan]`" type="text" x-model="item.jabatan">
+                                            <input :name="`work_experiences[${idx}][jabatan]`" type="text" x-model="item.jabatan" :class="{ error: hasFieldError('work_experiences', idx, 'jabatan') }">
+                                            <p class="field-error" x-show="hasFieldError('work_experiences', idx, 'jabatan')" x-text="fieldError('work_experiences', idx, 'jabatan')"></p>
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="field"><label>Alamat Perusahaan</label>
-                                            <textarea :name="`work_experiences[${idx}][alamat_perusahaan]`" x-model="item.alamat_perusahaan" style="min-height:60px;"></textarea>
+                                            <textarea :name="`work_experiences[${idx}][alamat_perusahaan]`" x-model="item.alamat_perusahaan" style="min-height:60px;" :class="{ error: hasFieldError('work_experiences', idx, 'alamat_perusahaan') }"></textarea>
+                                            <p class="field-error" x-show="hasFieldError('work_experiences', idx, 'alamat_perusahaan')" x-text="fieldError('work_experiences', idx, 'alamat_perusahaan')"></p>
                                         </div>
                                     </div>
                                     <div class="form-row cols-3">
                                         <div class="field"><label>Periode Mulai</label>
-                                            <input :name="`work_experiences[${idx}][periode_mulai]`" type="date" x-model="item.periode_mulai">
+                                            <input :name="`work_experiences[${idx}][periode_mulai]`" type="date" x-model="item.periode_mulai" :class="{ error: hasFieldError('work_experiences', idx, 'periode_mulai') }">
+                                            <p class="field-error" x-show="hasFieldError('work_experiences', idx, 'periode_mulai')" x-text="fieldError('work_experiences', idx, 'periode_mulai')"></p>
                                         </div>
                                         <div class="field"><label>Periode Selesai</label>
-                                            <input :name="`work_experiences[${idx}][periode_selesai]`" type="date" x-model="item.periode_selesai">
+                                            <input :name="`work_experiences[${idx}][periode_selesai]`" type="date" x-model="item.periode_selesai" :class="{ error: hasFieldError('work_experiences', idx, 'periode_selesai') }">
+                                            <p class="field-error" x-show="hasFieldError('work_experiences', idx, 'periode_selesai')" x-text="fieldError('work_experiences', idx, 'periode_selesai')"></p>
                                         </div>
                                         <div class="field"><label>Gaji Terakhir</label>
-                                            <input :name="`work_experiences[${idx}][gaji_terakhir]`" type="text" x-model="item.gaji_terakhir" placeholder="mis. 5.000.000">
+                                            <input :name="`work_experiences[${idx}][gaji_terakhir]`" type="text" x-model="item.gaji_terakhir" placeholder="mis. 5.000.000" :class="{ error: hasFieldError('work_experiences', idx, 'gaji_terakhir') }">
+                                            <p class="field-error" x-show="hasFieldError('work_experiences', idx, 'gaji_terakhir')" x-text="fieldError('work_experiences', idx, 'gaji_terakhir')"></p>
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="field"><label>Rincian Tugas</label>
-                                            <textarea :name="`work_experiences[${idx}][rincian_tugas]`" x-model="item.rincian_tugas"></textarea>
+                                            <textarea :name="`work_experiences[${idx}][rincian_tugas]`" x-model="item.rincian_tugas" :class="{ error: hasFieldError('work_experiences', idx, 'rincian_tugas') }"></textarea>
+                                            <p class="field-error" x-show="hasFieldError('work_experiences', idx, 'rincian_tugas')" x-text="fieldError('work_experiences', idx, 'rincian_tugas')"></p>
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="field"><label>Alasan Meninggalkan</label>
-                                            <textarea :name="`work_experiences[${idx}][alasan_meninggalkan]`" x-model="item.alasan_meninggalkan" style="min-height:60px;"></textarea>
+                                            <textarea :name="`work_experiences[${idx}][alasan_meninggalkan]`" x-model="item.alasan_meninggalkan" style="min-height:60px;" :class="{ error: hasFieldError('work_experiences', idx, 'alasan_meninggalkan') }"></textarea>
+                                            <p class="field-error" x-show="hasFieldError('work_experiences', idx, 'alasan_meninggalkan')" x-text="fieldError('work_experiences', idx, 'alasan_meninggalkan')"></p>
                                         </div>
                                     </div>
                                 </div>
@@ -880,13 +938,16 @@
                                 <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
                                 <div class="form-row cols-3">
                                     <div class="field"><label>Nama Karyawan</label>
-                                        <input :name="`references[${idx}][nama_karyawan]`" type="text" x-model="item.nama_karyawan">
+                                        <input :name="`references[${idx}][nama_karyawan]`" type="text" x-model="item.nama_karyawan" :class="{ error: hasFieldError('references', idx, 'nama_karyawan') }">
+                                        <p class="field-error" x-show="hasFieldError('references', idx, 'nama_karyawan')" x-text="fieldError('references', idx, 'nama_karyawan')"></p>
                                     </div>
                                     <div class="field"><label>Hubungan</label>
-                                        <input :name="`references[${idx}][hubungan]`" type="text" x-model="item.hubungan" placeholder="mis. Teman, Saudara">
+                                        <input :name="`references[${idx}][hubungan]`" type="text" x-model="item.hubungan" placeholder="mis. Teman, Saudara" :class="{ error: hasFieldError('references', idx, 'hubungan') }">
+                                        <p class="field-error" x-show="hasFieldError('references', idx, 'hubungan')" x-text="fieldError('references', idx, 'hubungan')"></p>
                                     </div>
                                     <div class="field"><label>Keterangan</label>
-                                        <input :name="`references[${idx}][keterangan]`" type="text" x-model="item.keterangan">
+                                        <input :name="`references[${idx}][keterangan]`" type="text" x-model="item.keterangan" :class="{ error: hasFieldError('references', idx, 'keterangan') }">
+                                        <p class="field-error" x-show="hasFieldError('references', idx, 'keterangan')" x-text="fieldError('references', idx, 'keterangan')"></p>
                                     </div>
                                 </div>
                             </div>
@@ -974,15 +1035,17 @@
                                 <button type="button" class="adj-remove" @click="remove(idx)">&times;</button>
                                 <div class="form-row cols-2">
                                     <div class="field"><label>Platform</label>
-                                        <select :name="`social_media_accounts[${idx}][platform]`" x-model="item.platform">
+                                        <select :name="`social_media_accounts[${idx}][platform]`" x-model="item.platform" :class="{ error: hasFieldError('social_media_accounts', idx, 'platform') }">
                                             <option value="">-- Pilih --</option>
                                             @foreach (['Facebook', 'Instagram', 'LinkedIn', 'TikTok', 'Twitter/X', 'Lainnya'] as $platform)
                                                 <option value="{{ $platform }}">{{ $platform }}</option>
                                             @endforeach
                                         </select>
+                                        <p class="field-error" x-show="hasFieldError('social_media_accounts', idx, 'platform')" x-text="fieldError('social_media_accounts', idx, 'platform')"></p>
                                     </div>
                                     <div class="field"><label>Link / Username</label>
-                                        <input :name="`social_media_accounts[${idx}][link]`" type="text" x-model="item.link" placeholder="mis. https://instagram.com/username">
+                                        <input :name="`social_media_accounts[${idx}][link]`" type="text" x-model="item.link" placeholder="mis. https://instagram.com/username" :class="{ error: hasFieldError('social_media_accounts', idx, 'link') }">
+                                        <p class="field-error" x-show="hasFieldError('social_media_accounts', idx, 'link')" x-text="fieldError('social_media_accounts', idx, 'link')"></p>
                                     </div>
                                 </div>
                             </div>
@@ -1081,6 +1144,16 @@
 window.__adjRegistry = {};
 window.__atsFormKey = 'ats_apply_' + @js($vacancy->id);
 window.__atsHasErrors = {{ $errors->any() ? 'true' : 'false' }};
+window.__atsValidationErrors = @js($errors->toArray());
+
+window.fieldError = function(prefix, idx, field) {
+    const key = prefix + '.' + idx + '.' + field;
+    const errors = window.__atsValidationErrors;
+    return errors[key] ? errors[key][0] : '';
+};
+window.hasFieldError = function(prefix, idx, field) {
+    return !!window.__atsValidationErrors[prefix + '.' + idx + '.' + field];
+};
 
 function applyWizard() {
     return {
