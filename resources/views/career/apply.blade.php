@@ -1124,6 +1124,9 @@ function applyWizard() {
                 if (saved) { this.hasSavedData = true; }
             }
             window.addEventListener('beforeunload', () => { this._save(); });
+            const debouncedSave = this._debounce(() => this._save(), 800);
+            document.getElementById('apply-form').addEventListener('input', debouncedSave);
+            document.getElementById('apply-form').addEventListener('change', debouncedSave);
         },
 
         restoreProgress() {
@@ -1131,25 +1134,42 @@ function applyWizard() {
             if (!saved) { return; }
             this.step = saved.step || 1;
             this.isFreshGraduate = !!saved.isFreshGraduate;
-            if (saved.fields) {
-                this.$nextTick(() => {
+            this.hasSavedData = false;
+
+            this.$nextTick(() => {
+                if (saved.fields) {
                     Object.entries(saved.fields).forEach(([name, val]) => {
                         if (!this._validFields.has(name)) { return; }
+                        if (name === 'is_fresh_graduate') { return; }
+
                         const el = document.querySelector(`#apply-form [name="${CSS.escape(name)}"]`);
                         if (!el || el.type === 'file') { return; }
+
+                        if (el.type === 'radio') {
+                            const target = document.querySelector(`#apply-form [name="${CSS.escape(name)}"][value="${CSS.escape(val)}"]`);
+                            if (target) { target.checked = true; target.dispatchEvent(new Event('change', { bubbles: true })); }
+                            return;
+                        }
+
+                        if (el.type === 'checkbox') {
+                            el.checked = (val === el.value);
+                            el.dispatchEvent(new Event('change', { bubbles: true }));
+                            return;
+                        }
+
                         el.value = val;
                         el.dispatchEvent(new Event('input', { bubbles: true }));
                         el.dispatchEvent(new Event('change', { bubbles: true }));
                     });
-                });
-            }
-            if (saved.adjItems) {
-                Object.entries(saved.adjItems).forEach(([prefix, items]) => {
-                    const comp = window.__adjRegistry[prefix];
-                    if (comp) { comp.items = items; }
-                });
-            }
-            this.hasSavedData = false;
+                }
+
+                if (saved.adjItems) {
+                    Object.entries(saved.adjItems).forEach(([prefix, items]) => {
+                        const comp = window.__adjRegistry[prefix];
+                        if (comp) { comp.items = items; }
+                    });
+                }
+            });
         },
 
         discardProgress() {
@@ -1191,6 +1211,10 @@ function applyWizard() {
 
         _clear() {
             try { localStorage.removeItem(window.__atsFormKey); } catch {}
+        },
+
+        _debounce(fn, ms) {
+            let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
         },
 
         next() {
