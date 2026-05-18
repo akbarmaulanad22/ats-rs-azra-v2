@@ -154,7 +154,7 @@ class StoreApplicationRequest extends FormRequest
 
     public function attributes(): array
     {
-        return [
+        $attributes = [
             'nama_lengkap' => 'nama lengkap',
             'tempat_lahir' => 'tempat lahir',
             'tanggal_lahir' => 'tanggal lahir',
@@ -178,8 +178,98 @@ class StoreApplicationRequest extends FormRequest
             'pernyataan' => 'pernyataan',
             'formal_educations' => 'pendidikan formal',
             'informal_educations' => 'pendidikan informal',
+            'work_experiences' => 'pengalaman kerja',
             'alasan_melamar' => 'alasan melamar',
             'gaji_diharapkan' => 'gaji yang diharapkan',
         ];
+
+        $arrayFields = [
+            'formal_educations' => [
+                'jenis_pendidikan' => 'jenis pendidikan',
+                'nama_sekolah' => 'nama sekolah/institusi',
+                'kota' => 'kota',
+                'tahun_lulus' => 'tahun lulus',
+                'ip_nilai' => 'IP/nilai',
+                'jurusan' => 'jurusan',
+            ],
+            'informal_educations' => [
+                'nama' => 'nama pendidikan',
+                'topik' => 'topik',
+                'periode_mulai' => 'periode mulai',
+                'periode_selesai' => 'periode selesai',
+                'penyelenggara' => 'penyelenggara',
+            ],
+            'achievements' => [
+                'nama_prestasi' => 'nama prestasi',
+                'tahun' => 'tahun',
+            ],
+            'language_skills' => [
+                'nama_bahasa' => 'nama bahasa',
+                'berbicara' => 'berbicara',
+                'menulis' => 'menulis',
+                'membaca' => 'membaca',
+            ],
+            'siblings' => [
+                'nama' => 'nama',
+                'usia' => 'usia',
+                'jenis_kelamin' => 'jenis kelamin',
+                'pendidikan_terakhir' => 'pendidikan terakhir',
+                'pekerjaan_jabatan' => 'pekerjaan/jabatan',
+            ],
+            'spouses' => [
+                'nama' => 'nama',
+                'usia' => 'usia',
+                'jenis_kelamin' => 'jenis kelamin',
+                'pendidikan_terakhir' => 'pendidikan terakhir',
+                'pekerjaan_jabatan' => 'pekerjaan/jabatan',
+            ],
+            'children' => [
+                'nama' => 'nama',
+                'usia' => 'usia',
+                'jenis_kelamin' => 'jenis kelamin',
+                'pendidikan_terakhir' => 'pendidikan terakhir',
+                'pekerjaan_jabatan' => 'pekerjaan/jabatan',
+            ],
+            'organization_experiences' => [
+                'nama_organisasi' => 'nama organisasi',
+                'jabatan' => 'jabatan',
+                'periode_mulai' => 'periode mulai',
+                'periode_selesai' => 'periode selesai',
+                'keterangan' => 'keterangan',
+            ],
+            'work_experiences' => [
+                'nama_perusahaan' => 'nama perusahaan',
+                'jabatan' => 'jabatan',
+                'alamat_perusahaan' => 'alamat perusahaan',
+                'periode_mulai' => 'periode mulai',
+                'periode_selesai' => 'periode selesai',
+                'gaji_terakhir' => 'gaji terakhir',
+                'rincian_tugas' => 'rincian tugas',
+                'alasan_meninggalkan' => 'alasan meninggalkan',
+            ],
+            'references' => [
+                'nama_karyawan' => 'nama karyawan',
+                'hubungan' => 'hubungan',
+                'keterangan' => 'keterangan',
+            ],
+            'social_media_accounts' => [
+                'platform' => 'platform',
+                'link' => 'link/username',
+            ],
+        ];
+
+        foreach ($arrayFields as $prefix => $fields) {
+            $items = $this->input($prefix, []);
+            if (! is_array($items)) {
+                continue;
+            }
+            foreach (array_keys($items) as $index) {
+                foreach ($fields as $field => $label) {
+                    $attributes["{$prefix}.{$index}.{$field}"] = $label;
+                }
+            }
+        }
+
+        return $attributes;
     }
 }
