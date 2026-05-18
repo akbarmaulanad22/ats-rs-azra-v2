@@ -34,13 +34,36 @@ class WorkflowTemplateSnapshot extends Model
         ]);
 
         $template->stages->each(function (Stage $stage) use ($snapshot) {
-            $snapshot->stages()->create([
+            $snapshotStage = $snapshot->stages()->create([
                 'position' => $stage->pivot->position,
                 'key' => $stage->key,
                 'nama' => $stage->nama,
                 'is_locked_first' => $stage->is_locked_first,
                 'is_locked_last' => $stage->is_locked_last,
+                'question_bank_id' => $stage->pivot->question_bank_id,
+                'batas_waktu_menit' => $stage->pivot->batas_waktu_menit,
             ]);
+
+            if ($stage->pivot->question_bank_id) {
+                $questionBank = QuestionBank::with('questions.options')
+                    ->find($stage->pivot->question_bank_id);
+
+                $questionBank?->questions->each(function (Question $question) use ($snapshotStage) {
+                    $snapshotQuestion = $snapshotStage->questions()->create([
+                        'urutan' => $question->pivot->urutan,
+                        'tipe' => $question->tipe->value,
+                        'pertanyaan' => $question->pertanyaan,
+                        'nilai_poin' => $question->nilai_poin,
+                    ]);
+
+                    $question->options->each(function (QuestionOption $option) use ($snapshotQuestion) {
+                        $snapshotQuestion->options()->create([
+                            'teks_opsi' => $option->teks_opsi,
+                            'is_correct' => $option->is_correct,
+                        ]);
+                    });
+                });
+            }
         });
 
         return $snapshot;
