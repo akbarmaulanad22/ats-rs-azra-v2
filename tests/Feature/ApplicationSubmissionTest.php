@@ -718,6 +718,25 @@ class ApplicationSubmissionTest extends TestCase
         $this->assertEquals('onboarding', $current->key);
     }
 
+    public function test_current_stage_returns_reserved_stage(): void
+    {
+        $this->seedStages();
+        $vacancy = $this->createPublishedVacancyWithStages(['lamaran', 'skrining_cv_hr', 'onboarding']);
+
+        $this->post(route('karier.lamar.store', $vacancy), $this->validPayload());
+
+        $application = Application::first();
+        $application->stages()->where('key', 'lamaran')->update(['status' => ApplicationStageStatus::Selesai]);
+        $application->stages()->where('key', 'skrining_cv_hr')->update(['status' => ApplicationStageStatus::Reserved]);
+        $application->load('stages');
+
+        $current = $application->currentStage();
+
+        $this->assertNotNull($current);
+        $this->assertEquals('skrining_cv_hr', $current->key);
+        $this->assertEquals(ApplicationStageStatus::Reserved, $current->status);
+    }
+
     // ── Email notification on application received ────────────────────────────
 
     public function test_confirmation_email_sent_to_candidate_on_application_submission(): void

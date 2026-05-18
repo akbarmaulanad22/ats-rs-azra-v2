@@ -62,6 +62,11 @@ class Application extends Model
             return $aktif;
         }
 
+        $reserved = $this->stages->firstWhere('status', ApplicationStageStatus::Reserved);
+        if ($reserved) {
+            return $reserved;
+        }
+
         if ($this->stages->isNotEmpty() && $this->stages->every(fn ($s) => $s->status === ApplicationStageStatus::Selesai)) {
             return $this->stages->sortByDesc('position')->first();
         }
