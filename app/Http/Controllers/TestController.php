@@ -14,12 +14,12 @@ class TestController extends Controller
     public function show(string $token): View|RedirectResponse
     {
         $submission = TestSubmission::with([
-            'snapshot.questions.options',
+            'stageSnapshot.questions.options',
             'application.vacancy',
         ])->where('token', $token)->firstOrFail();
 
         if ($submission->isSubmitted()) {
-            $questions = $submission->snapshot->questions;
+            $questions = $submission->stageSnapshot->questions;
 
             return view('test.show', compact('submission', 'questions'));
         }
@@ -32,7 +32,7 @@ class TestController extends Controller
             return $this->doSubmit($submission, []);
         }
 
-        $questions = $submission->snapshot->questions;
+        $questions = $submission->stageSnapshot->questions;
 
         return view('test.show', compact('submission', 'questions'));
     }
@@ -40,7 +40,7 @@ class TestController extends Controller
     public function submit(Request $request, string $token): RedirectResponse
     {
         $submission = TestSubmission::with([
-            'snapshot.questions.options',
+            'stageSnapshot.questions.options',
             'application.candidate',
             'application.vacancy',
         ])->where('token', $token)->firstOrFail();
@@ -64,7 +64,7 @@ class TestController extends Controller
             }
 
             $totalSkor = 0;
-            $questions = $submission->snapshot->questions;
+            $questions = $submission->stageSnapshot->questions;
 
             foreach ($questions as $question) {
                 $selectedOptionId = $answers[$question->id] ?? null;
@@ -89,8 +89,8 @@ class TestController extends Controller
                 }
 
                 $submission->answers()->create([
-                    'vacancy_test_snapshot_question_id' => $question->id,
-                    'vacancy_test_snapshot_option_id' => $snapshotOptionId,
+                    'stage_snapshot_question_id' => $question->id,
+                    'stage_snapshot_option_id' => $snapshotOptionId,
                     'jawaban_teks' => $jawabanTeks,
                     'skor' => $skor,
                     'is_reviewed' => $question->tipe === QuestionType::Mc,

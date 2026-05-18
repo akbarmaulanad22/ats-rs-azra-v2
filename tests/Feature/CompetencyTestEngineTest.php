@@ -8,6 +8,7 @@ use App\Enums\Role;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Question;
+use App\Models\QuestionBank;
 use App\Models\QuestionOption;
 use App\Models\Stage;
 use App\Models\TestSubmission;
@@ -15,7 +16,6 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Models\VacancyTest;
-use App\Models\VacancyTestSnapshot;
 use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,9 +42,27 @@ class CompetencyTestEngineTest extends TestCase
         $stageKeys = ['lamaran', 'tes_kompetensi', 'onboarding'];
         $template = WorkflowTemplate::factory()->create();
 
-        collect($stageKeys)->each(function (string $key, int $index) use ($template) {
+        $questionBank = QuestionBank::factory()->create();
+
+        $question = Question::factory()->create(['tipe' => QuestionType::Mc->value, 'nilai_poin' => 10]);
+        $correct = QuestionOption::factory()->correct()->create(['question_id' => $question->id]);
+        QuestionOption::factory()->create(['question_id' => $question->id]);
+
+        $essayQuestion = Question::factory()->essay()->create(['nilai_poin' => 20]);
+
+        $questionBank->questions()->attach($question->id, ['urutan' => 1]);
+        $questionBank->questions()->attach($essayQuestion->id, ['urutan' => 2]);
+
+        collect($stageKeys)->each(function (string $key, int $index) use ($template, $questionBank) {
             $stage = Stage::where('key', $key)->firstOrFail();
-            $template->stages()->attach($stage->id, ['position' => $index + 1]);
+            $pivotData = ['position' => $index + 1];
+
+            if ($key === 'tes_kompetensi') {
+                $pivotData['question_bank_id'] = $questionBank->id;
+                $pivotData['batas_waktu_menit'] = 60;
+            }
+
+            $template->stages()->attach($stage->id, $pivotData);
         });
 
         $template->load('stages');
@@ -55,23 +73,14 @@ class CompetencyTestEngineTest extends TestCase
             'workflow_template_snapshot_id' => $snapshot->id,
         ]);
 
-        $question = Question::factory()->create(['tipe' => QuestionType::Mc->value, 'nilai_poin' => 10]);
-        $correct = QuestionOption::factory()->correct()->create(['question_id' => $question->id]);
-        QuestionOption::factory()->create(['question_id' => $question->id]);
+        VacancyTest::create(['vacancy_id' => $vacancy->id, 'batas_waktu_menit' => 60]);
 
-        $essayQuestion = Question::factory()->essay()->create(['nilai_poin' => 20]);
-
-        $vacancyTest = VacancyTest::create(['vacancy_id' => $vacancy->id, 'batas_waktu_menit' => 60]);
-        $vacancyTest->questions()->attach($question->id, ['urutan' => 1]);
-        $vacancyTest->questions()->attach($essayQuestion->id, ['urutan' => 2]);
-
-        $testSnapshot = VacancyTestSnapshot::createFromVacancyTest($vacancyTest);
-
-        $snapshotMcQuestion = $testSnapshot->questions()->where('tipe', 'mc')->first();
-        $snapshotEssayQuestion = $testSnapshot->questions()->where('tipe', 'essay')->first();
+        $stageSnapshot = $snapshot->stages()->where('key', 'tes_kompetensi')->first();
+        $snapshotMcQuestion = $stageSnapshot->questions()->where('tipe', 'mc')->first();
+        $snapshotEssayQuestion = $stageSnapshot->questions()->where('tipe', 'essay')->first();
         $snapshotCorrectOption = $snapshotMcQuestion->options()->where('is_correct', true)->first();
 
-        return compact('vacancy', 'vacancyTest', 'testSnapshot', 'question', 'correct', 'essayQuestion', 'snapshotMcQuestion', 'snapshotEssayQuestion', 'snapshotCorrectOption');
+        return compact('vacancy', 'stageSnapshot', 'question', 'correct', 'essayQuestion', 'snapshotMcQuestion', 'snapshotEssayQuestion', 'snapshotCorrectOption');
     }
 
     private function makeApplicationAtTestStage(Vacancy $vacancy): Application
@@ -201,12 +210,12 @@ class CompetencyTestEngineTest extends TestCase
     {
         $this->seedStages();
         $unit = Unit::factory()->create();
-        ['vacancy' => $vacancy, 'testSnapshot' => $testSnapshot] = $this->createVacancyWithTest($unit);
+        ['vacancy' => $vacancy, 'stageSnapshot' => $stageSnapshot] = $this->createVacancyWithTest($unit);
 
         $application = $this->makeApplicationAtTestStage($vacancy);
         $submission = TestSubmission::factory()->create([
             'application_id' => $application->id,
-            'vacancy_test_snapshot_id' => $testSnapshot->id,
+            'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
         ]);
 
         $response = $this->get(route('tes.show', $submission->token));
@@ -219,12 +228,12 @@ class CompetencyTestEngineTest extends TestCase
     {
         $this->seedStages();
         $unit = Unit::factory()->create();
-        ['vacancy' => $vacancy, 'testSnapshot' => $testSnapshot] = $this->createVacancyWithTest($unit);
+        ['vacancy' => $vacancy, 'stageSnapshot' => $stageSnapshot] = $this->createVacancyWithTest($unit);
 
         $application = $this->makeApplicationAtTestStage($vacancy);
         $submission = TestSubmission::factory()->submitted()->create([
             'application_id' => $application->id,
-            'vacancy_test_snapshot_id' => $testSnapshot->id,
+            'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
         ]);
 
         $response = $this->get(route('tes.show', $submission->token));
@@ -239,7 +248,7 @@ class CompetencyTestEngineTest extends TestCase
         $unit = Unit::factory()->create();
         [
             'vacancy' => $vacancy,
-            'testSnapshot' => $testSnapshot,
+            'stageSnapshot' => $stageSnapshot,
             'snapshotMcQuestion' => $snapshotMcQuestion,
             'snapshotCorrectOption' => $snapshotCorrectOption,
             'snapshotEssayQuestion' => $snapshotEssayQuestion,
@@ -248,7 +257,7 @@ class CompetencyTestEngineTest extends TestCase
         $application = $this->makeApplicationAtTestStage($vacancy);
         $submission = TestSubmission::factory()->create([
             'application_id' => $application->id,
-            'vacancy_test_snapshot_id' => $testSnapshot->id,
+            'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
             'started_at' => now()->subMinutes(5),
         ]);
 
@@ -264,7 +273,7 @@ class CompetencyTestEngineTest extends TestCase
         $this->assertNotNull($submission->submitted_at);
         $this->assertDatabaseHas('test_answers', [
             'test_submission_id' => $submission->id,
-            'vacancy_test_snapshot_question_id' => $snapshotMcQuestion->id,
+            'stage_snapshot_question_id' => $snapshotMcQuestion->id,
             'skor' => 10,
             'is_reviewed' => true,
         ]);
@@ -276,7 +285,7 @@ class CompetencyTestEngineTest extends TestCase
         $unit = Unit::factory()->create();
         [
             'vacancy' => $vacancy,
-            'testSnapshot' => $testSnapshot,
+            'stageSnapshot' => $stageSnapshot,
             'snapshotMcQuestion' => $snapshotMcQuestion,
             'snapshotCorrectOption' => $snapshotCorrectOption,
             'snapshotEssayQuestion' => $snapshotEssayQuestion,
@@ -285,7 +294,7 @@ class CompetencyTestEngineTest extends TestCase
         $application = $this->makeApplicationAtTestStage($vacancy);
         $submission = TestSubmission::factory()->create([
             'application_id' => $application->id,
-            'vacancy_test_snapshot_id' => $testSnapshot->id,
+            'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
             'started_at' => now()->subMinutes(5),
         ]);
 
@@ -298,7 +307,7 @@ class CompetencyTestEngineTest extends TestCase
 
         $this->assertDatabaseHas('test_answers', [
             'test_submission_id' => $submission->id,
-            'vacancy_test_snapshot_question_id' => $snapshotEssayQuestion->id,
+            'stage_snapshot_question_id' => $snapshotEssayQuestion->id,
             'is_reviewed' => false,
             'skor' => null,
         ]);
@@ -310,7 +319,7 @@ class CompetencyTestEngineTest extends TestCase
         $unit = Unit::factory()->create();
         [
             'vacancy' => $vacancy,
-            'testSnapshot' => $testSnapshot,
+            'stageSnapshot' => $stageSnapshot,
             'snapshotMcQuestion' => $snapshotMcQuestion,
             'snapshotCorrectOption' => $snapshotCorrectOption,
             'snapshotEssayQuestion' => $snapshotEssayQuestion,
@@ -319,7 +328,7 @@ class CompetencyTestEngineTest extends TestCase
         $application = $this->makeApplicationAtTestStage($vacancy);
         $submission = TestSubmission::factory()->create([
             'application_id' => $application->id,
-            'vacancy_test_snapshot_id' => $testSnapshot->id,
+            'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
             'started_at' => now()->subMinutes(5),
         ]);
 
@@ -343,7 +352,7 @@ class CompetencyTestEngineTest extends TestCase
         $unit = Unit::factory()->create();
         [
             'vacancy' => $vacancy,
-            'testSnapshot' => $testSnapshot,
+            'stageSnapshot' => $stageSnapshot,
             'snapshotMcQuestion' => $snapshotMcQuestion,
             'snapshotCorrectOption' => $snapshotCorrectOption,
             'snapshotEssayQuestion' => $snapshotEssayQuestion,
@@ -352,7 +361,7 @@ class CompetencyTestEngineTest extends TestCase
         $application = $this->makeApplicationAtTestStage($vacancy);
         $submission = TestSubmission::factory()->create([
             'application_id' => $application->id,
-            'vacancy_test_snapshot_id' => $testSnapshot->id,
+            'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
             'started_at' => now()->subMinutes(5),
         ]);
 
@@ -379,18 +388,18 @@ class CompetencyTestEngineTest extends TestCase
         $unit = Unit::factory()->create();
         [
             'vacancy' => $vacancy,
-            'testSnapshot' => $testSnapshot,
+            'stageSnapshot' => $stageSnapshot,
             'snapshotEssayQuestion' => $snapshotEssayQuestion,
         ] = $this->createVacancyWithTest($unit);
 
         $application = $this->makeApplicationAtTestStage($vacancy);
         $submission = TestSubmission::factory()->submitted()->create([
             'application_id' => $application->id,
-            'vacancy_test_snapshot_id' => $testSnapshot->id,
+            'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
         ]);
 
         $answer = $submission->answers()->create([
-            'vacancy_test_snapshot_question_id' => $snapshotEssayQuestion->id,
+            'stage_snapshot_question_id' => $snapshotEssayQuestion->id,
             'jawaban_teks' => 'Jawaban esai',
             'skor' => null,
             'is_reviewed' => false,
@@ -411,18 +420,18 @@ class CompetencyTestEngineTest extends TestCase
         $unit = Unit::factory()->create();
         [
             'vacancy' => $vacancy,
-            'testSnapshot' => $testSnapshot,
+            'stageSnapshot' => $stageSnapshot,
             'snapshotEssayQuestion' => $snapshotEssayQuestion,
         ] = $this->createVacancyWithTest($unit);
 
         $application = $this->makeApplicationAtTestStage($vacancy);
         $submission = TestSubmission::factory()->submitted()->create([
             'application_id' => $application->id,
-            'vacancy_test_snapshot_id' => $testSnapshot->id,
+            'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
         ]);
 
         $answer = $submission->answers()->create([
-            'vacancy_test_snapshot_question_id' => $snapshotEssayQuestion->id,
+            'stage_snapshot_question_id' => $snapshotEssayQuestion->id,
             'jawaban_teks' => 'Jawaban esai',
             'skor' => null,
             'is_reviewed' => false,
@@ -442,7 +451,7 @@ class CompetencyTestEngineTest extends TestCase
         $unit = Unit::factory()->create();
         [
             'vacancy' => $vacancy,
-            'testSnapshot' => $testSnapshot,
+            'stageSnapshot' => $stageSnapshot,
             'snapshotMcQuestion' => $snapshotMcQuestion,
             'snapshotEssayQuestion' => $snapshotEssayQuestion,
         ] = $this->createVacancyWithTest($unit);
@@ -450,19 +459,19 @@ class CompetencyTestEngineTest extends TestCase
         $application = $this->makeApplicationAtTestStage($vacancy);
         $submission = TestSubmission::factory()->submitted()->create([
             'application_id' => $application->id,
-            'vacancy_test_snapshot_id' => $testSnapshot->id,
+            'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
             'total_skor' => null,
         ]);
 
         $submission->answers()->create([
-            'vacancy_test_snapshot_question_id' => $snapshotMcQuestion->id,
-            'vacancy_test_snapshot_option_id' => null,
+            'stage_snapshot_question_id' => $snapshotMcQuestion->id,
+            'stage_snapshot_option_id' => null,
             'skor' => 10,
             'is_reviewed' => true,
         ]);
 
         $answer = $submission->answers()->create([
-            'vacancy_test_snapshot_question_id' => $snapshotEssayQuestion->id,
+            'stage_snapshot_question_id' => $snapshotEssayQuestion->id,
             'jawaban_teks' => 'Jawaban esai',
             'skor' => null,
             'is_reviewed' => false,

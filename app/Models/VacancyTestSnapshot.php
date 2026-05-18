@@ -36,11 +36,6 @@ class VacancyTestSnapshot extends Model
             ->orderBy('urutan');
     }
 
-    public function submissions(): HasMany
-    {
-        return $this->hasMany(TestSubmission::class);
-    }
-
     public function totalNilaiMaksimal(): int
     {
         return $this->questions->sum('nilai_poin');

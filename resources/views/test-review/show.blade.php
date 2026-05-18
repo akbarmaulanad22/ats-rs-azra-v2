@@ -58,10 +58,10 @@
                     <div class="pl-9 space-y-1">
                         @foreach ($answer->question->options as $option)
                             <div class="flex items-center gap-2 text-sm
-                                {{ $option->id === $answer->vacancy_test_snapshot_option_id ? 'font-medium' : 'text-gray-500' }}">
+                                {{ $option->id === $answer->stage_snapshot_option_id ? 'font-medium' : 'text-gray-500' }}">
                                 <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0
-                                    {{ $option->id === $answer->vacancy_test_snapshot_option_id ? 'border-primary' : 'border-gray-200' }}">
-                                    @if ($option->id === $answer->vacancy_test_snapshot_option_id)
+                                    {{ $option->id === $answer->stage_snapshot_option_id ? 'border-primary' : 'border-gray-200' }}">
+                                    @if ($option->id === $answer->stage_snapshot_option_id)
                                         <span class="w-2 h-2 rounded-full bg-primary"></span>
                                     @endif
                                 </span>
@@ -103,7 +103,7 @@
     <div class="mt-4 bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-between">
         <span class="text-sm text-gray-600">Total Skor</span>
         <span class="text-lg font-semibold text-gray-900">
-            {{ $submission->total_skor ?? '-' }} / {{ $submission->snapshot->totalNilaiMaksimal() }}
+            {{ $submission->total_skor ?? '-' }} / {{ $submission->stageSnapshot->totalNilaiMaksimal() }}
         </span>
     </div>
 

@@ -45,29 +45,24 @@ class ApplicationPipelineService
             }
         });
 
-        $application->load(['stages', 'candidate', 'vacancy.vacancyTest']);
+        $application->load(['stages', 'candidate', 'vacancy.workflowTemplateSnapshot']);
 
         $nextStage = $application->stages
             ->where('status', ApplicationStageStatus::Aktif)
             ->first();
 
         if ($nextStage?->key === 'tes_kompetensi') {
-            $vacancyTest = $application->vacancy->vacancyTest;
+            $stageSnapshot = $application->vacancy->workflowTemplateSnapshot
+                ->stages()->where('key', 'tes_kompetensi')->first();
 
-            if (! $vacancyTest) {
-                throw new \RuntimeException('Konfigurasi tes kompetensi harus dibuat terlebih dahulu.');
-            }
-
-            $snapshot = $vacancyTest->latestSnapshot;
-
-            if (! $snapshot) {
+            if (! $stageSnapshot || $stageSnapshot->questions()->count() === 0) {
                 throw new \RuntimeException('Konfigurasi tes kompetensi harus dibuat terlebih dahulu.');
             }
 
             $token = Str::uuid()->toString();
             TestSubmission::create([
                 'application_id' => $application->id,
-                'vacancy_test_snapshot_id' => $snapshot->id,
+                'workflow_template_snapshot_stage_id' => $stageSnapshot->id,
                 'token' => $token,
             ]);
 

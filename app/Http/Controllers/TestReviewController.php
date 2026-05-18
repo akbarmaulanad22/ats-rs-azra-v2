@@ -23,14 +23,12 @@ class TestReviewController extends Controller
         $vacancyTest = $lowongan->vacancyTest()->firstOrFail();
         Gate::authorize('reviewEssay', $vacancyTest);
 
-        $latestSnapshot = $vacancyTest->latestSnapshot;
-
         $submissions = TestSubmission::with(['application.candidate', 'answers'])
-            ->whereHas('snapshot', fn ($q) => $q->where('vacancy_test_id', $vacancyTest->id))
+            ->whereHas('application', fn ($q) => $q->where('vacancy_id', $lowongan->id))
             ->whereNotNull('submitted_at')
             ->get();
 
-        return view('test-review.index', compact('lowongan', 'vacancyTest', 'latestSnapshot', 'submissions'));
+        return view('test-review.index', compact('lowongan', 'vacancyTest', 'submissions'));
     }
 
     public function show(Vacancy $lowongan, TestSubmission $submission): View
@@ -38,14 +36,14 @@ class TestReviewController extends Controller
         $vacancyTest = $lowongan->vacancyTest()->firstOrFail();
         Gate::authorize('reviewEssay', $vacancyTest);
 
-        abort_if($submission->snapshot->vacancy_test_id !== $vacancyTest->id, 404);
+        abort_if($submission->application->vacancy_id !== $lowongan->id, 404);
 
         $submission->load([
             'answers.question.options',
             'answers.selectedOption',
             'application.candidate',
             'application.stages',
-            'snapshot',
+            'stageSnapshot',
         ]);
 
         $allReviewed = $submission->answers->every(fn ($a) => $a->is_reviewed);
@@ -60,7 +58,7 @@ class TestReviewController extends Controller
         Gate::authorize('reviewEssay', $vacancyTest);
 
         abort_if($answer->question->tipe !== QuestionType::Essay, 422);
-        abort_if($answer->submission->snapshot->vacancy_test_id !== $vacancyTest->id, 404);
+        abort_if($answer->submission->application->vacancy_id !== $lowongan->id, 404);
 
         $validated = $request->validate([
             'skor' => ['required', 'integer', 'min:0', 'max:'.$answer->question->nilai_poin],
@@ -86,7 +84,7 @@ class TestReviewController extends Controller
         $vacancyTest = $lowongan->vacancyTest()->firstOrFail();
         Gate::authorize('decide', $vacancyTest);
 
-        abort_if($submission->snapshot->vacancy_test_id !== $vacancyTest->id, 404);
+        abort_if($submission->application->vacancy_id !== $lowongan->id, 404);
 
         $submission->load('answers');
         $allReviewed = $submission->answers->every(fn ($a) => $a->is_reviewed);

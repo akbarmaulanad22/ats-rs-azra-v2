@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Application;
 use App\Models\TestSubmission;
-use App\Models\VacancyTestSnapshot;
+use App\Models\WorkflowTemplateSnapshotStage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -20,7 +20,7 @@ class TestSubmissionFactory extends Factory
     {
         return [
             'application_id' => Application::factory(),
-            'vacancy_test_snapshot_id' => VacancyTestSnapshot::factory(),
+            'workflow_template_snapshot_stage_id' => WorkflowTemplateSnapshotStage::factory(),
             'token' => Str::uuid()->toString(),
             'started_at' => null,
             'submitted_at' => null,

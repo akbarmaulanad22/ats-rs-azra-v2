@@ -20,6 +20,7 @@ class WorkflowTemplateSnapshotStageFactory extends Factory
             'nama' => fake()->words(2, true),
             'is_locked_first' => false,
             'is_locked_last' => false,
+            'batas_waktu_menit' => fake()->numberBetween(30, 120),
         ];
     }
 }
