@@ -94,6 +94,8 @@ class VacancyController extends Controller
         $employmentTypes = EmploymentType::cases();
         $statuses = VacancyStatus::cases();
 
+        $lowongan->load('workflowTemplateSnapshot');
+
         return view('vacancies.edit', compact('lowongan', 'units', 'templates', 'employmentTypes', 'statuses'));
     }
 
