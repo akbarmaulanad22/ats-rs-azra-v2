@@ -24,6 +24,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestReviewController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\VacancyInterviewCriteriaController;
 use App\Http\Controllers\VacancyPipelineController;
@@ -62,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('karyawan', EmployeeController::class)->parameters(['karyawan' => 'employee']);
+    Route::resource('unit', UnitController::class)->parameters(['unit' => 'unit'])->except(['show']);
 
     Route::get('/akun/karyawan-tersedia', [AccountController::class, 'availableEmployees'])->name('akun.karyawan-tersedia');
     Route::resource('akun', AccountController::class)
