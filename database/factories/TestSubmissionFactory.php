@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Application;
 use App\Models\TestSubmission;
-use App\Models\VacancyTest;
+use App\Models\VacancyTestSnapshot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -14,15 +14,13 @@ use Illuminate\Support\Str;
 class TestSubmissionFactory extends Factory
 {
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
             'application_id' => Application::factory(),
-            'vacancy_test_id' => VacancyTest::factory(),
+            'vacancy_test_snapshot_id' => VacancyTestSnapshot::factory(),
             'token' => Str::uuid()->toString(),
             'started_at' => null,
             'submitted_at' => null,

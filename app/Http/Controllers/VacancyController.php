@@ -62,6 +62,16 @@ class VacancyController extends Controller
         Gate::authorize('create', Vacancy::class);
 
         $template = WorkflowTemplate::with('stages')->findOrFail($request->validated('workflow_template_id'));
+
+        $status = $request->validated('status') ?? VacancyStatus::Draft->value;
+        $hasTestStage = $template->stages->contains('key', 'tes_kompetensi');
+
+        if ($status === VacancyStatus::Published->value && $hasTestStage) {
+            return back()->withInput()->withErrors([
+                'status' => 'Lowongan tidak dapat dipublikasikan sebelum tes kompetensi dikonfigurasi. Simpan sebagai draft terlebih dahulu, lalu konfigurasi tes.',
+            ]);
+        }
+
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
 
         $data = collect($request->validated())->except('workflow_template_id')->all();
@@ -98,6 +108,16 @@ class VacancyController extends Controller
             $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
             unset($data['workflow_template_id']);
             $data['workflow_template_snapshot_id'] = $snapshot->id;
+        }
+
+        $status = $data['status'] ?? $lowongan->status->value;
+        $snapshotStages = $lowongan->workflowTemplateSnapshot->stages;
+        $hasTestStage = $snapshotStages->contains('key', 'tes_kompetensi');
+
+        if ($status === VacancyStatus::Published->value && $hasTestStage && ! $lowongan->vacancyTest?->latestSnapshot) {
+            return back()->withInput()->withErrors([
+                'status' => 'Lowongan tidak dapat dipublikasikan sebelum tes kompetensi dikonfigurasi.',
+            ]);
         }
 
         $lowongan->update($data);

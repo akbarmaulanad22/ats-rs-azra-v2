@@ -14,12 +14,12 @@ class TestController extends Controller
     public function show(string $token): View|RedirectResponse
     {
         $submission = TestSubmission::with([
-            'vacancyTest.questions.options',
+            'snapshot.questions.options',
             'application.vacancy',
         ])->where('token', $token)->firstOrFail();
 
         if ($submission->isSubmitted()) {
-            $questions = $submission->vacancyTest->questions;
+            $questions = $submission->snapshot->questions;
 
             return view('test.show', compact('submission', 'questions'));
         }
@@ -32,7 +32,7 @@ class TestController extends Controller
             return $this->doSubmit($submission, []);
         }
 
-        $questions = $submission->vacancyTest->questions;
+        $questions = $submission->snapshot->questions;
 
         return view('test.show', compact('submission', 'questions'));
     }
@@ -40,7 +40,7 @@ class TestController extends Controller
     public function submit(Request $request, string $token): RedirectResponse
     {
         $submission = TestSubmission::with([
-            'vacancyTest.questions.options',
+            'snapshot.questions.options',
             'application.candidate',
             'application.vacancy',
         ])->where('token', $token)->firstOrFail();
@@ -64,20 +64,20 @@ class TestController extends Controller
             }
 
             $totalSkor = 0;
-            $questions = $submission->vacancyTest->questions;
+            $questions = $submission->snapshot->questions;
 
             foreach ($questions as $question) {
                 $selectedOptionId = $answers[$question->id] ?? null;
 
                 $skor = null;
-                $questionOptionId = null;
+                $snapshotOptionId = null;
                 $jawabanTeks = null;
 
                 if ($question->tipe === QuestionType::Mc) {
-                    $questionOptionId = $selectedOptionId ? (int) $selectedOptionId : null;
-                    $correctOption = $question->correctOption();
+                    $snapshotOptionId = $selectedOptionId ? (int) $selectedOptionId : null;
+                    $correctOption = $question->options->firstWhere('is_correct', true);
 
-                    if ($correctOption && $questionOptionId === $correctOption->id) {
+                    if ($correctOption && $snapshotOptionId === $correctOption->id) {
                         $skor = $question->nilai_poin;
                     } else {
                         $skor = 0;
@@ -89,17 +89,19 @@ class TestController extends Controller
                 }
 
                 $submission->answers()->create([
-                    'question_id' => $question->id,
-                    'question_option_id' => $questionOptionId,
+                    'vacancy_test_snapshot_question_id' => $question->id,
+                    'vacancy_test_snapshot_option_id' => $snapshotOptionId,
                     'jawaban_teks' => $jawabanTeks,
                     'skor' => $skor,
                     'is_reviewed' => $question->tipe === QuestionType::Mc,
                 ]);
             }
 
+            $hasEssay = $questions->contains(fn ($q) => $q->tipe === QuestionType::Essay);
+
             $submission->update([
                 'submitted_at' => now(),
-                'total_skor' => $totalSkor,
+                'total_skor' => $hasEssay ? null : $totalSkor,
             ]);
         });
 

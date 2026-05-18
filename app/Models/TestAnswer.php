@@ -9,8 +9,8 @@ class TestAnswer extends Model
 {
     protected $fillable = [
         'test_submission_id',
-        'question_id',
-        'question_option_id',
+        'vacancy_test_snapshot_question_id',
+        'vacancy_test_snapshot_option_id',
         'jawaban_teks',
         'skor',
         'is_reviewed',
@@ -31,11 +31,11 @@ class TestAnswer extends Model
 
     public function question(): BelongsTo
     {
-        return $this->belongsTo(Question::class);
+        return $this->belongsTo(VacancyTestSnapshotQuestion::class, 'vacancy_test_snapshot_question_id');
     }
 
     public function selectedOption(): BelongsTo
     {
-        return $this->belongsTo(QuestionOption::class, 'question_option_id');
+        return $this->belongsTo(VacancyTestSnapshotOption::class, 'vacancy_test_snapshot_option_id');
     }
 }

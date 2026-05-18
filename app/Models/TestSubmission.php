@@ -15,7 +15,7 @@ class TestSubmission extends Model
 
     protected $fillable = [
         'application_id',
-        'vacancy_test_id',
+        'vacancy_test_snapshot_id',
         'token',
         'started_at',
         'submitted_at',
@@ -36,9 +36,9 @@ class TestSubmission extends Model
         return $this->belongsTo(Application::class);
     }
 
-    public function vacancyTest(): BelongsTo
+    public function snapshot(): BelongsTo
     {
-        return $this->belongsTo(VacancyTest::class);
+        return $this->belongsTo(VacancyTestSnapshot::class, 'vacancy_test_snapshot_id');
     }
 
     public function answers(): HasMany
@@ -57,17 +57,17 @@ class TestSubmission extends Model
             return false;
         }
 
-        return $this->started_at->diffInMinutes(now()) >= $this->vacancyTest->batas_waktu_menit;
+        return $this->started_at->diffInMinutes(now()) >= $this->snapshot->batas_waktu_menit;
     }
 
     public function remainingSeconds(): int
     {
         if ($this->started_at === null) {
-            return $this->vacancyTest->batas_waktu_menit * 60;
+            return $this->snapshot->batas_waktu_menit * 60;
         }
 
         $elapsed = $this->started_at->diffInSeconds(now());
-        $total = $this->vacancyTest->batas_waktu_menit * 60;
+        $total = $this->snapshot->batas_waktu_menit * 60;
 
         return max(0, $total - (int) $elapsed);
     }

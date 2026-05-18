@@ -6,6 +6,7 @@ use App\Models\Question;
 use App\Models\Unit;
 use App\Models\Vacancy;
 use App\Models\VacancyTest;
+use App\Models\VacancyTestSnapshot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -44,6 +45,8 @@ class VacancyTestController extends Controller
         ])->toArray();
 
         $vacancyTest->questions()->sync($sync);
+
+        VacancyTestSnapshot::createFromVacancyTest($vacancyTest->fresh());
 
         return redirect()->route('lowongan.tes.show', $lowongan)
             ->with('success', 'Konfigurasi tes berhasil disimpan.');

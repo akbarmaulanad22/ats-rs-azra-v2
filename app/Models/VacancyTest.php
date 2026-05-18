@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class VacancyTest extends Model
 {
@@ -38,9 +39,14 @@ class VacancyTest extends Model
             ->orderByPivot('urutan');
     }
 
-    public function submissions(): HasMany
+    public function snapshots(): HasMany
     {
-        return $this->hasMany(TestSubmission::class);
+        return $this->hasMany(VacancyTestSnapshot::class);
+    }
+
+    public function latestSnapshot(): HasOne
+    {
+        return $this->hasOne(VacancyTestSnapshot::class)->latestOfMany();
     }
 
     public function totalNilaiMaksimal(): int

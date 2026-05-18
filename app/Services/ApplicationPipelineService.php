@@ -54,27 +54,34 @@ class ApplicationPipelineService
         if ($nextStage?->key === 'tes_kompetensi') {
             $vacancyTest = $application->vacancy->vacancyTest;
 
-            if ($vacancyTest) {
-                $token = Str::uuid()->toString();
-                TestSubmission::create([
-                    'application_id' => $application->id,
-                    'vacancy_test_id' => $vacancyTest->id,
-                    'token' => $token,
-                ]);
-
-                try {
-                    $this->emailNotificationService->dispatch('undangan_tes_kompetensi', $application->candidate->email, [
-                        'nama_kandidat' => $application->candidate->nama_lengkap,
-                        'judul_lowongan' => $application->vacancy->judul_posisi,
-                        'link_tes' => route('tes.show', $token),
-                        'batas_waktu' => $vacancyTest->batas_waktu_menit.' menit',
-                    ]);
-                } catch (\Throwable $e) {
-                    report($e);
-                }
-
-                return;
+            if (! $vacancyTest) {
+                throw new \RuntimeException('Konfigurasi tes kompetensi harus dibuat terlebih dahulu.');
             }
+
+            $snapshot = $vacancyTest->latestSnapshot;
+
+            if (! $snapshot) {
+                throw new \RuntimeException('Konfigurasi tes kompetensi harus dibuat terlebih dahulu.');
+            }
+
+            $token = Str::uuid()->toString();
+            TestSubmission::create([
+                'application_id' => $application->id,
+                'vacancy_test_snapshot_id' => $snapshot->id,
+                'token' => $token,
+            ]);
+
+            try {
+                $this->emailNotificationService->dispatch('tes_tersedia', $application->candidate->email, [
+                    'nama_kandidat' => $application->candidate->nama_lengkap,
+                    'judul_lowongan' => $application->vacancy->judul_posisi,
+                    'link_tes' => route('tes.show', $token),
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            return;
         }
 
         if ($nextStage?->key === 'tes_disc') {
