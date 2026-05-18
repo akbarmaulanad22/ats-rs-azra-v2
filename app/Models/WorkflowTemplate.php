@@ -17,7 +17,7 @@ class WorkflowTemplate extends Model
     public function stages(): BelongsToMany
     {
         return $this->belongsToMany(Stage::class, 'stage_workflow_template')
-            ->withPivot('position')
+            ->withPivot('position', 'question_bank_id', 'batas_waktu_menit')
             ->orderByPivot('position');
     }
 }
