@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,6 +20,7 @@ class WorkflowTemplateSnapshotFactory extends Factory
     {
         return [
             'nama' => $this->faker->words(2, true),
+            'workflow_template_id' => WorkflowTemplate::factory(),
         ];
     }
 }

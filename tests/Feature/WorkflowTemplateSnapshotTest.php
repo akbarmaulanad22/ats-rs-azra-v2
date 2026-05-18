@@ -85,16 +85,29 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $this->assertFalse($last->is_locked_first);
     }
 
-    public function test_snapshot_has_no_foreign_key_to_master_template(): void
+    public function test_snapshot_stores_source_template_id(): void
     {
         $this->seedStages();
         $template = $this->createTemplateWithStages();
 
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
 
-        $columns = \Schema::getColumnListing('workflow_template_snapshots');
-        $this->assertNotContains('workflow_template_id', $columns);
-        $this->assertNotContains('original_template_id', $columns);
+        $this->assertEquals($template->id, $snapshot->workflow_template_id);
+        $this->assertTrue($snapshot->workflowTemplate()->exists());
+    }
+
+    public function test_snapshot_nullifies_template_id_on_template_delete(): void
+    {
+        $this->seedStages();
+        $template = $this->createTemplateWithStages();
+
+        $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
+        $this->assertNotNull($snapshot->workflow_template_id);
+
+        $template->stages()->detach();
+        $template->delete();
+
+        $this->assertNull($snapshot->fresh()->workflow_template_id);
     }
 
     public function test_snapshot_stages_have_no_foreign_key_to_master_stages(): void
