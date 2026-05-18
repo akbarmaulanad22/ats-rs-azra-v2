@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/tes/ulasan', [TestReviewController::class, 'index'])->name('lowongan.tes.ulasan.index');
     Route::get('/lowongan/{lowongan}/tes/ulasan/{submission}', [TestReviewController::class, 'show'])->scopeBindings()->name('lowongan.tes.ulasan.show');
     Route::post('/lowongan/{lowongan}/tes/ulasan/jawaban/{answer}/skor', [TestReviewController::class, 'scoreEssay'])->name('lowongan.tes.ulasan.skor');
+    Route::post('/lowongan/{lowongan}/tes/ulasan/{submission}/keputusan', [TestReviewController::class, 'decide'])->scopeBindings()->name('lowongan.tes.ulasan.keputusan');
 
     Route::get('/pengaturan/kriteria-wawancara', [InterviewCriteriaController::class, 'index'])->name('kriteria-wawancara.index');
     Route::post('/pengaturan/kriteria-wawancara', [InterviewCriteriaController::class, 'store'])->name('kriteria-wawancara.store');

@@ -152,8 +152,8 @@
                                             @endphp
                                             @if ($testSubmission?->submitted_at)
                                                 <span class="font-medium">{{ $testSubmission->total_skor ?? '-' }}</span>
-                                                @if ($lowongan->vacancyTest)
-                                                    <span class="text-gray-400">/ {{ $lowongan->vacancyTest->totalNilaiMaksimal() }}</span>
+                                                @if ($testSubmission->snapshot)
+                                                    <span class="text-gray-400">/ {{ $testSubmission->snapshot->totalNilaiMaksimal() }}</span>
                                                 @endif
                                             @else
                                                 <span class="text-gray-300">—</span>

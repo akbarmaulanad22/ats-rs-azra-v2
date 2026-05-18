@@ -22,4 +22,9 @@ class VacancyTestPolicy
     {
         return $user->role === Role::HrAdmin;
     }
+
+    public function decide(User $user, VacancyTest $vacancyTest): bool
+    {
+        return $user->role === Role::HrAdmin;
+    }
 }
