@@ -6,7 +6,6 @@ use App\Enums\QuestionType;
 use Database\Factories\QuestionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Question extends Model
@@ -15,7 +14,6 @@ class Question extends Model
     use HasFactory;
 
     protected $fillable = [
-        'unit_id',
         'tipe',
         'pertanyaan',
         'nilai_poin',
@@ -27,11 +25,6 @@ class Question extends Model
             'tipe' => QuestionType::class,
             'nilai_poin' => 'integer',
         ];
-    }
-
-    public function unit(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class);
     }
 
     public function options(): HasMany

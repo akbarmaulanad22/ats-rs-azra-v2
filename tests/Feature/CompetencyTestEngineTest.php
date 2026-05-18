@@ -55,11 +55,11 @@ class CompetencyTestEngineTest extends TestCase
             'workflow_template_snapshot_id' => $snapshot->id,
         ]);
 
-        $question = Question::factory()->create(['unit_id' => $unit->id, 'tipe' => QuestionType::Mc->value, 'nilai_poin' => 10]);
+        $question = Question::factory()->create(['tipe' => QuestionType::Mc->value, 'nilai_poin' => 10]);
         $correct = QuestionOption::factory()->correct()->create(['question_id' => $question->id]);
         QuestionOption::factory()->create(['question_id' => $question->id]);
 
-        $essayQuestion = Question::factory()->essay()->create(['unit_id' => $unit->id, 'nilai_poin' => 20]);
+        $essayQuestion = Question::factory()->essay()->create(['nilai_poin' => 20]);
 
         $vacancyTest = VacancyTest::create(['vacancy_id' => $vacancy->id, 'batas_waktu_menit' => 60]);
         $vacancyTest->questions()->attach($question->id, ['urutan' => 1]);
@@ -107,7 +107,7 @@ class CompetencyTestEngineTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->hrAdmin();
-        Question::factory(3)->create(['unit_id' => Unit::factory()->create()->id]);
+        Question::factory(3)->create();
 
         $response = $this->actingAs($admin)->get(route('bank-soal.index'));
 
@@ -128,10 +128,8 @@ class CompetencyTestEngineTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->hrAdmin();
-        $unit = Unit::factory()->create();
 
         $response = $this->actingAs($admin)->post(route('bank-soal.store'), [
-            'unit_id' => $unit->id,
             'tipe' => 'mc',
             'pertanyaan' => 'Apa itu hemoglobin?',
             'nilai_poin' => 5,
@@ -152,10 +150,8 @@ class CompetencyTestEngineTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->hrAdmin();
-        $unit = Unit::factory()->create();
 
         $response = $this->actingAs($admin)->post(route('bank-soal.store'), [
-            'unit_id' => $unit->id,
             'tipe' => 'essay',
             'pertanyaan' => 'Jelaskan prosedur sterilisasi alat medis.',
             'nilai_poin' => 20,
@@ -169,8 +165,7 @@ class CompetencyTestEngineTest extends TestCase
     {
         $this->seedStages();
         $admin = $this->hrAdmin();
-        $unit = Unit::factory()->create();
-        $question = Question::factory()->create(['unit_id' => $unit->id]);
+        $question = Question::factory()->create();
 
         $response = $this->actingAs($admin)->delete(route('bank-soal.destroy', $question));
 

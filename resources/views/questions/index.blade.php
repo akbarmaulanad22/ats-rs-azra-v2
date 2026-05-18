@@ -4,7 +4,7 @@
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h1 class="text-xl font-semibold text-gray-900">Bank Soal</h1>
-                <p class="text-xs text-gray-500 mt-0.5">Kelola soal tes kompetensi berdasarkan unit</p>
+                <p class="text-xs text-gray-500 mt-0.5">Kelola soal tes kompetensi</p>
             </div>
             <a
                 href="{{ route('bank-soal.create') }}"
@@ -26,13 +26,6 @@
 
     {{-- Filters --}}
     <form method="GET" action="{{ route('bank-soal.index') }}" class="mb-4 flex flex-wrap items-center gap-2">
-        <select name="unit_id" onchange="this.form.submit()"
-            class="text-xs border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary/40">
-            <option value="">Semua Unit</option>
-            @foreach ($units as $unit)
-                <option value="{{ $unit->id }}" {{ $unitFilter == $unit->id ? 'selected' : '' }}>{{ $unit->nama }}</option>
-            @endforeach
-        </select>
         <select name="tipe" onchange="this.form.submit()"
             class="text-xs border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary/40">
             <option value="">Semua Tipe</option>
@@ -51,7 +44,6 @@
                 <thead>
                     <tr class="border-b border-gray-100 bg-gray-50">
                         <th class="text-left text-xs font-medium text-gray-400 px-5 py-2.5">Soal</th>
-                        <th class="text-left text-xs font-medium text-gray-400 px-5 py-2.5">Unit</th>
                         <th class="text-left text-xs font-medium text-gray-400 px-5 py-2.5">Tipe</th>
                         <th class="text-left text-xs font-medium text-gray-400 px-5 py-2.5">Poin</th>
                         <th class="text-right text-xs font-medium text-gray-400 px-5 py-2.5">Aksi</th>
@@ -63,7 +55,6 @@
                             <td class="px-5 py-3 text-gray-800 max-w-sm">
                                 <p class="line-clamp-2">{{ $question->pertanyaan }}</p>
                             </td>
-                            <td class="px-5 py-3 text-gray-600 whitespace-nowrap">{{ $question->unit->nama }}</td>
                             <td class="px-5 py-3 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
                                     {{ $question->tipe->value === 'mc' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700' }}">

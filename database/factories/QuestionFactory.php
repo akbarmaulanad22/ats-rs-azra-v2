@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Enums\QuestionType;
 use App\Models\Question;
-use App\Models\Unit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,7 +19,6 @@ class QuestionFactory extends Factory
     public function definition(): array
     {
         return [
-            'unit_id' => Unit::factory(),
             'tipe' => QuestionType::Mc->value,
             'pertanyaan' => fake()->sentence().'?',
             'nilai_poin' => fake()->numberBetween(1, 10),
