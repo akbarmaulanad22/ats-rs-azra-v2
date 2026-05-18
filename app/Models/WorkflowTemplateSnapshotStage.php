@@ -16,6 +16,8 @@ class WorkflowTemplateSnapshotStage extends Model
         'nama',
         'is_locked_first',
         'is_locked_last',
+        'question_bank_id',
+        'batas_waktu_menit',
     ];
 
     protected function casts(): array
@@ -23,6 +25,7 @@ class WorkflowTemplateSnapshotStage extends Model
         return [
             'is_locked_first' => 'boolean',
             'is_locked_last' => 'boolean',
+            'batas_waktu_menit' => 'integer',
         ];
     }
 
