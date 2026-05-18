@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('karyawan', EmployeeController::class)->parameters(['karyawan' => 'employee']);
-    Route::resource('unit', UnitController::class)->parameters(['unit' => 'unit'])->except(['show']);
+    Route::resource('unit', UnitController::class)->except(['show']);
 
     Route::get('/akun/karyawan-tersedia', [AccountController::class, 'availableEmployees'])->name('akun.karyawan-tersedia');
     Route::resource('akun', AccountController::class)

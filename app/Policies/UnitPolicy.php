@@ -13,11 +13,6 @@ class UnitPolicy
         return $user->hasRole(Role::HrAdmin);
     }
 
-    public function view(User $user, Unit $unit): bool
-    {
-        return $user->hasRole(Role::HrAdmin);
-    }
-
     public function create(User $user): bool
     {
         return $user->hasRole(Role::HrAdmin);
@@ -30,6 +25,6 @@ class UnitPolicy
 
     public function delete(User $user, Unit $unit): bool
     {
-        return $user->hasRole(Role::HrAdmin);
+        return $user->hasRole(Role::HrAdmin) && ! $unit->vacancies()->exists();
     }
 }

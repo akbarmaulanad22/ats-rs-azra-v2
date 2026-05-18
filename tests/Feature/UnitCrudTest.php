@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\Role;
 use App\Models\Unit;
 use App\Models\User;
+use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -197,6 +198,18 @@ class UnitCrudTest extends TestCase
 
         $response->assertRedirect(route('unit.index'));
         $this->assertDatabaseMissing('units', ['id' => $unit->id]);
+    }
+
+    public function test_hr_admin_cannot_delete_unit_with_vacancies(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $unit = Unit::factory()->create();
+        Vacancy::factory()->create(['unit_id' => $unit->id]);
+
+        $response = $this->actingAs($admin)->delete(route('unit.destroy', $unit));
+
+        $response->assertStatus(403);
+        $this->assertDatabaseHas('units', ['id' => $unit->id]);
     }
 
     public function test_employee_role_cannot_delete_unit(): void

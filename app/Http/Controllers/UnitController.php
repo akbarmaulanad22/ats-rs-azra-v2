@@ -19,7 +19,7 @@ class UnitController extends Controller
         $units = Unit::query()
             ->when(
                 $request->q,
-                fn ($q, $search) => $q->whereRaw('LOWER(nama) LIKE ?', ['%'.strtolower($search).'%']),
+                fn ($q, $search) => $q->whereRaw('LOWER(nama) LIKE ?', ['%'.strtolower(str_replace(['%', '_'], ['\%', '\_'], $search)).'%']),
             )
             ->orderBy('nama')
             ->paginate(15)
