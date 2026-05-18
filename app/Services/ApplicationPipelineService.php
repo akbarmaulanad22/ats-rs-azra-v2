@@ -72,11 +72,10 @@ class ApplicationPipelineService
             ]);
 
             try {
-                $this->emailNotificationService->dispatch('undangan_tes_kompetensi', $application->candidate->email, [
+                $this->emailNotificationService->dispatch('tes_tersedia', $application->candidate->email, [
                     'nama_kandidat' => $application->candidate->nama_lengkap,
                     'judul_lowongan' => $application->vacancy->judul_posisi,
                     'link_tes' => route('tes.show', $token),
-                    'batas_waktu' => $snapshot->batas_waktu_menit.' menit',
                 ]);
             } catch (\Throwable $e) {
                 report($e);
