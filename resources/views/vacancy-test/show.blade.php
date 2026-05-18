@@ -38,21 +38,9 @@
                 <h2 class="text-sm font-semibold text-gray-800">Bank Soal Tersedia</h2>
             </div>
 
-            {{-- Unit filter --}}
-            <div class="px-5 py-3 border-b border-gray-100">
-                <select x-model="unitFilter"
-                    class="text-xs border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary/40">
-                    <option value="">Semua Unit</option>
-                    @foreach ($units as $unit)
-                        <option value="{{ $unit->id }}">{{ $unit->nama }}</option>
-                    @endforeach
-                </select>
-            </div>
-
             <div class="divide-y divide-gray-50 max-h-[500px] overflow-y-auto">
                 @foreach ($allQuestions as $question)
-                    <div class="px-5 py-3 flex items-start gap-3 hover:bg-gray-50/50 transition-colors"
-                         x-show="!unitFilter || unitFilter == '{{ $question->unit_id }}'">
+                    <div class="px-5 py-3 flex items-start gap-3 hover:bg-gray-50/50 transition-colors">
                         <input type="checkbox"
                             :value="{{ $question->id }}"
                             x-model="selectedIds"
@@ -60,7 +48,6 @@
                         <div class="flex-1 min-w-0">
                             <p class="text-sm text-gray-800">{{ $question->pertanyaan }}</p>
                             <div class="flex items-center gap-2 mt-1">
-                                <span class="text-xs text-gray-400">{{ $question->unit->nama }}</span>
                                 <span class="text-xs font-medium px-1.5 py-0.5 rounded-full
                                     {{ $question->tipe->value === 'mc' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600' }}">
                                     {{ $question->tipe->label() }}
@@ -120,7 +107,6 @@
 
             return {
                 selectedIds: initialSelected.map(String),
-                unitFilter: '',
                 get totalPoin() {
                     return allQuestions
                         .filter(q => this.selectedIds.includes(String(q.id)))

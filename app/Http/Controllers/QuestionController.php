@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\QuestionType;
 use App\Models\Question;
-use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,33 +17,25 @@ class QuestionController extends Controller
     {
         Gate::authorize('viewAny', Question::class);
 
-        $unitFilter = $request->query('unit_id');
         $typeFilter = $request->query('tipe');
 
-        $questionsQuery = Question::with(['unit', 'options'])
+        $questionsQuery = Question::with(['options'])
             ->latest();
-
-        if ($unitFilter) {
-            $questionsQuery->where('unit_id', $unitFilter);
-        }
 
         if ($typeFilter && in_array($typeFilter, ['mc', 'essay'], true)) {
             $questionsQuery->where('tipe', $typeFilter);
         }
 
         $questions = $questionsQuery->paginate(20)->withQueryString();
-        $units = Unit::orderBy('nama')->get();
 
-        return view('questions.index', compact('questions', 'units', 'unitFilter', 'typeFilter'));
+        return view('questions.index', compact('questions', 'typeFilter'));
     }
 
     public function create(): View
     {
         Gate::authorize('create', Question::class);
 
-        $units = Unit::orderBy('nama')->get();
-
-        return view('questions.create', compact('units'));
+        return view('questions.create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -52,7 +43,6 @@ class QuestionController extends Controller
         Gate::authorize('create', Question::class);
 
         $validated = $request->validate([
-            'unit_id' => ['required', 'exists:units,id'],
             'tipe' => ['required', Rule::enum(QuestionType::class)],
             'pertanyaan' => ['required', 'string'],
             'nilai_poin' => ['required', 'integer', 'min:1', 'max:100'],
@@ -64,7 +54,6 @@ class QuestionController extends Controller
 
         DB::transaction(function () use ($validated, $request): void {
             $question = Question::create([
-                'unit_id' => $validated['unit_id'],
                 'tipe' => $validated['tipe'],
                 'pertanyaan' => $validated['pertanyaan'],
                 'nilai_poin' => $validated['nilai_poin'],
@@ -90,9 +79,8 @@ class QuestionController extends Controller
         Gate::authorize('update', $bankSoal);
 
         $bankSoal->load('options');
-        $units = Unit::orderBy('nama')->get();
 
-        return view('questions.edit', ['question' => $bankSoal, 'units' => $units]);
+        return view('questions.edit', ['question' => $bankSoal]);
     }
 
     public function update(Request $request, Question $bankSoal): RedirectResponse
@@ -100,7 +88,6 @@ class QuestionController extends Controller
         Gate::authorize('update', $bankSoal);
 
         $validated = $request->validate([
-            'unit_id' => ['required', 'exists:units,id'],
             'tipe' => ['required', Rule::enum(QuestionType::class)],
             'pertanyaan' => ['required', 'string'],
             'nilai_poin' => ['required', 'integer', 'min:1', 'max:100'],
@@ -111,7 +98,6 @@ class QuestionController extends Controller
 
         DB::transaction(function () use ($validated, $request, $bankSoal): void {
             $bankSoal->update([
-                'unit_id' => $validated['unit_id'],
                 'tipe' => $validated['tipe'],
                 'pertanyaan' => $validated['pertanyaan'],
                 'nilai_poin' => $validated['nilai_poin'],

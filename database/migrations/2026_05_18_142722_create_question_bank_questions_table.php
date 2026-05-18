@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('questions', function (Blueprint $table) {
+        Schema::create('question_bank_questions', function (Blueprint $table) {
             $table->id();
-            $table->string('tipe'); // mc | essay
-            $table->text('pertanyaan');
-            $table->unsignedInteger('nilai_poin')->default(1);
+            $table->foreignId('question_bank_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('question_id')->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('urutan');
             $table->timestamps();
+
+            $table->unique(['question_bank_id', 'question_id']);
         });
     }
 
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('question_bank_questions');
     }
 };
