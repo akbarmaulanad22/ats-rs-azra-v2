@@ -68,7 +68,7 @@
                             @endif
                             <div class="w-3 h-3 rounded-full flex-shrink-0 {{ $dotClass }}"></div>
                         </div>
-                        <span class="text-[10px] mt-1 px-1 {{ $labelClass }} whitespace-nowrap">{{ $stage->name }}</span>
+                        <span class="text-[10px] mt-1 px-1 {{ $labelClass }} whitespace-nowrap">{{ $stage->nama }}</span>
                     </div>
                 @endforeach
             </div>
@@ -99,7 +99,7 @@
                         'lowongan' => $lowongan,
                         'currentStage' => $currentStage,
                     ])
-                @elseif ($stageKey === 'skrining_cv')
+                @elseif (str_starts_with($stageKey, 'skrining_cv'))
                     @include('vacancies.partials._aksi-skrining', [
                         'application' => $application,
                         'lowongan' => $lowongan,

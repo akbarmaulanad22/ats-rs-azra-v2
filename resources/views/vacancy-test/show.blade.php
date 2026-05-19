@@ -14,7 +14,7 @@
             </div>
             @if ($vacancyTest)
                 <a
-                    href="{{ route('lowongan.tes.ulasan.index', $lowongan) }}"
+                    href="{{ route('lowongan.pipeline', $lowongan) }}"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-primary/30 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors ease-out duration-150"
                 >
                     Ulasan Esai
