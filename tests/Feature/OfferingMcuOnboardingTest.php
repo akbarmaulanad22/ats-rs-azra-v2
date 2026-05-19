@@ -100,10 +100,10 @@ class OfferingMcuOnboardingTest extends TestCase
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
 
-        $response = $this->actingAs($admin)->get(route('lowongan.surat-penawaran.show', [$vacancy, $application]));
+        $response = $this->actingAs($admin)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
-        $response->assertViewIs('offering-letter.show');
+        $response->assertViewIs('vacancies.pipeline-show');
     }
 
     public function test_non_admin_cannot_view_offering_letter_page(): void
@@ -113,7 +113,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'surat_penawaran');
 
-        $response = $this->actingAs($user)->get(route('lowongan.surat-penawaran.show', [$vacancy, $application]));
+        $response = $this->actingAs($user)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertForbidden();
     }
@@ -215,10 +215,10 @@ class OfferingMcuOnboardingTest extends TestCase
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
-        $response = $this->actingAs($admin)->get(route('lowongan.mcu.show', [$vacancy, $application]));
+        $response = $this->actingAs($admin)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
-        $response->assertViewIs('mcu.show');
+        $response->assertViewIs('vacancies.pipeline-show');
     }
 
     public function test_non_admin_cannot_view_mcu_page(): void
@@ -228,7 +228,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
-        $response = $this->actingAs($user)->get(route('lowongan.mcu.show', [$vacancy, $application]));
+        $response = $this->actingAs($user)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertForbidden();
     }
@@ -245,7 +245,7 @@ class OfferingMcuOnboardingTest extends TestCase
             'catatan' => 'MCU dilakukan di RS Azra.',
         ]);
 
-        $response->assertRedirect(route('lowongan.mcu.show', [$vacancy, $application]));
+        $response->assertRedirect(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $this->assertDatabaseHas('mcu_results', [
             'application_id' => $application->id,
@@ -317,7 +317,7 @@ class OfferingMcuOnboardingTest extends TestCase
             'dokumen' => $file,
         ]);
 
-        $response->assertRedirect(route('lowongan.mcu.show', [$vacancy, $application]));
+        $response->assertRedirect(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $mcuResult = McuResult::where('application_id', $application->id)->first();
         $this->assertNotNull($mcuResult);
@@ -424,10 +424,10 @@ class OfferingMcuOnboardingTest extends TestCase
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
 
-        $response = $this->actingAs($admin)->get(route('lowongan.onboarding.show', [$vacancy, $application]));
+        $response = $this->actingAs($admin)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
-        $response->assertViewIs('onboarding.show');
+        $response->assertViewIs('vacancies.pipeline-show');
     }
 
     public function test_non_admin_cannot_view_onboarding_page(): void
@@ -437,7 +437,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
 
-        $response = $this->actingAs($user)->get(route('lowongan.onboarding.show', [$vacancy, $application]));
+        $response = $this->actingAs($user)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertForbidden();
     }
@@ -457,7 +457,7 @@ class OfferingMcuOnboardingTest extends TestCase
             'catatan' => 'Hadir pukul 08.00 WIB.',
         ]);
 
-        $response->assertRedirect(route('lowongan.onboarding.show', [$vacancy, $application]));
+        $response->assertRedirect(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $onboardingRecord = OnboardingResult::where('application_id', $application->id)->first();
         $this->assertNotNull($onboardingRecord);

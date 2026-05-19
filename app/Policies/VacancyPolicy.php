@@ -66,6 +66,29 @@ class VacancyPolicy
         return false;
     }
 
+    public function viewCandidateDetail(User $user, Vacancy $vacancy): bool
+    {
+        if ($user->isHrAdmin()) {
+            return true;
+        }
+
+        if ($user->hasRole(Role::HrManager, Role::Director)) {
+            return true;
+        }
+
+        if ($user->hasRole(Role::UnitHead)) {
+            $employee = $user->employee;
+            if (! $employee) {
+                return false;
+            }
+            $vacancy->loadMissing('unit');
+
+            return $employee->unit === $vacancy->unit->nama;
+        }
+
+        return false;
+    }
+
     public function manageInterviewTemplates(User $user, Vacancy $vacancy): bool
     {
         return $user->role === Role::HrAdmin;

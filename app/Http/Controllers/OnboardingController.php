@@ -10,7 +10,6 @@ use App\Services\EmailNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\View\View;
 
 class OnboardingController extends Controller
 {
@@ -18,20 +17,6 @@ class OnboardingController extends Controller
         private readonly ApplicationPipelineService $pipelineService,
         private readonly EmailNotificationService $emailNotificationService,
     ) {}
-
-    public function show(Vacancy $lowongan, Application $application): View
-    {
-        Gate::authorize('manageOnboarding', $application);
-
-        abort_if($application->vacancy_id !== $lowongan->id, 404);
-
-        $application->load(['candidate', 'stages', 'onboardingResult']);
-
-        $onboardingStage = $application->stages->firstWhere('key', 'onboarding');
-        abort_if(! $onboardingStage, 404);
-
-        return view('onboarding.show', compact('lowongan', 'application', 'onboardingStage'));
-    }
 
     public function sendInvitation(SendOnboardingInvitationRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
@@ -69,7 +54,7 @@ class OnboardingController extends Controller
         }
 
         return redirect()
-            ->route('lowongan.onboarding.show', [$lowongan, $application])
+            ->route('lowongan.pipeline.show', [$lowongan, $application])
             ->with('success', 'Undangan onboarding berhasil dikirim ke kandidat.');
     }
 

@@ -10,7 +10,6 @@ use App\Services\EmailNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\View\View;
 
 class OfferingLetterController extends Controller
 {
@@ -18,20 +17,6 @@ class OfferingLetterController extends Controller
         private readonly ApplicationPipelineService $pipelineService,
         private readonly EmailNotificationService $emailNotificationService,
     ) {}
-
-    public function show(Vacancy $lowongan, Application $application): View
-    {
-        Gate::authorize('manageOffering', $application);
-
-        abort_if($application->vacancy_id !== $lowongan->id, 404);
-
-        $application->load(['candidate', 'stages', 'offeringLetter']);
-
-        $offeringStage = $application->stages->firstWhere('key', 'surat_penawaran');
-        abort_if(! $offeringStage, 404);
-
-        return view('offering-letter.show', compact('lowongan', 'application', 'offeringStage'));
-    }
 
     public function send(SendOfferingLetterRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
