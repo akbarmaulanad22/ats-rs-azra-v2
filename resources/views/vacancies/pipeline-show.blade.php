@@ -39,7 +39,7 @@
     {{-- Stage progress strip --}}
     @if ($snapshotStages->isNotEmpty())
         <div class="mb-5 overflow-x-auto">
-            <div class="flex items-center gap-0 min-w-max">
+            <div class="flex items-start min-w-max">
                 @foreach ($snapshotStages as $index => $stage)
                     @php
                         $appStage = $application->stages->firstWhere('key', $stage->key);
@@ -61,13 +61,11 @@
                         $lineClass = $stageStatus === 'selesai' ? 'bg-green-300' : 'bg-gray-200';
                     @endphp
 
+                    @if ($index > 0)
+                        <div class="w-8 h-0.5 flex-shrink-0 mt-1.5 {{ $lineClass }}"></div>
+                    @endif
                     <div class="flex flex-col items-center">
-                        <div class="flex items-center">
-                            @if ($index > 0)
-                                <div class="w-8 h-0.5 {{ $lineClass }}"></div>
-                            @endif
-                            <div class="w-3 h-3 rounded-full flex-shrink-0 {{ $dotClass }}"></div>
-                        </div>
+                        <div class="w-3 h-3 rounded-full flex-shrink-0 {{ $dotClass }}"></div>
                         <span class="text-[10px] mt-1 px-1 {{ $labelClass }} whitespace-nowrap">{{ $stage->nama }}</span>
                     </div>
                 @endforeach
