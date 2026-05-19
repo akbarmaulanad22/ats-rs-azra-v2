@@ -15,10 +15,11 @@ class Question extends Model
     use HasFactory;
 
     protected $fillable = [
-        'unit_id',
+        'question_bank_template_id',
         'tipe',
         'pertanyaan',
         'nilai_poin',
+        'urutan',
     ];
 
     protected function casts(): array
@@ -26,12 +27,13 @@ class Question extends Model
         return [
             'tipe' => QuestionType::class,
             'nilai_poin' => 'integer',
+            'urutan' => 'integer',
         ];
     }
 
-    public function unit(): BelongsTo
+    public function questionBankTemplate(): BelongsTo
     {
-        return $this->belongsTo(Unit::class);
+        return $this->belongsTo(QuestionBankTemplate::class);
     }
 
     public function options(): HasMany

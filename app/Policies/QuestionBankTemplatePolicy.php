@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Enums\Role;
-use App\Models\Question;
+use App\Models\QuestionBankTemplate;
 use App\Models\User;
 
-class QuestionPolicy
+class QuestionBankTemplatePolicy
 {
     public function viewAny(User $user): bool
     {
@@ -18,12 +18,12 @@ class QuestionPolicy
         return $user->role === Role::HrAdmin;
     }
 
-    public function update(User $user, Question $question): bool
+    public function update(User $user, QuestionBankTemplate $questionBankTemplate): bool
     {
         return $user->role === Role::HrAdmin;
     }
 
-    public function delete(User $user, Question $question): bool
+    public function delete(User $user, QuestionBankTemplate $questionBankTemplate): bool
     {
         return $user->role === Role::HrAdmin;
     }
