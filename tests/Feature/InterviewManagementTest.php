@@ -136,6 +136,46 @@ class InterviewManagementTest extends TestCase
         return User::factory()->withRole(Role::Director)->create();
     }
 
+    /** Assigns a kesiapan template with items to the given stage keys on a vacancy. */
+    private function assignReadinessTemplate(Vacancy $vacancy, array $stageKeys, string $templateNama = 'Kesiapan Umum'): InterviewTemplate
+    {
+        $template = InterviewTemplate::factory()->kesiapan()->create(['nama' => $templateNama]);
+        InterviewTemplateItem::factory()->count(2)->create(['interview_template_id' => $template->id]);
+
+        foreach ($stageKeys as $stageKey) {
+            VacancyInterviewTemplate::create([
+                'vacancy_id' => $vacancy->id,
+                'interview_template_id' => $template->id,
+                'stage_key' => $stageKey,
+            ]);
+        }
+
+        return $template;
+    }
+
+    /** Builds readiness_answers payload for all kesiapan templates assigned to a stage. */
+    private function readinessAnswersFor(Vacancy $vacancy, string $stageKey, bool $jawaban = true): array
+    {
+        $templates = $vacancy->interviewTemplates()
+            ->wherePivot('stage_key', $stageKey)
+            ->where('tipe', InterviewTemplateType::Kesiapan)
+            ->with('items')
+            ->get();
+
+        $answers = [];
+        foreach ($templates as $template) {
+            foreach ($template->items as $item) {
+                $answers[] = [
+                    'interview_template_id' => $template->id,
+                    'pertanyaan' => $item->teks,
+                    'jawaban' => $jawaban ? '1' : '0',
+                ];
+            }
+        }
+
+        return $answers;
+    }
+
     /** Assigns a kriteria_penilaian template with items to the given stage keys on a vacancy. */
     private function assignCriteriaTemplate(Vacancy $vacancy, array $stageKeys, string $templateNama = 'Kriteria Umum'): InterviewTemplate
     {
@@ -882,5 +922,164 @@ class InterviewManagementTest extends TestCase
         $response = $this->get(route('lowongan.wawancara.index', $vacancy));
 
         $response->assertRedirect(route('login'));
+    }
+
+    // ── Readiness Questions Display ───────────────────────────────────────────
+
+    public function test_interview_form_shows_readiness_questions_after_scored_criteria(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
+        $readinessTemplate = $this->assignReadinessTemplate($vacancy, ['wawancara_kepala_unit'], 'Kesiapan Perawat');
+
+        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+
+        $response->assertOk();
+        $response->assertSee('Pertanyaan Kesiapan');
+        $response->assertSee('Kesiapan Perawat');
+        $response->assertSee($readinessTemplate->items->first()->teks);
+    }
+
+    // ── Readiness Answers Stored ──────────────────────────────────────────────
+
+    public function test_readiness_answers_stored_in_same_transaction_as_ratings(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
+        $this->assignReadinessTemplate($vacancy, ['wawancara_kepala_unit']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
+        $readinessAnswers = $this->readinessAnswersFor($vacancy, 'wawancara_kepala_unit', true);
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings, 'readiness_answers' => $readinessAnswers]
+        );
+
+        $application->load('stages');
+        $stage = $application->stages->firstWhere('key', 'wawancara_kepala_unit');
+        $result = InterviewResult::where('application_stage_id', $stage->id)->first();
+
+        $this->assertNotNull($result);
+        $this->assertEquals(count($readinessAnswers), $result->readinessAnswers()->count());
+        $this->assertDatabaseHas('interview_readiness_answers', [
+            'interview_result_id' => $result->id,
+            'pertanyaan' => $readinessAnswers[0]['pertanyaan'],
+            'jawaban' => true,
+        ]);
+    }
+
+    public function test_readiness_no_answer_stored_correctly(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
+        $this->assignReadinessTemplate($vacancy, ['wawancara_kepala_unit']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
+        $readinessAnswers = $this->readinessAnswersFor($vacancy, 'wawancara_kepala_unit', false);
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings, 'readiness_answers' => $readinessAnswers]
+        );
+
+        $application->load('stages');
+        $stage = $application->stages->firstWhere('key', 'wawancara_kepala_unit');
+        $result = InterviewResult::where('application_stage_id', $stage->id)->first();
+
+        $this->assertNotNull($result);
+        $this->assertDatabaseHas('interview_readiness_answers', [
+            'interview_result_id' => $result->id,
+            'jawaban' => false,
+        ]);
+    }
+
+    // ── No-Blocking Behavior ──────────────────────────────────────────────────
+
+    public function test_no_readiness_answer_does_not_block_lulus_decision(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
+        $this->assignReadinessTemplate($vacancy, ['wawancara_kepala_unit']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
+        $readinessAnswers = $this->readinessAnswersFor($vacancy, 'wawancara_kepala_unit', false);
+
+        $response = $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings, 'readiness_answers' => $readinessAnswers]
+        );
+
+        $response->assertRedirect(route('lowongan.wawancara.index', $vacancy));
+
+        $application->load('stages');
+        $stage = $application->stages->firstWhere('key', 'wawancara_kepala_unit');
+        $this->assertEquals(ApplicationStageStatus::Selesai, $stage->status);
+    }
+
+    public function test_readiness_answers_required_when_kesiapan_templates_assigned(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
+        $this->assignReadinessTemplate($vacancy, ['wawancara_kepala_unit']);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
+
+        $response = $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings]
+        );
+
+        $response->assertSessionHasErrors('readiness_answers');
+    }
+
+    // ── Prior Interview Display ───────────────────────────────────────────────
+
+    public function test_prior_interview_shows_readiness_answers_grouped_by_template(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $hrManager = $this->makeHrManager();
+        $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit', 'wawancara_manajer_hr']);
+        $readinessTemplate = $this->assignReadinessTemplate($vacancy, ['wawancara_kepala_unit'], 'Kesiapan Umum');
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+
+        $unitHead = $this->makeUnitHead($unit);
+        $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
+        $readinessAnswers = $this->readinessAnswersFor($vacancy, 'wawancara_kepala_unit', true);
+
+        $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'ratings' => $ratings, 'readiness_answers' => $readinessAnswers]
+        );
+
+        $application->load('stages');
+        $hrRatings = $this->criteriaRatingsFor($vacancy, 'wawancara_manajer_hr');
+        $application->refresh()->load('stages');
+
+        $response = $this->actingAs($hrManager)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+
+        $response->assertOk();
+        $response->assertSee('Hasil Wawancara Sebelumnya');
+        $response->assertSee('Kesiapan Umum');
+        $response->assertSee($readinessTemplate->items->first()->teks);
+        $response->assertSee('Ya');
     }
 }
