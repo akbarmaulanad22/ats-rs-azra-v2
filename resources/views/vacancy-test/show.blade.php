@@ -30,46 +30,58 @@
     @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4"
-         x-data="testConfig({{ $vacancyTest ? $vacancyTest->questions->pluck('id')->toJson() : '[]' }})">
+         x-data="testConfig(
+            {{ $vacancyTest ? $vacancyTest->questions->pluck('id')->toJson() : '[]' }},
+            {{ $templateQuestions->toJson() }}
+         )">
 
-        {{-- Left: Question Bank --}}
-        <div class="lg:col-span-2 bg-white rounded-xl border border-gray-100 overflow-hidden">
-            <div class="px-5 py-3 bg-gray-50 border-b border-gray-100">
-                <h2 class="text-sm font-semibold text-gray-800">Bank Soal Tersedia</h2>
-            </div>
-
-            {{-- Unit filter --}}
-            <div class="px-5 py-3 border-b border-gray-100">
-                <select x-model="unitFilter"
-                    class="text-xs border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary/40">
-                    <option value="">Semua Unit</option>
-                    @foreach ($units as $unit)
-                        <option value="{{ $unit->id }}">{{ $unit->nama }}</option>
+        {{-- Left: Template Selection + Questions --}}
+        <div class="lg:col-span-2 space-y-4">
+            {{-- Template Selector --}}
+            <div class="bg-white rounded-xl border border-gray-100 p-5">
+                <h2 class="text-sm font-semibold text-gray-800 mb-3">Pilih Template Bank Soal</h2>
+                <select x-model="selectedTemplate" @change="applyTemplate()"
+                    class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary/40 bg-white">
+                    <option value="">-- Pilih template --</option>
+                    @foreach ($templates as $template)
+                        <option value="{{ $template->id }}">{{ $template->nama }} ({{ $template->questions_count }} soal)</option>
                     @endforeach
                 </select>
+                <p class="mt-1.5 text-[10px] text-gray-400">Memilih template akan mengisi daftar soal. Anda masih bisa menambah/menghapus soal setelah memilih.</p>
             </div>
 
-            <div class="divide-y divide-gray-50 max-h-[500px] overflow-y-auto">
-                @foreach ($allQuestions as $question)
-                    <div class="px-5 py-3 flex items-start gap-3 hover:bg-gray-50/50 transition-colors"
-                         x-show="!unitFilter || unitFilter == '{{ $question->unit_id }}'">
-                        <input type="checkbox"
-                            :value="{{ $question->id }}"
-                            x-model="selectedIds"
-                            class="mt-0.5 w-4 h-4 text-primary rounded focus:ring-primary/40">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-800">{{ $question->pertanyaan }}</p>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-xs text-gray-400">{{ $question->unit->nama }}</span>
-                                <span class="text-xs font-medium px-1.5 py-0.5 rounded-full
-                                    {{ $question->tipe->value === 'mc' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600' }}">
-                                    {{ $question->tipe->label() }}
-                                </span>
-                                <span class="text-xs text-gray-400">{{ $question->nilai_poin }} poin</span>
+            {{-- Questions Preview --}}
+            <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div class="px-5 py-3 bg-gray-50 border-b border-gray-100">
+                    <h2 class="text-sm font-semibold text-gray-800">Soal Terpilih</h2>
+                </div>
+
+                <div x-show="selectedIds.length === 0" class="px-5 py-10 text-center">
+                    <p class="text-sm text-gray-400">Belum ada soal dipilih. Pilih template di atas.</p>
+                </div>
+
+                <div class="divide-y divide-gray-50 max-h-[500px] overflow-y-auto" x-show="selectedIds.length > 0">
+                    <template x-for="(qId, index) in selectedIds" :key="qId">
+                        <div class="px-5 py-3 flex items-start gap-3 hover:bg-gray-50/50 transition-colors">
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5" x-text="index + 1"></span>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-gray-800" x-text="getQuestion(qId)?.pertanyaan || 'Soal #' + qId"></p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs font-medium px-1.5 py-0.5 rounded-full"
+                                        :class="getQuestion(qId)?.tipe === 'mc' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'"
+                                        x-text="getQuestion(qId)?.tipe_label || ''"></span>
+                                    <span class="text-xs text-gray-400" x-text="(getQuestion(qId)?.nilai_poin || 0) + ' poin'"></span>
+                                </div>
                             </div>
+                            <button type="button" @click="removeQuestion(index)"
+                                class="p-1 text-red-400 hover:text-red-600 rounded transition-colors shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
                         </div>
-                    </div>
-                @endforeach
+                    </template>
+                </div>
             </div>
         </div>
 
@@ -115,16 +127,32 @@
     </div>
 
     <script>
-        function testConfig(initialSelected) {
-            const allQuestions = @json($allQuestions->map(fn($q) => ['id' => $q->id, 'nilai_poin' => $q->nilai_poin]));
+        function testConfig(initialSelected, templateQuestions) {
+            const allQuestionsMap = {};
+            Object.values(templateQuestions).forEach(questions => {
+                questions.forEach(q => { allQuestionsMap[q.id] = q; });
+            });
 
             return {
-                selectedIds: initialSelected.map(String),
-                unitFilter: '',
+                selectedIds: initialSelected.map(Number),
+                selectedTemplate: '',
+                templateQuestions: templateQuestions,
                 get totalPoin() {
-                    return allQuestions
-                        .filter(q => this.selectedIds.includes(String(q.id)))
-                        .reduce((sum, q) => sum + q.nilai_poin, 0);
+                    return this.selectedIds.reduce((sum, id) => {
+                        const q = allQuestionsMap[id];
+                        return sum + (q ? q.nilai_poin : 0);
+                    }, 0);
+                },
+                getQuestion(id) {
+                    return allQuestionsMap[id] || null;
+                },
+                applyTemplate() {
+                    if (!this.selectedTemplate) return;
+                    const questions = this.templateQuestions[this.selectedTemplate] || [];
+                    this.selectedIds = questions.map(q => q.id);
+                },
+                removeQuestion(index) {
+                    this.selectedIds.splice(index, 1);
                 },
                 prepareSubmit() {
                     const container = document.getElementById('selected-ids-container');

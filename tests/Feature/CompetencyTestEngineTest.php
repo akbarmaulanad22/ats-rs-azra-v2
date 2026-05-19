@@ -8,6 +8,7 @@ use App\Enums\Role;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Question;
+use App\Models\QuestionBankTemplate;
 use App\Models\QuestionOption;
 use App\Models\Stage;
 use App\Models\TestSubmission;
@@ -55,11 +56,13 @@ class CompetencyTestEngineTest extends TestCase
             'workflow_template_snapshot_id' => $snapshot->id,
         ]);
 
-        $question = Question::factory()->create(['unit_id' => $unit->id, 'tipe' => QuestionType::Mc->value, 'nilai_poin' => 10]);
+        $questionBankTemplate = QuestionBankTemplate::factory()->create();
+
+        $question = Question::factory()->create(['question_bank_template_id' => $questionBankTemplate->id, 'tipe' => QuestionType::Mc->value, 'nilai_poin' => 10, 'urutan' => 1]);
         $correct = QuestionOption::factory()->correct()->create(['question_id' => $question->id]);
         QuestionOption::factory()->create(['question_id' => $question->id]);
 
-        $essayQuestion = Question::factory()->essay()->create(['unit_id' => $unit->id, 'nilai_poin' => 20]);
+        $essayQuestion = Question::factory()->essay()->create(['question_bank_template_id' => $questionBankTemplate->id, 'nilai_poin' => 20, 'urutan' => 2]);
 
         $vacancyTest = VacancyTest::create(['vacancy_id' => $vacancy->id, 'batas_waktu_menit' => 60]);
         $vacancyTest->questions()->attach($question->id, ['urutan' => 1]);
@@ -101,80 +104,141 @@ class CompetencyTestEngineTest extends TestCase
         return $application;
     }
 
-    // ===== Question Bank CRUD =====
+    // ===== Question Bank Template CRUD =====
 
-    public function test_hr_admin_can_view_question_bank(): void
+    public function test_hr_admin_can_view_template_list(): void
     {
         $this->seedStages();
         $admin = $this->hrAdmin();
-        Question::factory(3)->create(['unit_id' => Unit::factory()->create()->id]);
+        QuestionBankTemplate::factory(3)->create();
 
-        $response = $this->actingAs($admin)->get(route('bank-soal.index'));
+        $response = $this->actingAs($admin)->get(route('template-bank-soal.index'));
 
         $response->assertOk();
     }
 
-    public function test_non_hr_admin_cannot_view_question_bank(): void
+    public function test_non_hr_admin_cannot_view_template_list(): void
     {
         $this->seedStages();
         $user = User::factory()->withRole(Role::Employee)->create();
 
-        $response = $this->actingAs($user)->get(route('bank-soal.index'));
+        $response = $this->actingAs($user)->get(route('template-bank-soal.index'));
 
         $response->assertForbidden();
     }
 
-    public function test_hr_admin_can_create_mc_question(): void
+    public function test_hr_admin_can_create_template_with_mc_question(): void
     {
         $this->seedStages();
         $admin = $this->hrAdmin();
-        $unit = Unit::factory()->create();
 
-        $response = $this->actingAs($admin)->post(route('bank-soal.store'), [
-            'unit_id' => $unit->id,
-            'tipe' => 'mc',
-            'pertanyaan' => 'Apa itu hemoglobin?',
-            'nilai_poin' => 5,
-            'options' => [
-                ['teks_opsi' => 'Protein pembawa oksigen'],
-                ['teks_opsi' => 'Jenis sel darah putih'],
-                ['teks_opsi' => 'Enzim pencernaan'],
+        $response = $this->actingAs($admin)->post(route('template-bank-soal.store'), [
+            'nama' => 'Tes Kompetensi Perawat',
+            'questions' => [
+                [
+                    'tipe' => 'mc',
+                    'pertanyaan' => 'Apa itu hemoglobin?',
+                    'nilai_poin' => 5,
+                    'options' => [
+                        ['teks_opsi' => 'Protein pembawa oksigen'],
+                        ['teks_opsi' => 'Jenis sel darah putih'],
+                        ['teks_opsi' => 'Enzim pencernaan'],
+                    ],
+                    'correct_option' => 0,
+                ],
             ],
-            'correct_option' => 0,
         ]);
 
-        $response->assertRedirect(route('bank-soal.index'));
+        $response->assertRedirect(route('template-bank-soal.index'));
+        $this->assertDatabaseHas('question_bank_templates', ['nama' => 'Tes Kompetensi Perawat']);
         $this->assertDatabaseHas('questions', ['pertanyaan' => 'Apa itu hemoglobin?', 'tipe' => 'mc']);
         $this->assertDatabaseHas('question_options', ['teks_opsi' => 'Protein pembawa oksigen', 'is_correct' => true]);
     }
 
-    public function test_hr_admin_can_create_essay_question(): void
+    public function test_hr_admin_can_create_template_with_essay_question(): void
     {
         $this->seedStages();
         $admin = $this->hrAdmin();
-        $unit = Unit::factory()->create();
 
-        $response = $this->actingAs($admin)->post(route('bank-soal.store'), [
-            'unit_id' => $unit->id,
-            'tipe' => 'essay',
-            'pertanyaan' => 'Jelaskan prosedur sterilisasi alat medis.',
-            'nilai_poin' => 20,
+        $response = $this->actingAs($admin)->post(route('template-bank-soal.store'), [
+            'nama' => 'Tes Esai Medis',
+            'questions' => [
+                [
+                    'tipe' => 'essay',
+                    'pertanyaan' => 'Jelaskan prosedur sterilisasi alat medis.',
+                    'nilai_poin' => 20,
+                ],
+            ],
         ]);
 
-        $response->assertRedirect(route('bank-soal.index'));
+        $response->assertRedirect(route('template-bank-soal.index'));
         $this->assertDatabaseHas('questions', ['tipe' => 'essay', 'nilai_poin' => 20]);
     }
 
-    public function test_hr_admin_can_delete_question(): void
+    public function test_hr_admin_can_update_template_with_upsert(): void
     {
         $this->seedStages();
         $admin = $this->hrAdmin();
-        $unit = Unit::factory()->create();
-        $question = Question::factory()->create(['unit_id' => $unit->id]);
 
-        $response = $this->actingAs($admin)->delete(route('bank-soal.destroy', $question));
+        $template = QuestionBankTemplate::factory()->create(['nama' => 'Original']);
+        $existingQuestion = Question::factory()->create([
+            'question_bank_template_id' => $template->id,
+            'tipe' => QuestionType::Mc->value,
+            'pertanyaan' => 'Old question',
+            'nilai_poin' => 5,
+            'urutan' => 1,
+        ]);
+        QuestionOption::factory()->correct()->create(['question_id' => $existingQuestion->id]);
+        QuestionOption::factory()->create(['question_id' => $existingQuestion->id]);
 
-        $response->assertRedirect(route('bank-soal.index'));
+        $removedQuestion = Question::factory()->essay()->create([
+            'question_bank_template_id' => $template->id,
+            'pertanyaan' => 'To be removed',
+            'nilai_poin' => 10,
+            'urutan' => 2,
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('template-bank-soal.update', $template), [
+            'nama' => 'Updated Template',
+            'questions' => [
+                [
+                    'id' => $existingQuestion->id,
+                    'tipe' => 'mc',
+                    'pertanyaan' => 'Updated question',
+                    'nilai_poin' => 8,
+                    'options' => [
+                        ['teks_opsi' => 'Opsi A'],
+                        ['teks_opsi' => 'Opsi B'],
+                    ],
+                    'correct_option' => 1,
+                ],
+                [
+                    'tipe' => 'essay',
+                    'pertanyaan' => 'New essay question',
+                    'nilai_poin' => 15,
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect(route('template-bank-soal.index'));
+        $this->assertDatabaseHas('question_bank_templates', ['id' => $template->id, 'nama' => 'Updated Template']);
+        $this->assertDatabaseHas('questions', ['id' => $existingQuestion->id, 'pertanyaan' => 'Updated question', 'nilai_poin' => 8]);
+        $this->assertDatabaseMissing('questions', ['id' => $removedQuestion->id]);
+        $this->assertDatabaseHas('questions', ['pertanyaan' => 'New essay question', 'nilai_poin' => 15]);
+        $this->assertDatabaseHas('question_options', ['teks_opsi' => 'Opsi B', 'is_correct' => true]);
+    }
+
+    public function test_hr_admin_can_delete_template_and_questions_cascade(): void
+    {
+        $this->seedStages();
+        $admin = $this->hrAdmin();
+        $template = QuestionBankTemplate::factory()->create();
+        $question = Question::factory()->create(['question_bank_template_id' => $template->id, 'urutan' => 1]);
+
+        $response = $this->actingAs($admin)->delete(route('template-bank-soal.destroy', $template));
+
+        $response->assertRedirect(route('template-bank-soal.index'));
+        $this->assertDatabaseMissing('question_bank_templates', ['id' => $template->id]);
         $this->assertDatabaseMissing('questions', ['id' => $question->id]);
     }
 
@@ -198,6 +262,47 @@ class CompetencyTestEngineTest extends TestCase
         $this->assertDatabaseHas('vacancy_tests', ['vacancy_id' => $vacancy->id, 'batas_waktu_menit' => 45]);
         $this->assertDatabaseHas('vacancy_test_questions', ['question_id' => $question->id]);
         $this->assertDatabaseHas('vacancy_test_snapshots', ['batas_waktu_menit' => 45]);
+    }
+
+    public function test_hr_admin_can_toggle_questions_after_template_selection(): void
+    {
+        $this->seedStages();
+        $admin = $this->hrAdmin();
+        $unit = Unit::factory()->create();
+        ['vacancy' => $vacancy, 'question' => $question, 'essayQuestion' => $essayQuestion] = $this->createVacancyWithTest($unit);
+
+        $response = $this->actingAs($admin)->post(route('lowongan.tes.save', $vacancy), [
+            'batas_waktu_menit' => 30,
+            'question_ids' => [$essayQuestion->id],
+        ]);
+
+        $response->assertRedirect(route('lowongan.tes.show', $vacancy));
+        $vacancy->refresh();
+        $vacancyTest = $vacancy->vacancyTest;
+        $this->assertEquals(1, $vacancyTest->questions()->count());
+        $this->assertDatabaseHas('vacancy_test_questions', ['vacancy_test_id' => $vacancyTest->id, 'question_id' => $essayQuestion->id]);
+        $this->assertDatabaseMissing('vacancy_test_questions', ['vacancy_test_id' => $vacancyTest->id, 'question_id' => $question->id]);
+    }
+
+    public function test_delete_template_used_by_vacancy_preserves_snapshot(): void
+    {
+        $this->seedStages();
+        $admin = $this->hrAdmin();
+        $unit = Unit::factory()->create();
+        ['vacancy' => $vacancy, 'testSnapshot' => $testSnapshot] = $this->createVacancyWithTest($unit);
+
+        $template = QuestionBankTemplate::first();
+        $snapshotQuestionCount = $testSnapshot->questions()->count();
+
+        $response = $this->actingAs($admin)->delete(route('template-bank-soal.destroy', $template));
+
+        $response->assertRedirect(route('template-bank-soal.index'));
+        $this->assertDatabaseMissing('question_bank_templates', ['id' => $template->id]);
+        $this->assertDatabaseMissing('questions', ['question_bank_template_id' => $template->id]);
+
+        $testSnapshot->refresh();
+        $this->assertEquals($snapshotQuestionCount, $testSnapshot->questions()->count());
+        $this->assertDatabaseHas('vacancy_test_snapshots', ['id' => $testSnapshot->id]);
     }
 
     // ===== Candidate Test-Taking =====

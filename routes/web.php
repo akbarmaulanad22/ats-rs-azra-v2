@@ -21,7 +21,7 @@ use App\Http\Controllers\McuController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\OfferingLetterController;
 use App\Http\Controllers\OnboardingController;
-use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\QuestionBankTemplateController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestReviewController;
 use App\Http\Controllers\UnitController;
@@ -92,8 +92,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
 
-    Route::resource('bank-soal', QuestionController::class)
-        ->parameters(['bank-soal' => 'bankSoal'])
+    Route::resource('template-bank-soal', QuestionBankTemplateController::class)
+        ->parameters(['template-bank-soal' => 'templateBankSoal'])
         ->except(['show']);
 
     Route::get('/lowongan/{lowongan}/tes', [VacancyTestController::class, 'show'])->name('lowongan.tes.show');

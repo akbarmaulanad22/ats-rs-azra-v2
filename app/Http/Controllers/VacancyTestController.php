@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Question;
-use App\Models\Unit;
+use App\Models\QuestionBankTemplate;
 use App\Models\Vacancy;
 use App\Models\VacancyTest;
 use App\Models\VacancyTestSnapshot;
@@ -18,12 +17,23 @@ class VacancyTestController extends Controller
     {
         Gate::authorize('create', VacancyTest::class);
 
-        $vacancyTest = $lowongan->vacancyTest()->with(['questions.options', 'questions.unit'])->first();
+        $vacancyTest = $lowongan->vacancyTest()->with('questions.options')->first();
 
-        $units = Unit::orderBy('nama')->get();
-        $allQuestions = Question::with(['unit', 'options'])->orderBy('unit_id')->orderBy('id')->get();
+        $templates = QuestionBankTemplate::withCount('questions')
+            ->with('questions.options')
+            ->orderBy('nama')
+            ->get();
 
-        return view('vacancy-test.show', compact('lowongan', 'vacancyTest', 'units', 'allQuestions'));
+        $templateQuestions = $templates->keyBy('id')
+            ->map(fn ($t) => $t->questions->map(fn ($q) => [
+                'id' => $q->id,
+                'tipe' => $q->tipe->value,
+                'tipe_label' => $q->tipe->label(),
+                'pertanyaan' => $q->pertanyaan,
+                'nilai_poin' => $q->nilai_poin,
+            ])->values());
+
+        return view('vacancy-test.show', compact('lowongan', 'vacancyTest', 'templates', 'templateQuestions'));
     }
 
     public function save(Request $request, Vacancy $lowongan): RedirectResponse
