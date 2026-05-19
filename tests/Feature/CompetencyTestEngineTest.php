@@ -175,6 +175,59 @@ class CompetencyTestEngineTest extends TestCase
         $this->assertDatabaseHas('questions', ['tipe' => 'essay', 'nilai_poin' => 20]);
     }
 
+    public function test_hr_admin_can_update_template_with_upsert(): void
+    {
+        $this->seedStages();
+        $admin = $this->hrAdmin();
+
+        $template = QuestionBankTemplate::factory()->create(['nama' => 'Original']);
+        $existingQuestion = Question::factory()->create([
+            'question_bank_template_id' => $template->id,
+            'tipe' => QuestionType::Mc->value,
+            'pertanyaan' => 'Old question',
+            'nilai_poin' => 5,
+            'urutan' => 1,
+        ]);
+        QuestionOption::factory()->correct()->create(['question_id' => $existingQuestion->id]);
+        QuestionOption::factory()->create(['question_id' => $existingQuestion->id]);
+
+        $removedQuestion = Question::factory()->essay()->create([
+            'question_bank_template_id' => $template->id,
+            'pertanyaan' => 'To be removed',
+            'nilai_poin' => 10,
+            'urutan' => 2,
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('template-bank-soal.update', $template), [
+            'nama' => 'Updated Template',
+            'questions' => [
+                [
+                    'id' => $existingQuestion->id,
+                    'tipe' => 'mc',
+                    'pertanyaan' => 'Updated question',
+                    'nilai_poin' => 8,
+                    'options' => [
+                        ['teks_opsi' => 'Opsi A'],
+                        ['teks_opsi' => 'Opsi B'],
+                    ],
+                    'correct_option' => 1,
+                ],
+                [
+                    'tipe' => 'essay',
+                    'pertanyaan' => 'New essay question',
+                    'nilai_poin' => 15,
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect(route('template-bank-soal.index'));
+        $this->assertDatabaseHas('question_bank_templates', ['id' => $template->id, 'nama' => 'Updated Template']);
+        $this->assertDatabaseHas('questions', ['id' => $existingQuestion->id, 'pertanyaan' => 'Updated question', 'nilai_poin' => 8]);
+        $this->assertDatabaseMissing('questions', ['id' => $removedQuestion->id]);
+        $this->assertDatabaseHas('questions', ['pertanyaan' => 'New essay question', 'nilai_poin' => 15]);
+        $this->assertDatabaseHas('question_options', ['teks_opsi' => 'Opsi B', 'is_correct' => true]);
+    }
+
     public function test_hr_admin_can_delete_template_and_questions_cascade(): void
     {
         $this->seedStages();

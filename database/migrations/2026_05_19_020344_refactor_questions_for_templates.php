@@ -15,7 +15,7 @@ return new class extends Migration
             if (Schema::hasColumn('questions', 'unit_id')) {
                 $table->dropConstrainedForeignId('unit_id');
             }
-            $table->foreignId('question_bank_template_id')->after('id')->constrained()->cascadeOnDelete();
+            $table->foreignId('question_bank_template_id')->nullable()->after('id')->constrained()->cascadeOnDelete();
             $table->unsignedSmallInteger('urutan')->after('nilai_poin')->default(1);
         });
     }

@@ -96,6 +96,7 @@ class QuestionBankTemplateController extends Controller
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255', Rule::unique('question_bank_templates', 'nama')->ignore($templateBankSoal->id)],
             'questions' => ['required', 'array', 'min:1'],
+            'questions.*.id' => ['nullable', 'integer', Rule::exists('questions', 'id')->where('question_bank_template_id', $templateBankSoal->id)],
             'questions.*.tipe' => ['required', Rule::enum(QuestionType::class)],
             'questions.*.pertanyaan' => ['required', 'string'],
             'questions.*.nilai_poin' => ['required', 'integer', 'min:1', 'max:100'],
@@ -107,20 +108,26 @@ class QuestionBankTemplateController extends Controller
         DB::transaction(function () use ($validated, $templateBankSoal): void {
             $templateBankSoal->update(['nama' => $validated['nama']]);
 
-            $templateBankSoal->questions()->each(function ($question) {
-                $question->options()->delete();
-            });
-            $templateBankSoal->questions()->delete();
+            $submittedIds = collect($validated['questions'])->pluck('id')->filter()->all();
+            $templateBankSoal->questions()->whereNotIn('id', $submittedIds)->delete();
 
             foreach ($validated['questions'] as $index => $questionData) {
-                $question = $templateBankSoal->questions()->create([
+                $attributes = [
                     'tipe' => $questionData['tipe'],
                     'pertanyaan' => $questionData['pertanyaan'],
                     'nilai_poin' => $questionData['nilai_poin'],
                     'urutan' => $index + 1,
-                ]);
+                ];
+
+                if (! empty($questionData['id'])) {
+                    $question = $templateBankSoal->questions()->findOrFail($questionData['id']);
+                    $question->update($attributes);
+                } else {
+                    $question = $templateBankSoal->questions()->create($attributes);
+                }
 
                 if ($questionData['tipe'] === QuestionType::Mc->value) {
+                    $question->options()->delete();
                     $correctIndex = (int) ($questionData['correct_option'] ?? 0);
                     foreach ($questionData['options'] as $optIndex => $option) {
                         $question->options()->create([
@@ -128,6 +135,8 @@ class QuestionBankTemplateController extends Controller
                             'is_correct' => $optIndex === $correctIndex,
                         ]);
                     }
+                } else {
+                    $question->options()->delete();
                 }
             }
         });

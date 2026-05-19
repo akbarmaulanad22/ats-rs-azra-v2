@@ -20,11 +20,11 @@ class VacancyTestController extends Controller
         $vacancyTest = $lowongan->vacancyTest()->with('questions.options')->first();
 
         $templates = QuestionBankTemplate::withCount('questions')
+            ->with('questions.options')
             ->orderBy('nama')
             ->get();
 
-        $templateQuestions = QuestionBankTemplate::with('questions.options')->get()
-            ->keyBy('id')
+        $templateQuestions = $templates->keyBy('id')
             ->map(fn ($t) => $t->questions->map(fn ($q) => [
                 'id' => $q->id,
                 'tipe' => $q->tipe->value,
