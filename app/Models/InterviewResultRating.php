@@ -16,17 +16,24 @@ class InterviewResultRating extends Model
         'interview_result_id',
         'nama_kriteria',
         'nilai',
+        'interview_template_id',
     ];
 
     protected function casts(): array
     {
         return [
             'nilai' => 'integer',
+            'interview_template_id' => 'integer',
         ];
     }
 
     public function interviewResult(): BelongsTo
     {
         return $this->belongsTo(InterviewResult::class);
+    }
+
+    public function interviewTemplate(): BelongsTo
+    {
+        return $this->belongsTo(InterviewTemplate::class);
     }
 }

@@ -102,6 +102,11 @@
                         <p class="text-xs text-gray-400 text-center">Tidak ada catatan.</p>
                     @endif
                 @elseif ($interviewStage->status->isAdvanceable())
+                    @if ($assignedTemplates->isEmpty())
+                        <div class="text-center py-4">
+                            <p class="text-sm text-gray-500">Belum ada kriteria, hubungi HR Admin.</p>
+                        </div>
+                    @else
                     <form
                         method="POST"
                         action="{{ route('lowongan.wawancara.keputusan', [$lowongan, $application]) }}"
@@ -109,25 +114,27 @@
                     >
                         @csrf
 
-                        @if ($criteria->isNotEmpty())
+                        @php $ratingIndex = 0; @endphp
+                        @foreach ($assignedTemplates as $template)
                             <div class="mb-4 space-y-3">
-                                <p class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">Nilai Kriteria</p>
-                                @foreach ($criteria as $index => $criterion)
+                                <p class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">{{ $template->nama }}</p>
+                                @foreach ($template->items as $item)
                                     <div>
                                         <label class="block text-xs text-gray-700 mb-1">
-                                            {{ $criterion->nama }}
+                                            {{ $item->teks }}
                                             <span class="text-red-500">*</span>
                                         </label>
-                                        <input type="hidden" name="ratings[{{ $index }}][nama_kriteria]" value="{{ $criterion->nama }}">
+                                        <input type="hidden" name="ratings[{{ $ratingIndex }}][interview_template_id]" value="{{ $template->id }}">
+                                        <input type="hidden" name="ratings[{{ $ratingIndex }}][nama_kriteria]" value="{{ $item->teks }}">
                                         <div class="flex items-center gap-2">
                                             @for ($i = 1; $i <= 5; $i++)
                                                 <label class="flex flex-col items-center cursor-pointer">
                                                     <input
                                                         type="radio"
-                                                        name="ratings[{{ $index }}][nilai]"
+                                                        name="ratings[{{ $ratingIndex }}][nilai]"
                                                         value="{{ $i }}"
                                                         class="sr-only peer"
-                                                        @if (old("ratings.{$index}.nilai") == $i) checked @endif
+                                                        @if (old("ratings.{$ratingIndex}.nilai") == $i) checked @endif
                                                         required
                                                     >
                                                     <span class="w-8 h-8 flex items-center justify-center text-sm font-semibold rounded-full border border-gray-200 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:border-primary/40 transition-colors cursor-pointer">
@@ -136,13 +143,14 @@
                                                 </label>
                                             @endfor
                                         </div>
-                                        @error("ratings.{$index}.nilai")
+                                        @error("ratings.{$ratingIndex}.nilai")
                                             <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
+                                    @php $ratingIndex++ @endphp
                                 @endforeach
                             </div>
-                        @endif
+                        @endforeach
 
                         <div class="space-y-2 mb-4">
                             @foreach (['lulus' => ['Lulus', 'bg-green-50 border-green-300 text-green-700'], 'reserved' => ['Tunda', 'bg-amber-50 border-amber-300 text-amber-700'], 'gagal' => ['Gagal', 'bg-red-50 border-red-300 text-red-700']] as $value => $config)
@@ -190,6 +198,7 @@
                             Simpan Keputusan
                         </button>
                     </form>
+                    @endif
                 @else
                     @php
                         $statusBadge = match ($interviewStage->status->value) {
@@ -340,11 +349,17 @@
                                     </span>
                                 </div>
                                 @if ($priorResult->ratings->isNotEmpty())
-                                    <div class="space-y-1 mb-2">
-                                        @foreach ($priorResult->ratings as $rating)
-                                            <div class="flex items-center justify-between text-xs">
-                                                <span class="text-gray-600">{{ $rating->nama_kriteria }}</span>
-                                                <span class="font-medium text-gray-800">{{ $rating->nilai }}/5</span>
+                                    <div class="space-y-2 mb-2">
+                                        @foreach ($priorResult->ratings->groupBy('interview_template_id') as $templateId => $groupRatings)
+                                            @php $templateName = $groupRatings->first()->interviewTemplate?->nama ?? 'Template Dihapus'; @endphp
+                                            <div>
+                                                <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wide mb-1">{{ $templateName }}</p>
+                                                @foreach ($groupRatings as $rating)
+                                                    <div class="flex items-center justify-between text-xs">
+                                                        <span class="text-gray-600">{{ $rating->nama_kriteria }}</span>
+                                                        <span class="font-medium text-gray-800">{{ $rating->nilai }}/5</span>
+                                                    </div>
+                                                @endforeach
                                             </div>
                                         @endforeach
                                     </div>
