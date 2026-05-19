@@ -43,8 +43,8 @@
 <div id="hidden-fields"></div>
 
 <script>
-    function itemForm(initialItems) {
-        return {
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('itemForm', (initialItems) => ({
             items: initialItems && initialItems.length ? initialItems : [{ id: null, teks: '' }],
             addItem() {
                 this.items.push({ id: null, teks: '' });
@@ -66,19 +66,18 @@
                 container.innerHTML = '';
                 this.items.forEach((item, i) => {
                     if (item.id) {
-                        addHidden(container, `items[${i}][id]`, item.id);
+                        this.addHidden(container, `items[${i}][id]`, item.id);
                     }
-                    addHidden(container, `items[${i}][teks]`, item.teks);
+                    this.addHidden(container, `items[${i}][teks]`, item.teks);
                 });
             },
-        };
-    }
-
-    function addHidden(container, name, value) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = value;
-        container.appendChild(input);
-    }
+            addHidden(container, name, value) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                container.appendChild(input);
+            },
+        }));
+    });
 </script>

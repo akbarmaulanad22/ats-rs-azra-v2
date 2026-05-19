@@ -90,6 +90,8 @@ class InterviewTemplateController extends Controller
             $submittedIds = collect($validated['items'])->pluck('id')->filter()->all();
             $templateWawancara->items()->whereNotIn('id', $submittedIds)->delete();
 
+            $existingItems = $templateWawancara->items()->whereIn('id', $submittedIds)->get()->keyBy('id');
+
             foreach ($validated['items'] as $index => $itemData) {
                 $attributes = [
                     'teks' => $itemData['teks'],
@@ -97,7 +99,7 @@ class InterviewTemplateController extends Controller
                 ];
 
                 if (! empty($itemData['id'])) {
-                    $templateWawancara->items()->findOrFail($itemData['id'])->update($attributes);
+                    $existingItems->get($itemData['id'])->update($attributes);
                 } else {
                     $templateWawancara->items()->create($attributes);
                 }
