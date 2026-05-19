@@ -24,7 +24,6 @@ class DatabaseSeeder extends Seeder
             WorkflowTemplateSeeder::class,
             UnitSeeder::class,
             EmailTemplateSeeder::class,
-            InterviewCriteriaSeeder::class,
             InterviewTemplateSeeder::class,
             DiscQuestionSeeder::class,
         ]);

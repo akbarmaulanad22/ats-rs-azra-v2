@@ -25,7 +25,7 @@
 
     <form
         method="POST"
-        action="{{ route('lowongan.kriteria-wawancara.save', $lowongan) }}"
+        action="{{ route('lowongan.template-wawancara.save', $lowongan) }}"
         x-data="templateAssignment()"
     >
         @csrf

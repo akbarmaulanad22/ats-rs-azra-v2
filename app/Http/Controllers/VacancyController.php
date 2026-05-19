@@ -6,10 +6,8 @@ use App\Enums\EmploymentType;
 use App\Enums\VacancyStatus;
 use App\Http\Requests\StoreVacancyRequest;
 use App\Http\Requests\UpdateVacancyRequest;
-use App\Models\InterviewCriteria;
 use App\Models\Unit;
 use App\Models\Vacancy;
-use App\Models\VacancyInterviewCriteria;
 use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Http\RedirectResponse;
@@ -79,8 +77,6 @@ class VacancyController extends Controller
 
         $vacancy = Vacancy::create($data);
 
-        $this->snapshotInterviewCriteria($vacancy);
-
         return redirect()->route('lowongan.index')
             ->with('status', 'Lowongan berhasil dibuat.');
     }
@@ -136,19 +132,5 @@ class VacancyController extends Controller
 
         return redirect()->route('lowongan.index')
             ->with('status', 'Lowongan berhasil dihapus.');
-    }
-
-    private function snapshotInterviewCriteria(Vacancy $vacancy): void
-    {
-        $globalCriteria = InterviewCriteria::orderBy('stage_key')->orderBy('urutan')->get();
-
-        foreach ($globalCriteria as $criterion) {
-            VacancyInterviewCriteria::create([
-                'vacancy_id' => $vacancy->id,
-                'stage_key' => $criterion->stage_key,
-                'nama' => $criterion->nama,
-                'urutan' => $criterion->urutan,
-            ]);
-        }
     }
 }
