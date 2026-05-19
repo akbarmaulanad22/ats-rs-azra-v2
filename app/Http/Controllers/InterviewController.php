@@ -73,6 +73,7 @@ class InterviewController extends Controller
             'candidate.languageSkills',
             'candidate.achievements',
             'stages.interviewResult.ratings.interviewTemplate',
+            'stages.interviewResult.readinessAnswers.interviewTemplate',
             'testSubmission.answers.question',
             'discSubmission.result',
         ]);
@@ -86,6 +87,12 @@ class InterviewController extends Controller
         $assignedTemplates = $lowongan->interviewTemplates()
             ->wherePivot('stage_key', $stageKey)
             ->where('tipe', InterviewTemplateType::KriteriaPenilaian)
+            ->with('items')
+            ->get();
+
+        $assignedReadinessTemplates = $lowongan->interviewTemplates()
+            ->wherePivot('stage_key', $stageKey)
+            ->where('tipe', InterviewTemplateType::Kesiapan)
             ->with('items')
             ->get();
 
@@ -107,6 +114,7 @@ class InterviewController extends Controller
             'interviewStage',
             'existingResult',
             'assignedTemplates',
+            'assignedReadinessTemplates',
             'screeningStages',
             'priorInterviews',
         ));
@@ -137,9 +145,10 @@ class InterviewController extends Controller
         $keputusan = $request->input('keputusan');
         $catatan = $request->input('catatan');
         $ratings = $request->input('ratings', []);
+        $readinessAnswers = $request->input('readiness_answers', []);
 
         try {
-            DB::transaction(function () use ($interviewStage, $application, $user, $keputusan, $catatan, $ratings): void {
+            DB::transaction(function () use ($interviewStage, $application, $user, $keputusan, $catatan, $ratings, $readinessAnswers): void {
                 $result = InterviewResult::create([
                     'application_id' => $application->id,
                     'application_stage_id' => $interviewStage->id,
@@ -154,6 +163,14 @@ class InterviewController extends Controller
                         'interview_template_id' => $rating['interview_template_id'],
                         'nama_kriteria' => $rating['nama_kriteria'],
                         'nilai' => $rating['nilai'],
+                    ]);
+                }
+
+                foreach ($readinessAnswers as $answer) {
+                    $result->readinessAnswers()->create([
+                        'interview_template_id' => $answer['interview_template_id'],
+                        'pertanyaan' => $answer['pertanyaan'],
+                        'jawaban' => filter_var($answer['jawaban'], FILTER_VALIDATE_BOOLEAN),
                     ]);
                 }
 

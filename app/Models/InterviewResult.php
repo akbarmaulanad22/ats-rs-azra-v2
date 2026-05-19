@@ -48,4 +48,9 @@ class InterviewResult extends Model
     {
         return $this->hasMany(InterviewResultRating::class);
     }
+
+    public function readinessAnswers(): HasMany
+    {
+        return $this->hasMany(InterviewReadinessAnswer::class);
+    }
 }

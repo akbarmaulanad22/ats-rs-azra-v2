@@ -152,6 +152,53 @@
                             </div>
                         @endforeach
 
+                        @if ($assignedReadinessTemplates->isNotEmpty())
+                            <div class="mb-4">
+                                <p class="text-xs font-semibold text-gray-700 mb-3">Pertanyaan Kesiapan</p>
+                                @php $readinessIndex = 0; @endphp
+                                @foreach ($assignedReadinessTemplates as $readinessTemplate)
+                                    <div class="mb-3 space-y-2">
+                                        <p class="text-[10px] font-medium text-gray-700 uppercase tracking-wide">{{ $readinessTemplate->nama }}</p>
+                                        @foreach ($readinessTemplate->items as $readinessItem)
+                                            <div>
+                                                <label class="block text-xs text-gray-700 mb-1">
+                                                    {{ $readinessItem->teks }}
+                                                    <span class="text-red-500">*</span>
+                                                </label>
+                                                <input type="hidden" name="readiness_answers[{{ $readinessIndex }}][interview_template_id]" value="{{ $readinessTemplate->id }}">
+                                                <input type="hidden" name="readiness_answers[{{ $readinessIndex }}][pertanyaan]" value="{{ $readinessItem->teks }}">
+                                                <div class="flex items-center gap-4">
+                                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name="readiness_answers[{{ $readinessIndex }}][jawaban]"
+                                                            value="1"
+                                                            class="w-4 h-4 accent-primary"
+                                                            @if (old("readiness_answers.{$readinessIndex}.jawaban") === '1') checked @endif
+                                                            required
+                                                        >
+                                                        <span class="text-xs text-gray-700">Ya</span>
+                                                    </label>
+                                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name="readiness_answers[{{ $readinessIndex }}][jawaban]"
+                                                            value="0"
+                                                            class="w-4 h-4 accent-primary"
+                                                            @if (old("readiness_answers.{$readinessIndex}.jawaban") === '0') checked @endif
+                                                            required
+                                                        >
+                                                        <span class="text-xs text-gray-700">Tidak</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            @php $readinessIndex++ @endphp
+                                        @endforeach
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
                         <div class="space-y-2 mb-4">
                             @foreach (['lulus' => ['Lulus', 'bg-green-50 border-green-300 text-green-700'], 'reserved' => ['Tunda', 'bg-amber-50 border-amber-300 text-amber-700'], 'gagal' => ['Gagal', 'bg-red-50 border-red-300 text-red-700']] as $value => $config)
                                 <label
@@ -358,6 +405,24 @@
                                                     <div class="flex items-center justify-between text-xs">
                                                         <span class="text-gray-600">{{ $rating->nama_kriteria }}</span>
                                                         <span class="font-medium text-gray-800">{{ $rating->nilai }}/5</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                @if ($priorResult->readinessAnswers->isNotEmpty())
+                                    <div class="space-y-2 mb-2">
+                                        @foreach ($priorResult->readinessAnswers->groupBy('interview_template_id') as $templateId => $groupAnswers)
+                                            @php $readinessTemplateName = $groupAnswers->first()->interviewTemplate?->nama ?? 'Template Dihapus'; @endphp
+                                            <div>
+                                                <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wide mb-1">{{ $readinessTemplateName }}</p>
+                                                @foreach ($groupAnswers as $answer)
+                                                    <div class="flex items-center justify-between text-xs">
+                                                        <span class="text-gray-600">{{ $answer->pertanyaan }}</span>
+                                                        <span class="font-medium {{ $answer->jawaban ? 'text-green-600' : 'text-red-500' }}">
+                                                            {{ $answer->jawaban ? 'Ya' : 'Tidak' }}
+                                                        </span>
                                                     </div>
                                                 @endforeach
                                             </div>
