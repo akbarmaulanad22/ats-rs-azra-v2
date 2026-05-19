@@ -192,10 +192,19 @@
                             $stagesArr = $snapshotStages;
                             $currentIdx = $stagesArr->search(fn ($s) => $s->key === $currentKey);
                             if ($currentIdx === false) { $currentIdx = 0; }
+                            $total = $stagesArr->count();
+                            $windowSize = 7;
                             $windowStart = max(0, $currentIdx - 3);
-                            $windowEnd = min($stagesArr->count() - 1, $currentIdx + 3);
+                            $windowEnd = min($total - 1, $currentIdx + 3);
+                            if ($windowEnd - $windowStart + 1 < min($windowSize, $total)) {
+                                if ($windowStart === 0) {
+                                    $windowEnd = min($total - 1, $windowSize - 1);
+                                } else {
+                                    $windowStart = max(0, $total - $windowSize);
+                                }
+                            }
                             $showLeadingEllipsis = $windowStart > 0;
-                            $showTrailingEllipsis = $windowEnd < $stagesArr->count() - 1;
+                            $showTrailingEllipsis = $windowEnd < $total - 1;
                             $windowStages = $stagesArr->slice($windowStart, $windowEnd - $windowStart + 1)->values();
                         @endphp
                         <tr class="odd:bg-white even:bg-primary/5 hover:bg-primary/10 transition-colors ease-out duration-100">
@@ -215,17 +224,13 @@
                                         <span class="text-gray-300">→</span>
                                     @endif
                                     @foreach ($windowStages as $wStage)
-                                        @if (!$loop->first || !$showLeadingEllipsis)
-                                        @else
+                                        @if (!$loop->first)
                                             <span class="text-gray-300">→</span>
                                         @endif
                                         @if ($wStage->key === $currentKey)
                                             <span class="font-semibold text-primary">[{{ $wStage->nama }}]</span>
                                         @else
                                             <span class="text-gray-500">{{ $wStage->nama }}</span>
-                                        @endif
-                                        @if (!$loop->last)
-                                            <span class="text-gray-300">→</span>
                                         @endif
                                     @endforeach
                                     @if ($showTrailingEllipsis)
