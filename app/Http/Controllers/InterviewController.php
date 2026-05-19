@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InterviewTemplateType;
 use App\Enums\Role;
 use App\Http\Requests\StoreInterviewResultRequest;
 use App\Models\Application;
@@ -71,7 +72,7 @@ class InterviewController extends Controller
             'candidate.children',
             'candidate.languageSkills',
             'candidate.achievements',
-            'stages.interviewResult.ratings',
+            'stages.interviewResult.ratings.interviewTemplate',
             'testSubmission.answers.question',
             'discSubmission.result',
         ]);
@@ -82,9 +83,10 @@ class InterviewController extends Controller
 
         $existingResult = $interviewStage->interviewResult;
 
-        $criteria = $lowongan->interviewCriteria()
-            ->where('stage_key', $stageKey)
-            ->orderBy('urutan')
+        $assignedTemplates = $lowongan->interviewTemplates()
+            ->wherePivot('stage_key', $stageKey)
+            ->where('tipe', InterviewTemplateType::KriteriaPenilaian)
+            ->with('items')
             ->get();
 
         $screeningStages = $application->stages->whereIn('key', ['skrining_cv_hr', 'skrining_cv_kepala_unit']);
@@ -104,7 +106,7 @@ class InterviewController extends Controller
             'application',
             'interviewStage',
             'existingResult',
-            'criteria',
+            'assignedTemplates',
             'screeningStages',
             'priorInterviews',
         ));
@@ -149,6 +151,7 @@ class InterviewController extends Controller
 
                 foreach ($ratings as $rating) {
                     $result->ratings()->create([
+                        'interview_template_id' => $rating['interview_template_id'],
                         'nama_kriteria' => $rating['nama_kriteria'],
                         'nilai' => $rating['nilai'],
                     ]);

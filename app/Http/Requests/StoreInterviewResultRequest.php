@@ -2,13 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\InterviewTemplateType;
 use App\Enums\Role;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreInterviewResultRequest extends FormRequest
 {
+    private ?Collection $assignedTemplates = null;
+
     public function authorize(): bool
     {
         return true;
@@ -19,22 +24,48 @@ class StoreInterviewResultRequest extends FormRequest
      */
     public function rules(): array
     {
-        $validCriteria = $this->resolveValidCriteria();
-
-        return [
+        $templates = $this->resolveAssignedTemplates();
+        $base = [
             'keputusan' => ['required', 'in:lulus,gagal,reserved'],
             'catatan' => ['nullable', 'string', 'max:2000'],
-            'ratings' => ['required', 'array', 'size:'.count($validCriteria)],
-            'ratings.*.nama_kriteria' => ['required', 'string', Rule::in($validCriteria)],
-            'ratings.*.nilai' => ['required', 'integer', 'min:1', 'max:5'],
         ];
+
+        if ($templates->isEmpty()) {
+            return $base;
+        }
+
+        $validTemplateIds = $templates->pluck('id')->toArray();
+        $validCriteriaNames = $templates->flatMap(fn ($t) => $t->items->pluck('teks'))->toArray();
+        $expectedCount = $templates->sum(fn ($t) => $t->items->count());
+
+        return array_merge($base, [
+            'ratings' => ['required', 'array', 'size:'.$expectedCount],
+            'ratings.*.interview_template_id' => ['required', 'integer', Rule::in($validTemplateIds)],
+            'ratings.*.nama_kriteria' => ['required', 'string', Rule::in($validCriteriaNames)],
+            'ratings.*.nilai' => ['required', 'integer', 'min:1', 'max:5'],
+        ]);
     }
 
     /**
-     * @return array<int, string>
+     * @return array<int, \Closure>
      */
-    private function resolveValidCriteria(): array
+    public function after(): array
     {
+        return [
+            function (Validator $validator) {
+                if ($this->resolveAssignedTemplates()->isEmpty()) {
+                    $validator->errors()->add('interview', 'Belum ada kriteria, hubungi HR Admin.');
+                }
+            },
+        ];
+    }
+
+    private function resolveAssignedTemplates(): Collection
+    {
+        if ($this->assignedTemplates !== null) {
+            return $this->assignedTemplates;
+        }
+
         $vacancy = $this->route('lowongan');
         $stageKey = match ($this->user()->role) {
             Role::UnitHead => 'wawancara_kepala_unit',
@@ -43,10 +74,11 @@ class StoreInterviewResultRequest extends FormRequest
             default => 'wawancara_kepala_unit',
         };
 
-        return $vacancy->interviewCriteria()
-            ->where('stage_key', $stageKey)
-            ->pluck('nama')
-            ->toArray();
+        return $this->assignedTemplates = $vacancy->interviewTemplates()
+            ->wherePivot('stage_key', $stageKey)
+            ->where('tipe', InterviewTemplateType::KriteriaPenilaian)
+            ->with('items')
+            ->get();
     }
 
     public function messages(): array
@@ -55,6 +87,7 @@ class StoreInterviewResultRequest extends FormRequest
             'keputusan.required' => 'Pilih keputusan wawancara.',
             'keputusan.in' => 'Keputusan tidak valid.',
             'ratings.required' => 'Nilai kriteria wawancara wajib diisi.',
+            'ratings.size' => 'Jumlah penilaian tidak sesuai dengan kriteria yang ditentukan.',
             'ratings.*.nilai.required' => 'Setiap kriteria wajib diberi nilai.',
             'ratings.*.nilai.min' => 'Nilai minimal adalah 1.',
             'ratings.*.nilai.max' => 'Nilai maksimal adalah 5.',

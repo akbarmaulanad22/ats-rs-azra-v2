@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\ApplicationStageStatus;
+use App\Enums\InterviewTemplateType;
 use App\Enums\Role;
 use App\Models\Application;
 use App\Models\ApplicationStage;
@@ -11,6 +12,7 @@ use App\Models\Employee;
 use App\Models\InterviewCriteria;
 use App\Models\InterviewResult;
 use App\Models\InterviewTemplate;
+use App\Models\InterviewTemplateItem;
 use App\Models\Stage;
 use App\Models\Unit;
 use App\Models\User;
@@ -134,15 +136,43 @@ class InterviewManagementTest extends TestCase
         return User::factory()->withRole(Role::Director)->create();
     }
 
+    /** Assigns a kriteria_penilaian template with items to the given stage keys on a vacancy. */
+    private function assignCriteriaTemplate(Vacancy $vacancy, array $stageKeys, string $templateNama = 'Kriteria Umum'): InterviewTemplate
+    {
+        $template = InterviewTemplate::factory()->kriteriaPenilaian()->create(['nama' => $templateNama]);
+        InterviewTemplateItem::factory()->count(3)->create(['interview_template_id' => $template->id]);
+
+        foreach ($stageKeys as $stageKey) {
+            VacancyInterviewTemplate::create([
+                'vacancy_id' => $vacancy->id,
+                'interview_template_id' => $template->id,
+                'stage_key' => $stageKey,
+            ]);
+        }
+
+        return $template;
+    }
+
     private function criteriaRatingsFor(Vacancy $vacancy, string $stageKey): array
     {
-        return $vacancy->interviewCriteria()
-            ->where('stage_key', $stageKey)
-            ->orderBy('urutan')
-            ->get()
-            ->values()
-            ->map(fn ($c, $i) => ['nama_kriteria' => $c->nama, 'nilai' => 4])
-            ->toArray();
+        $templates = $vacancy->interviewTemplates()
+            ->wherePivot('stage_key', $stageKey)
+            ->where('tipe', InterviewTemplateType::KriteriaPenilaian)
+            ->with('items')
+            ->get();
+
+        $ratings = [];
+        foreach ($templates as $template) {
+            foreach ($template->items as $item) {
+                $ratings[] = [
+                    'interview_template_id' => $template->id,
+                    'nama_kriteria' => $item->teks,
+                    'nilai' => 4,
+                ];
+            }
+        }
+
+        return $ratings;
     }
 
     // ── Global Criteria CRUD ──────────────────────────────────────────────────
@@ -485,6 +515,36 @@ class InterviewManagementTest extends TestCase
         $response->assertForbidden();
     }
 
+    public function test_interview_form_shows_blocking_message_when_no_templates_assigned(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+
+        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+
+        $response->assertOk();
+        $response->assertSee('Belum ada kriteria, hubungi HR Admin.');
+    }
+
+    public function test_interview_form_shows_criteria_grouped_by_template(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $template = $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit'], 'Kriteria Umum');
+
+        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+
+        $response->assertOk();
+        $response->assertSee('Kriteria Umum');
+        $response->assertSee($template->items->first()->teks);
+    }
+
     // ── Record Interview Result: Pass ─────────────────────────────────────────
 
     public function test_unit_head_can_pass_candidate_at_unit_head_interview(): void
@@ -493,6 +553,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
@@ -525,6 +586,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $hrManager = $this->makeHrManager();
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_manajer_hr']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_manajer_hr');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_manajer_hr');
 
@@ -546,6 +608,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $director = $this->makeDirector();
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_direktur']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_direktur');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_direktur');
 
@@ -569,6 +632,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
@@ -592,6 +656,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
@@ -615,6 +680,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
@@ -631,9 +697,28 @@ class InterviewManagementTest extends TestCase
         $this->assertEquals(count($ratings), $result->ratings()->count());
         $this->assertDatabaseHas('interview_result_ratings', [
             'interview_result_id' => $result->id,
+            'interview_template_id' => $ratings[0]['interview_template_id'],
             'nama_kriteria' => $ratings[0]['nama_kriteria'],
             'nilai' => $ratings[0]['nilai'],
         ]);
+    }
+
+    // ── Blocking When No Templates ────────────────────────────────────────────
+
+    public function test_cannot_decide_when_no_templates_assigned(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $unitHead = $this->makeUnitHead($unit);
+        $vacancy = $this->createVacancy($unit);
+        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+
+        $response = $this->actingAs($unitHead)->post(
+            route('lowongan.wawancara.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus']
+        );
+
+        $response->assertSessionHasErrors('interview');
     }
 
     // ── Role-Based Access ─────────────────────────────────────────────────────
@@ -644,6 +729,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_manajer_hr');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
@@ -663,6 +749,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $hrManager = $this->makeHrManager();
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit', 'wawancara_manajer_hr']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_manajer_hr');
 
@@ -681,6 +768,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
@@ -711,6 +799,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
@@ -722,12 +811,13 @@ class InterviewManagementTest extends TestCase
         $response->assertSessionHasErrors('keputusan');
     }
 
-    public function test_decide_requires_ratings(): void
+    public function test_decide_requires_ratings_when_templates_assigned(): void
     {
         $this->seedStages();
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
 
         $response = $this->actingAs($unitHead)->post(
@@ -744,17 +834,19 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $template = $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
+        $item = $template->items->first();
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
 
         $response = $this->actingAs($unitHead)->post(
             route('lowongan.wawancara.keputusan', [$vacancy, $application]),
             [
                 'keputusan' => 'lulus',
-                'ratings' => [['nama_kriteria' => 'Test', 'nilai' => 6]],
+                'ratings' => [['interview_template_id' => $template->id, 'nama_kriteria' => $item->teks, 'nilai' => 6]],
             ]
         );
 
-        $response->assertSessionHasErrors('ratings.0.nilai');
+        $response->assertSessionHasErrors();
     }
 
     public function test_catatan_is_optional(): void
@@ -763,6 +855,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
+        $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $ratings = $this->criteriaRatingsFor($vacancy, 'wawancara_kepala_unit');
 
