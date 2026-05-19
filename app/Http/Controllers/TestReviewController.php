@@ -12,47 +12,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\View\View;
 
 class TestReviewController extends Controller
 {
     public function __construct(private readonly ApplicationPipelineService $pipelineService) {}
-
-    public function index(Vacancy $lowongan): View
-    {
-        $vacancyTest = $lowongan->vacancyTest()->firstOrFail();
-        Gate::authorize('reviewEssay', $vacancyTest);
-
-        $latestSnapshot = $vacancyTest->latestSnapshot;
-
-        $submissions = TestSubmission::with(['application.candidate', 'answers'])
-            ->whereHas('snapshot', fn ($q) => $q->where('vacancy_test_id', $vacancyTest->id))
-            ->whereNotNull('submitted_at')
-            ->get();
-
-        return view('test-review.index', compact('lowongan', 'vacancyTest', 'latestSnapshot', 'submissions'));
-    }
-
-    public function show(Vacancy $lowongan, TestSubmission $submission): View
-    {
-        $vacancyTest = $lowongan->vacancyTest()->firstOrFail();
-        Gate::authorize('reviewEssay', $vacancyTest);
-
-        abort_if($submission->snapshot->vacancy_test_id !== $vacancyTest->id, 404);
-
-        $submission->load([
-            'answers.question.options',
-            'answers.selectedOption',
-            'application.candidate',
-            'application.stages',
-            'snapshot',
-        ]);
-
-        $allReviewed = $submission->answers->every(fn ($a) => $a->is_reviewed);
-        $currentStage = $submission->application->stages->firstWhere('key', 'tes_kompetensi');
-
-        return view('test-review.show', compact('lowongan', 'vacancyTest', 'submission', 'allReviewed', 'currentStage'));
-    }
 
     public function scoreEssay(Request $request, Vacancy $lowongan, TestAnswer $answer): RedirectResponse
     {
@@ -121,7 +84,7 @@ class TestReviewController extends Controller
         };
 
         return redirect()
-            ->route('lowongan.tes.ulasan.index', $lowongan)
+            ->route('lowongan.pipeline', $lowongan)
             ->with('success', "Kandidat berhasil {$label}.");
     }
 }

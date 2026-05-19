@@ -78,12 +78,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('lowongan', VacancyController::class)
         ->parameters(['lowongan' => 'lowongan'])
         ->except(['show']);
-    Route::get('/lowongan/{lowongan}/pipeline', [VacancyPipelineController::class, 'show'])->name('lowongan.pipeline');
+    Route::get('/lowongan/{lowongan}/pipeline', [VacancyPipelineController::class, 'index'])->name('lowongan.pipeline');
+    Route::get('/lowongan/{lowongan}/pipeline/{application}', [VacancyPipelineController::class, 'showApplication'])->scopeBindings()->name('lowongan.pipeline.show');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/lanjut', [ApplicationPipelineController::class, 'advance'])->scopeBindings()->name('lowongan.lamaran.lanjut');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/gagal', [ApplicationPipelineController::class, 'fail'])->scopeBindings()->name('lowongan.lamaran.gagal');
 
-    Route::get('/lowongan/{lowongan}/skrining', [CvScreeningController::class, 'index'])->name('lowongan.skrining.index');
-    Route::get('/lowongan/{lowongan}/skrining/{application}', [CvScreeningController::class, 'show'])->scopeBindings()->name('lowongan.skrining.show');
     Route::post('/lowongan/{lowongan}/skrining/{application}/keputusan', [CvScreeningController::class, 'decide'])->scopeBindings()->name('lowongan.skrining.keputusan');
 
     Route::get('/pengaturan/template-email', [EmailTemplateController::class, 'index'])->name('template-email.index');
@@ -103,27 +102,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/lowongan/{lowongan}/tes', [VacancyTestController::class, 'show'])->name('lowongan.tes.show');
     Route::post('/lowongan/{lowongan}/tes', [VacancyTestController::class, 'save'])->name('lowongan.tes.save');
 
-    Route::get('/lowongan/{lowongan}/tes/ulasan', [TestReviewController::class, 'index'])->name('lowongan.tes.ulasan.index');
-    Route::get('/lowongan/{lowongan}/tes/ulasan/{submission}', [TestReviewController::class, 'show'])->name('lowongan.tes.ulasan.show');
     Route::post('/lowongan/{lowongan}/tes/ulasan/jawaban/{answer}/skor', [TestReviewController::class, 'scoreEssay'])->name('lowongan.tes.ulasan.skor');
     Route::post('/lowongan/{lowongan}/tes/ulasan/{submission}/keputusan', [TestReviewController::class, 'decide'])->name('lowongan.tes.ulasan.keputusan');
 
     Route::get('/lowongan/{lowongan}/template-wawancara', [VacancyInterviewTemplateController::class, 'show'])->name('lowongan.template-wawancara.show');
     Route::post('/lowongan/{lowongan}/template-wawancara', [VacancyInterviewTemplateController::class, 'save'])->name('lowongan.template-wawancara.save');
 
-    Route::get('/lowongan/{lowongan}/wawancara', [InterviewController::class, 'index'])->name('lowongan.wawancara.index');
-    Route::get('/lowongan/{lowongan}/wawancara/{application}', [InterviewController::class, 'show'])->scopeBindings()->name('lowongan.wawancara.show');
     Route::post('/lowongan/{lowongan}/wawancara/{application}/keputusan', [InterviewController::class, 'decide'])->scopeBindings()->name('lowongan.wawancara.keputusan');
     Route::post('/lowongan/{lowongan}/wawancara/{application}/jadwal', [InterviewScheduleController::class, 'store'])->scopeBindings()->name('lowongan.wawancara.jadwal');
 
-    Route::get('/lowongan/{lowongan}/surat-penawaran/{application}', [OfferingLetterController::class, 'show'])->scopeBindings()->name('lowongan.surat-penawaran.show');
     Route::post('/lowongan/{lowongan}/surat-penawaran/{application}/kirim', [OfferingLetterController::class, 'send'])->scopeBindings()->name('lowongan.surat-penawaran.kirim');
 
-    Route::get('/lowongan/{lowongan}/mcu/{application}', [McuController::class, 'show'])->scopeBindings()->name('lowongan.mcu.show');
     Route::post('/lowongan/{lowongan}/mcu/{application}/status', [McuController::class, 'updateStatus'])->scopeBindings()->name('lowongan.mcu.status');
     Route::post('/lowongan/{lowongan}/mcu/{application}/dokumen', [McuController::class, 'uploadDocument'])->scopeBindings()->name('lowongan.mcu.dokumen');
 
-    Route::get('/lowongan/{lowongan}/onboarding/{application}', [OnboardingController::class, 'show'])->scopeBindings()->name('lowongan.onboarding.show');
     Route::post('/lowongan/{lowongan}/onboarding/{application}/undangan', [OnboardingController::class, 'sendInvitation'])->scopeBindings()->name('lowongan.onboarding.undangan');
     Route::post('/lowongan/{lowongan}/onboarding/{application}/selesai', [OnboardingController::class, 'complete'])->scopeBindings()->name('lowongan.onboarding.selesai');
 

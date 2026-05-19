@@ -12,25 +12,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\View\View;
 
 class McuController extends Controller
 {
     public function __construct(private readonly ApplicationPipelineService $pipelineService) {}
-
-    public function show(Vacancy $lowongan, Application $application): View
-    {
-        Gate::authorize('manageMcu', $application);
-
-        abort_if($application->vacancy_id !== $lowongan->id, 404);
-
-        $application->load(['candidate', 'stages', 'mcuResult']);
-
-        $mcuStage = $application->stages->firstWhere('key', 'mcu');
-        abort_if(! $mcuStage, 404);
-
-        return view('mcu.show', compact('lowongan', 'application', 'mcuStage'));
-    }
 
     public function updateStatus(UpdateMcuStatusRequest $request, Vacancy $lowongan, Application $application): RedirectResponse
     {
@@ -79,7 +64,7 @@ class McuController extends Controller
         }
 
         return redirect()
-            ->route('lowongan.mcu.show', [$lowongan, $application])
+            ->route('lowongan.pipeline.show', [$lowongan, $application])
             ->with('success', 'Status MCU berhasil diperbarui.');
     }
 
@@ -111,7 +96,7 @@ class McuController extends Controller
         });
 
         return redirect()
-            ->route('lowongan.mcu.show', [$lowongan, $application])
+            ->route('lowongan.pipeline.show', [$lowongan, $application])
             ->with('success', 'Dokumen MCU berhasil diunggah.');
     }
 }

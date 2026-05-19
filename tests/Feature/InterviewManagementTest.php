@@ -348,10 +348,10 @@ class InterviewManagementTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.index', $vacancy));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertOk();
-        $response->assertViewIs('interview.index');
+        $response->assertViewIs('vacancies.pipeline');
     }
 
     public function test_unit_head_cannot_view_interview_dashboard_for_other_unit(): void
@@ -362,7 +362,7 @@ class InterviewManagementTest extends TestCase
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($otherUnit);
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.index', $vacancy));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertForbidden();
     }
@@ -374,7 +374,7 @@ class InterviewManagementTest extends TestCase
         $hrManager = $this->makeHrManager();
         $vacancy = $this->createVacancy($unit);
 
-        $response = $this->actingAs($hrManager)->get(route('lowongan.wawancara.index', $vacancy));
+        $response = $this->actingAs($hrManager)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertOk();
     }
@@ -386,24 +386,25 @@ class InterviewManagementTest extends TestCase
         $director = $this->makeDirector();
         $vacancy = $this->createVacancy($unit);
 
-        $response = $this->actingAs($director)->get(route('lowongan.wawancara.index', $vacancy));
+        $response = $this->actingAs($director)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertOk();
     }
 
-    public function test_hr_admin_cannot_view_interview_dashboard(): void
+    public function test_hr_admin_can_view_pipeline(): void
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
         $unit = Unit::factory()->create();
         $vacancy = $this->createVacancy($unit);
 
-        $response = $this->actingAs($admin)->get(route('lowongan.wawancara.index', $vacancy));
+        $response = $this->actingAs($admin)->get(route('lowongan.pipeline', $vacancy));
 
-        $response->assertForbidden();
+        $response->assertOk();
+        $response->assertViewIs('vacancies.pipeline');
     }
 
-    public function test_dashboard_shows_candidates_at_correct_interview_stage(): void
+    public function test_pipeline_shows_all_candidates_regardless_of_stage(): void
     {
         $this->seedStages();
         $unit = Unit::factory()->create();
@@ -411,24 +412,28 @@ class InterviewManagementTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_manajer_hr');
 
-        $response = $this->actingAs($hrManager)->get(route('lowongan.wawancara.index', $vacancy));
+        $response = $this->actingAs($hrManager)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertOk();
         $response->assertSee($application->candidate->nama_lengkap);
     }
 
-    public function test_dashboard_hides_candidates_not_yet_at_stage(): void
+    public function test_pipeline_stage_filter_shows_only_candidates_at_that_stage(): void
     {
         $this->seedStages();
         $unit = Unit::factory()->create();
         $hrManager = $this->makeHrManager();
         $vacancy = $this->createVacancy($unit);
-        $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $applicationAtKepalaUnit = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $applicationAtManajerHr = $this->makeAtInterviewStage($vacancy, 'wawancara_manajer_hr');
 
-        $response = $this->actingAs($hrManager)->get(route('lowongan.wawancara.index', $vacancy));
+        $response = $this->actingAs($hrManager)->get(
+            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'stage' => 'wawancara_manajer_hr'])
+        );
 
         $response->assertOk();
-        $response->assertDontSee($application->candidate->nama_lengkap);
+        $response->assertSee($applicationAtManajerHr->candidate->nama_lengkap);
+        $response->assertDontSee($applicationAtKepalaUnit->candidate->nama_lengkap);
     }
 
     // ── Interview Show (Candidate Profile) ────────────────────────────────────
@@ -441,10 +446,10 @@ class InterviewManagementTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
-        $response->assertViewIs('interview.show');
+        $response->assertViewIs('vacancies.pipeline-show');
         $response->assertSee($application->candidate->nama_lengkap);
     }
 
@@ -457,7 +462,7 @@ class InterviewManagementTest extends TestCase
         $vacancy = $this->createVacancy($otherUnit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertForbidden();
     }
@@ -469,8 +474,12 @@ class InterviewManagementTest extends TestCase
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $application->stages()->where('key', 'wawancara_kepala_unit')->update([
+            'jadwal_interview' => now()->addDays(2),
+            'lokasi_interview' => 'Ruang Meeting',
+        ]);
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
         $response->assertSee('Belum ada kriteria, hubungi HR Admin.');
@@ -483,9 +492,13 @@ class InterviewManagementTest extends TestCase
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $application->stages()->where('key', 'wawancara_kepala_unit')->update([
+            'jadwal_interview' => now()->addDays(2),
+            'lokasi_interview' => 'Ruang Meeting',
+        ]);
         $template = $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit'], 'Kriteria Umum');
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
         $response->assertSee('Kriteria Umum');
@@ -509,7 +522,7 @@ class InterviewManagementTest extends TestCase
             ['keputusan' => 'lulus', 'catatan' => 'Kandidat sangat baik.', 'ratings' => $ratings]
         );
 
-        $response->assertRedirect(route('lowongan.wawancara.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $interviewStage = $application->stages->firstWhere('key', 'wawancara_kepala_unit');
@@ -542,7 +555,7 @@ class InterviewManagementTest extends TestCase
             ['keputusan' => 'lulus', 'ratings' => $ratings]
         );
 
-        $response->assertRedirect(route('lowongan.wawancara.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $interviewStage = $application->stages->firstWhere('key', 'wawancara_manajer_hr');
@@ -564,7 +577,7 @@ class InterviewManagementTest extends TestCase
             ['keputusan' => 'lulus', 'ratings' => $ratings]
         );
 
-        $response->assertRedirect(route('lowongan.wawancara.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $stage = $application->stages->firstWhere('key', 'wawancara_direktur');
@@ -588,7 +601,7 @@ class InterviewManagementTest extends TestCase
             ['keputusan' => 'gagal', 'catatan' => 'Tidak memenuhi syarat.', 'ratings' => $ratings]
         );
 
-        $response->assertRedirect(route('lowongan.wawancara.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $stage = $application->stages->firstWhere('key', 'wawancara_kepala_unit');
@@ -612,7 +625,7 @@ class InterviewManagementTest extends TestCase
             ['keputusan' => 'reserved', 'ratings' => $ratings]
         );
 
-        $response->assertRedirect(route('lowongan.wawancara.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $stage = $application->stages->firstWhere('key', 'wawancara_kepala_unit');
@@ -811,7 +824,7 @@ class InterviewManagementTest extends TestCase
             ['keputusan' => 'lulus', 'ratings' => $ratings]
         );
 
-        $response->assertRedirect(route('lowongan.wawancara.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $stage = $application->stages->firstWhere('key', 'wawancara_kepala_unit');
@@ -826,7 +839,7 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $vacancy = Vacancy::factory()->published()->create(['unit_id' => $unit->id]);
 
-        $response = $this->get(route('lowongan.wawancara.index', $vacancy));
+        $response = $this->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertRedirect(route('login'));
     }
@@ -840,10 +853,14 @@ class InterviewManagementTest extends TestCase
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
+        $application->stages()->where('key', 'wawancara_kepala_unit')->update([
+            'jadwal_interview' => now()->addDays(2),
+            'lokasi_interview' => 'Ruang Meeting',
+        ]);
         $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $readinessTemplate = $this->assignReadinessTemplate($vacancy, ['wawancara_kepala_unit'], 'Kesiapan Perawat');
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
         $response->assertSee('Pertanyaan Kesiapan');
@@ -930,7 +947,7 @@ class InterviewManagementTest extends TestCase
             ['keputusan' => 'lulus', 'ratings' => $ratings, 'readiness_answers' => $readinessAnswers]
         );
 
-        $response->assertRedirect(route('lowongan.wawancara.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $stage = $application->stages->firstWhere('key', 'wawancara_kepala_unit');
@@ -981,7 +998,7 @@ class InterviewManagementTest extends TestCase
         $hrRatings = $this->criteriaRatingsFor($vacancy, 'wawancara_manajer_hr');
         $application->refresh()->load('stages');
 
-        $response = $this->actingAs($hrManager)->get(route('lowongan.wawancara.show', [$vacancy, $application]));
+        $response = $this->actingAs($hrManager)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
         $response->assertSee('Hasil Wawancara Sebelumnya');

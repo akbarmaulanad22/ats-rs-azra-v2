@@ -286,7 +286,7 @@ class MbtiTestSubmissionTest extends TestCase
         ]);
 
         $response = $this->actingAs($unitHead)->get(
-            route('lowongan.wawancara.show', [$vacancyWithInterview, $application])
+            route('lowongan.pipeline.show', [$vacancyWithInterview, $application])
         );
 
         $response->assertOk();

@@ -95,10 +95,10 @@ class CvScreeningTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $this->makeApplication($vacancy);
 
-        $response = $this->actingAs($admin)->get(route('lowongan.skrining.index', $vacancy));
+        $response = $this->actingAs($admin)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertOk();
-        $response->assertViewIs('screening.index');
+        $response->assertViewIs('vacancies.pipeline');
     }
 
     public function test_unit_head_can_view_screening_list_for_own_unit(): void
@@ -114,7 +114,7 @@ class CvScreeningTest extends TestCase
             3 => ApplicationStageStatus::Pending,
         ]);
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.skrining.index', $vacancy));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertOk();
     }
@@ -127,7 +127,7 @@ class CvScreeningTest extends TestCase
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($otherUnit);
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.skrining.index', $vacancy));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertForbidden();
     }
@@ -139,7 +139,7 @@ class CvScreeningTest extends TestCase
         $unitHead = User::factory()->withRole(Role::UnitHead)->create();
         $vacancy = $this->createVacancy($unit);
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.skrining.index', $vacancy));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertForbidden();
     }
@@ -151,7 +151,7 @@ class CvScreeningTest extends TestCase
         $unit = Unit::factory()->create();
         $vacancy = $this->createVacancy($unit);
 
-        $response = $this->actingAs($employee)->get(route('lowongan.skrining.index', $vacancy));
+        $response = $this->actingAs($employee)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertForbidden();
     }
@@ -164,7 +164,7 @@ class CvScreeningTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeApplication($vacancy);
 
-        $response = $this->actingAs($admin)->get(route('lowongan.skrining.index', $vacancy));
+        $response = $this->actingAs($admin)->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertOk();
         $response->assertSee($application->candidate->nama_lengkap);
@@ -179,7 +179,7 @@ class CvScreeningTest extends TestCase
         $application = $this->makeApplication($vacancy);
 
         $response = $this->actingAs($admin)->get(
-            route('lowongan.skrining.index', ['lowongan' => $vacancy->id, 'status' => 'aktif'])
+            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'status' => 'aktif'])
         );
 
         $response->assertOk();
@@ -195,7 +195,7 @@ class CvScreeningTest extends TestCase
         $application = $this->makeApplication($vacancy);
 
         $response = $this->actingAs($admin)->get(
-            route('lowongan.skrining.index', ['lowongan' => $vacancy->id, 'status' => 'selesai'])
+            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'status' => 'selesai'])
         );
 
         $response->assertOk();
@@ -212,10 +212,10 @@ class CvScreeningTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeApplication($vacancy);
 
-        $response = $this->actingAs($admin)->get(route('lowongan.skrining.show', [$vacancy, $application]));
+        $response = $this->actingAs($admin)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
-        $response->assertViewIs('screening.show');
+        $response->assertViewIs('vacancies.pipeline-show');
         $response->assertSee($application->candidate->nama_lengkap);
     }
 
@@ -232,7 +232,7 @@ class CvScreeningTest extends TestCase
             3 => ApplicationStageStatus::Pending,
         ]);
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.skrining.show', [$vacancy, $application]));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertOk();
     }
@@ -246,7 +246,7 @@ class CvScreeningTest extends TestCase
         $vacancy = $this->createVacancy($otherUnit);
         $application = $this->makeApplication($vacancy);
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.skrining.show', [$vacancy, $application]));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
 
         $response->assertForbidden();
     }
@@ -266,7 +266,7 @@ class CvScreeningTest extends TestCase
             ['keputusan' => 'lulus', 'catatan' => 'CV bagus.']
         );
 
-        $response->assertRedirect(route('lowongan.skrining.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $skriningStage = $application->stages->firstWhere('key', 'skrining_cv_hr');
@@ -290,7 +290,7 @@ class CvScreeningTest extends TestCase
             ['keputusan' => 'gagal', 'catatan' => 'Tidak memenuhi kualifikasi.']
         );
 
-        $response->assertRedirect(route('lowongan.skrining.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $skriningStage = $application->stages->firstWhere('key', 'skrining_cv_hr');
@@ -312,7 +312,7 @@ class CvScreeningTest extends TestCase
             ['keputusan' => 'reserved', 'catatan' => 'Dipertimbangkan.']
         );
 
-        $response->assertRedirect(route('lowongan.skrining.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $skriningStage = $application->stages->firstWhere('key', 'skrining_cv_hr');
@@ -343,7 +343,7 @@ class CvScreeningTest extends TestCase
             ['keputusan' => 'lulus', 'catatan' => 'Kandidat potensial.']
         );
 
-        $response->assertRedirect(route('lowongan.skrining.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $unitHeadStage = $application->stages->firstWhere('key', 'skrining_cv_kepala_unit');
@@ -351,7 +351,7 @@ class CvScreeningTest extends TestCase
         $this->assertEquals('Kandidat potensial.', $unitHeadStage->catatan);
     }
 
-    public function test_unit_head_sees_only_candidates_at_unit_head_screening_stage(): void
+    public function test_pipeline_stage_filter_shows_only_candidates_at_unit_head_screening_stage(): void
     {
         $this->seedStages();
         $unit = Unit::factory()->create();
@@ -366,7 +366,9 @@ class CvScreeningTest extends TestCase
             3 => ApplicationStageStatus::Pending,
         ]);
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.skrining.index', $vacancy));
+        $response = $this->actingAs($unitHead)->get(
+            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'stage' => 'skrining_cv_kepala_unit'])
+        );
 
         $response->assertOk();
         $response->assertSee($hrPassedApplication->candidate->nama_lengkap);
@@ -487,7 +489,7 @@ class CvScreeningTest extends TestCase
             ['keputusan' => 'lulus']
         );
 
-        $response->assertRedirect(route('lowongan.skrining.index', $vacancy));
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
         $skriningStage = $application->stages->firstWhere('key', 'skrining_cv_hr');
@@ -501,7 +503,7 @@ class CvScreeningTest extends TestCase
         $unit = Unit::factory()->create();
         $vacancy = Vacancy::factory()->published()->create(['unit_id' => $unit->id]);
 
-        $response = $this->get(route('lowongan.skrining.index', $vacancy));
+        $response = $this->get(route('lowongan.pipeline', $vacancy));
 
         $response->assertRedirect(route('login'));
     }
