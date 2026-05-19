@@ -298,6 +298,36 @@ class InterviewTemplateTest extends TestCase
         $this->assertEquals(InterviewTemplateType::KriteriaPenilaian, $template->fresh()->tipe);
     }
 
+    public function test_update_validates_nama_unique_against_other_template(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        InterviewTemplate::factory()->create(['nama' => 'Existing Template']);
+        $template = InterviewTemplate::factory()->create(['nama' => 'My Template']);
+        InterviewTemplateItem::factory()->create(['interview_template_id' => $template->id]);
+
+        $response = $this->actingAs($admin)->put(route('template-wawancara.update', $template), [
+            'nama' => 'Existing Template',
+            'items' => [['teks' => 'Item']],
+        ]);
+
+        $response->assertSessionHasErrors('nama');
+    }
+
+    public function test_update_allows_keeping_own_nama(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $template = InterviewTemplate::factory()->create(['nama' => 'Keep This Name']);
+        InterviewTemplateItem::factory()->create(['interview_template_id' => $template->id]);
+
+        $response = $this->actingAs($admin)->put(route('template-wawancara.update', $template), [
+            'nama' => 'Keep This Name',
+            'items' => [['teks' => 'Item']],
+        ]);
+
+        $response->assertRedirect(route('template-wawancara.index'));
+        $response->assertSessionHasNoErrors();
+    }
+
     public function test_non_hr_admin_cannot_update_template(): void
     {
         $user = User::factory()->create(['role' => Role::Director]);

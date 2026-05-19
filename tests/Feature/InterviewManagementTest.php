@@ -326,6 +326,29 @@ class InterviewManagementTest extends TestCase
         ]);
     }
 
+    public function test_save_deduplicates_same_template_in_stage(): void
+    {
+        $this->seedStages();
+        $admin = User::factory()->hrAdmin()->create();
+        $unit = Unit::factory()->create();
+        $vacancy = $this->createVacancy($unit);
+
+        $template = InterviewTemplate::factory()->create();
+
+        $response = $this->actingAs($admin)->post(route('lowongan.kriteria-wawancara.save', $vacancy), [
+            'assignments' => [
+                'wawancara_kepala_unit' => [$template->id, $template->id],
+            ],
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals(1, VacancyInterviewTemplate::where([
+            'vacancy_id' => $vacancy->id,
+            'interview_template_id' => $template->id,
+            'stage_key' => 'wawancara_kepala_unit',
+        ])->count());
+    }
+
     public function test_non_admin_cannot_manage_vacancy_criteria(): void
     {
         $this->seedStages();
