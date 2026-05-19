@@ -65,7 +65,7 @@
                 <h2 class="text-sm font-semibold text-gray-800 mb-3">Dokumen</h2>
                 @if ($application->cv_path)
                     <a
-                        href="{{ Storage::url($application->cv_path) }}"
+                        href="{{ Storage::temporaryUrl($application->cv_path, now()->addMinutes(5)) }}"
                         target="_blank"
                         class="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-colors ease-out duration-150 w-full justify-center"
                     >
@@ -80,7 +80,7 @@
 
                 @if ($application->str_sip_path)
                     <a
-                        href="{{ Storage::url($application->str_sip_path) }}"
+                        href="{{ Storage::temporaryUrl($application->str_sip_path, now()->addMinutes(5)) }}"
                         target="_blank"
                         class="mt-2 inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors ease-out duration-150 w-full justify-center"
                     >
