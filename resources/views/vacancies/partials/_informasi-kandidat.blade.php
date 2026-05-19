@@ -5,7 +5,7 @@
 
 {{-- Section 1: Semua Lamaran Kandidat --}}
 <div class="bg-white rounded-xl border border-gray-100 p-5">
-    <h2 class="text-sm font-semibold text-gray-800 mb-3">Lowongan yang Dilamar</h2>
+    <h2 class="text-sm font-semibold text-gray-800 mb-3">Riwayat Lamaran Kandidat</h2>
     <div class="space-y-2">
         @foreach ($candidate->applications as $otherApp)
             @php
