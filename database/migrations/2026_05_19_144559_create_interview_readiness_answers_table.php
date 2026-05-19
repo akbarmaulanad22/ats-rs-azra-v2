@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('interview_result_id')->constrained()->cascadeOnDelete();
             $table->string('pertanyaan');
             $table->boolean('jawaban');
-            $table->unsignedBigInteger('interview_template_id')->nullable();
+            $table->foreignId('interview_template_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamps();
         });
     }

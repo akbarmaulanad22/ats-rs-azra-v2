@@ -170,7 +170,7 @@ class InterviewController extends Controller
                     $result->readinessAnswers()->create([
                         'interview_template_id' => $answer['interview_template_id'],
                         'pertanyaan' => $answer['pertanyaan'],
-                        'jawaban' => filter_var($answer['jawaban'], FILTER_VALIDATE_BOOLEAN),
+                        'jawaban' => $answer['jawaban'],
                     ]);
                 }
 

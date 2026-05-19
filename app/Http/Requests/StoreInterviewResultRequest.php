@@ -51,12 +51,13 @@ class StoreInterviewResultRequest extends FormRequest
 
         if ($readinessTemplates->isNotEmpty()) {
             $validReadinessTemplateIds = $readinessTemplates->pluck('id')->toArray();
+            $validReadinessTexts = $readinessTemplates->flatMap(fn ($t) => $t->items->pluck('teks'))->toArray();
             $expectedReadinessCount = $readinessTemplates->sum(fn ($t) => $t->items->count());
 
             $rules = array_merge($rules, [
                 'readiness_answers' => ['required', 'array', 'size:'.$expectedReadinessCount],
                 'readiness_answers.*.interview_template_id' => ['required', 'integer', Rule::in($validReadinessTemplateIds)],
-                'readiness_answers.*.pertanyaan' => ['required', 'string'],
+                'readiness_answers.*.pertanyaan' => ['required', 'string', 'max:255', Rule::in($validReadinessTexts)],
                 'readiness_answers.*.jawaban' => ['required', 'in:0,1,true,false'],
             ]);
         }
