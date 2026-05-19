@@ -66,7 +66,7 @@ class VacancyPolicy
         return false;
     }
 
-    public function manageInterviewCriteria(User $user, Vacancy $vacancy): bool
+    public function manageInterviewTemplates(User $user, Vacancy $vacancy): bool
     {
         return $user->role === Role::HrAdmin;
     }

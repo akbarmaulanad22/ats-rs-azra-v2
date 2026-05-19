@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
-class VacancyInterviewCriteriaController extends Controller
+class VacancyInterviewTemplateController extends Controller
 {
     public function show(Vacancy $lowongan): View
     {
-        Gate::authorize('manageInterviewCriteria', $lowongan);
+        Gate::authorize('manageInterviewTemplates', $lowongan);
 
         $lowongan->load('workflowTemplateSnapshot.stages');
 
@@ -29,7 +29,7 @@ class VacancyInterviewCriteriaController extends Controller
 
         $templates = InterviewTemplate::orderBy('nama')->get();
 
-        return view('vacancy-interview-criteria.show', [
+        return view('vacancy-interview-templates.show', [
             'lowongan' => $lowongan,
             'wawancaraStages' => $wawancaraStages,
             'assigned' => $assigned,
@@ -39,7 +39,7 @@ class VacancyInterviewCriteriaController extends Controller
 
     public function save(Request $request, Vacancy $lowongan): RedirectResponse
     {
-        Gate::authorize('manageInterviewCriteria', $lowongan);
+        Gate::authorize('manageInterviewTemplates', $lowongan);
 
         $lowongan->load('workflowTemplateSnapshot.stages');
 
@@ -72,7 +72,7 @@ class VacancyInterviewCriteriaController extends Controller
             }
         });
 
-        return redirect()->route('lowongan.kriteria-wawancara.show', $lowongan)
+        return redirect()->route('lowongan.template-wawancara.show', $lowongan)
             ->with('success', 'Template wawancara berhasil disimpan.');
     }
 }

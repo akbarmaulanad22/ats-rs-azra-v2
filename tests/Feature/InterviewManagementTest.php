@@ -9,7 +9,6 @@ use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Candidate;
 use App\Models\Employee;
-use App\Models\InterviewCriteria;
 use App\Models\InterviewResult;
 use App\Models\InterviewTemplate;
 use App\Models\InterviewTemplateItem;
@@ -17,7 +16,6 @@ use App\Models\Stage;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vacancy;
-use App\Models\VacancyInterviewCriteria;
 use App\Models\VacancyInterviewTemplate;
 use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
@@ -32,7 +30,6 @@ class InterviewManagementTest extends TestCase
     {
         $this->artisan('db:seed', ['--class' => 'StageSeeder']);
         $this->artisan('db:seed', ['--class' => 'EmailTemplateSeeder']);
-        $this->artisan('db:seed', ['--class' => 'InterviewCriteriaSeeder']);
     }
 
     private function createVacancy(Unit $unit, array $stageKeys = ['lamaran', 'skrining_cv_hr', 'wawancara_kepala_unit', 'wawancara_manajer_hr', 'wawancara_direktur', 'onboarding']): Vacancy
@@ -51,16 +48,6 @@ class InterviewManagementTest extends TestCase
             'unit_id' => $unit->id,
             'workflow_template_snapshot_id' => $snapshot->id,
         ]);
-
-        $globalCriteria = InterviewCriteria::all();
-        foreach ($globalCriteria as $criterion) {
-            VacancyInterviewCriteria::create([
-                'vacancy_id' => $vacancy->id,
-                'stage_key' => $criterion->stage_key,
-                'nama' => $criterion->nama,
-                'urutan' => $criterion->urutan,
-            ]);
-        }
 
         return $vacancy;
     }
@@ -215,87 +202,7 @@ class InterviewManagementTest extends TestCase
         return $ratings;
     }
 
-    // ── Global Criteria CRUD ──────────────────────────────────────────────────
-
-    public function test_hr_admin_can_view_global_criteria_index(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-
-        $response = $this->actingAs($admin)->get(route('kriteria-wawancara.index'));
-
-        $response->assertOk();
-        $response->assertViewIs('interview-criteria.index');
-    }
-
-    public function test_non_admin_cannot_view_global_criteria_index(): void
-    {
-        $this->seedStages();
-        $unit = Unit::factory()->create();
-        $unitHead = $this->makeUnitHead($unit);
-
-        $response = $this->actingAs($unitHead)->get(route('kriteria-wawancara.index'));
-
-        $response->assertForbidden();
-    }
-
-    public function test_hr_admin_can_create_global_criterion(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-
-        $response = $this->actingAs($admin)->post(route('kriteria-wawancara.store'), [
-            'stage_key' => 'wawancara_kepala_unit',
-            'nama' => 'Kemampuan Analitis',
-        ]);
-
-        $response->assertRedirect(route('kriteria-wawancara.index'));
-        $this->assertDatabaseHas('interview_criteria', [
-            'stage_key' => 'wawancara_kepala_unit',
-            'nama' => 'Kemampuan Analitis',
-        ]);
-    }
-
-    public function test_hr_admin_can_update_global_criterion(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-        $criterion = InterviewCriteria::factory()->create(['stage_key' => 'wawancara_kepala_unit', 'nama' => 'Old Name']);
-
-        $response = $this->actingAs($admin)->put(route('kriteria-wawancara.update', $criterion), [
-            'nama' => 'New Name',
-        ]);
-
-        $response->assertRedirect(route('kriteria-wawancara.index'));
-        $this->assertDatabaseHas('interview_criteria', ['id' => $criterion->id, 'nama' => 'New Name']);
-    }
-
-    public function test_hr_admin_can_delete_global_criterion(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-        $criterion = InterviewCriteria::factory()->create(['stage_key' => 'wawancara_kepala_unit']);
-
-        $response = $this->actingAs($admin)->delete(route('kriteria-wawancara.destroy', $criterion));
-
-        $response->assertRedirect(route('kriteria-wawancara.index'));
-        $this->assertDatabaseMissing('interview_criteria', ['id' => $criterion->id]);
-    }
-
-    public function test_create_criterion_requires_valid_stage_key(): void
-    {
-        $this->seedStages();
-        $admin = User::factory()->hrAdmin()->create();
-
-        $response = $this->actingAs($admin)->post(route('kriteria-wawancara.store'), [
-            'stage_key' => 'invalid_stage',
-            'nama' => 'Test',
-        ]);
-
-        $response->assertSessionHasErrors('stage_key');
-    }
-
-    // ── Per-Vacancy Criteria Override ─────────────────────────────────────────
+    // ── Per-Vacancy Template Assignment ──────────────────────────────────────
 
     public function test_hr_admin_can_view_vacancy_criteria_page(): void
     {
@@ -304,10 +211,10 @@ class InterviewManagementTest extends TestCase
         $unit = Unit::factory()->create();
         $vacancy = $this->createVacancy($unit);
 
-        $response = $this->actingAs($admin)->get(route('lowongan.kriteria-wawancara.show', $vacancy));
+        $response = $this->actingAs($admin)->get(route('lowongan.template-wawancara.show', $vacancy));
 
         $response->assertOk();
-        $response->assertViewIs('vacancy-interview-criteria.show');
+        $response->assertViewIs('vacancy-interview-templates.show');
     }
 
     public function test_hr_admin_can_save_vacancy_template_assignments(): void
@@ -320,14 +227,14 @@ class InterviewManagementTest extends TestCase
         $templateA = InterviewTemplate::factory()->kriteriaPenilaian()->create();
         $templateB = InterviewTemplate::factory()->kesiapan()->create();
 
-        $response = $this->actingAs($admin)->post(route('lowongan.kriteria-wawancara.save', $vacancy), [
+        $response = $this->actingAs($admin)->post(route('lowongan.template-wawancara.save', $vacancy), [
             'assignments' => [
                 'wawancara_kepala_unit' => [$templateA->id, $templateB->id],
                 'wawancara_manajer_hr' => [$templateA->id],
             ],
         ]);
 
-        $response->assertRedirect(route('lowongan.kriteria-wawancara.show', $vacancy));
+        $response->assertRedirect(route('lowongan.template-wawancara.show', $vacancy));
         $this->assertDatabaseHas('vacancy_interview_templates', [
             'vacancy_id' => $vacancy->id,
             'interview_template_id' => $templateA->id,
@@ -359,11 +266,11 @@ class InterviewManagementTest extends TestCase
             'stage_key' => 'wawancara_kepala_unit',
         ]);
 
-        $response = $this->actingAs($admin)->post(route('lowongan.kriteria-wawancara.save', $vacancy), [
+        $response = $this->actingAs($admin)->post(route('lowongan.template-wawancara.save', $vacancy), [
             'assignments' => [],
         ]);
 
-        $response->assertRedirect(route('lowongan.kriteria-wawancara.show', $vacancy));
+        $response->assertRedirect(route('lowongan.template-wawancara.show', $vacancy));
         $this->assertDatabaseMissing('vacancy_interview_templates', [
             'vacancy_id' => $vacancy->id,
         ]);
@@ -378,7 +285,7 @@ class InterviewManagementTest extends TestCase
 
         $template = InterviewTemplate::factory()->create();
 
-        $response = $this->actingAs($admin)->post(route('lowongan.kriteria-wawancara.save', $vacancy), [
+        $response = $this->actingAs($admin)->post(route('lowongan.template-wawancara.save', $vacancy), [
             'assignments' => [
                 'invalid_stage' => [$template->id],
                 'wawancara_kepala_unit' => [$template->id],
@@ -405,7 +312,7 @@ class InterviewManagementTest extends TestCase
 
         $template = InterviewTemplate::factory()->create();
 
-        $response = $this->actingAs($admin)->post(route('lowongan.kriteria-wawancara.save', $vacancy), [
+        $response = $this->actingAs($admin)->post(route('lowongan.template-wawancara.save', $vacancy), [
             'assignments' => [
                 'wawancara_kepala_unit' => [$template->id, $template->id],
             ],
@@ -426,7 +333,7 @@ class InterviewManagementTest extends TestCase
         $unitHead = $this->makeUnitHead($unit);
         $vacancy = $this->createVacancy($unit);
 
-        $response = $this->actingAs($unitHead)->get(route('lowongan.kriteria-wawancara.show', $vacancy));
+        $response = $this->actingAs($unitHead)->get(route('lowongan.template-wawancara.show', $vacancy));
 
         $response->assertForbidden();
     }

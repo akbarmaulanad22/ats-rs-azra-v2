@@ -60,11 +60,6 @@ class Vacancy extends Model
         return $this->hasOne(VacancyTest::class);
     }
 
-    public function interviewCriteria(): HasMany
-    {
-        return $this->hasMany(VacancyInterviewCriteria::class)->orderBy('stage_key')->orderBy('urutan');
-    }
-
     public function interviewTemplates(): BelongsToMany
     {
         return $this->belongsToMany(InterviewTemplate::class, 'vacancy_interview_templates')
