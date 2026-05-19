@@ -16,6 +16,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewCriteriaController;
 use App\Http\Controllers\InterviewScheduleController;
+use App\Http\Controllers\InterviewTemplateController;
 use App\Http\Controllers\MbtiTestController;
 use App\Http\Controllers\McuController;
 use App\Http\Controllers\NotifikasiController;
@@ -94,6 +95,10 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('template-bank-soal', QuestionBankTemplateController::class)
         ->parameters(['template-bank-soal' => 'templateBankSoal'])
+        ->except(['show']);
+
+    Route::resource('template-wawancara', InterviewTemplateController::class)
+        ->parameters(['template-wawancara' => 'templateWawancara'])
         ->except(['show']);
 
     Route::get('/lowongan/{lowongan}/tes', [VacancyTestController::class, 'show'])->name('lowongan.tes.show');

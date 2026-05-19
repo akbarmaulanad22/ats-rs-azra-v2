@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             UnitSeeder::class,
             EmailTemplateSeeder::class,
             InterviewCriteriaSeeder::class,
+            InterviewTemplateSeeder::class,
             DiscQuestionSeeder::class,
         ]);
     }
