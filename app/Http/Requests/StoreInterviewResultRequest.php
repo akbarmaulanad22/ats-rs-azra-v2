@@ -8,9 +8,12 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreInterviewResultRequest extends FormRequest
 {
+    private ?Collection $assignedTemplates = null;
+
     public function authorize(): bool
     {
         return true;
@@ -43,8 +46,26 @@ class StoreInterviewResultRequest extends FormRequest
         ]);
     }
 
+    /**
+     * @return array<int, \Closure>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if ($this->resolveAssignedTemplates()->isEmpty()) {
+                    $validator->errors()->add('interview', 'Belum ada kriteria, hubungi HR Admin.');
+                }
+            },
+        ];
+    }
+
     private function resolveAssignedTemplates(): Collection
     {
+        if ($this->assignedTemplates !== null) {
+            return $this->assignedTemplates;
+        }
+
         $vacancy = $this->route('lowongan');
         $stageKey = match ($this->user()->role) {
             Role::UnitHead => 'wawancara_kepala_unit',
@@ -53,7 +74,7 @@ class StoreInterviewResultRequest extends FormRequest
             default => 'wawancara_kepala_unit',
         };
 
-        return $vacancy->interviewTemplates()
+        return $this->assignedTemplates = $vacancy->interviewTemplates()
             ->wherePivot('stage_key', $stageKey)
             ->where('tipe', InterviewTemplateType::KriteriaPenilaian)
             ->with('items')

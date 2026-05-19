@@ -134,15 +134,6 @@ class InterviewController extends Controller
             return back()->withErrors(['interview' => 'Hasil wawancara sudah direkam sebelumnya.']);
         }
 
-        $hasTemplates = $lowongan->interviewTemplates()
-            ->wherePivot('stage_key', $stageKey)
-            ->where('tipe', InterviewTemplateType::KriteriaPenilaian)
-            ->exists();
-
-        if (! $hasTemplates) {
-            return back()->withErrors(['interview' => 'Belum ada kriteria, hubungi HR Admin.']);
-        }
-
         $keputusan = $request->input('keputusan');
         $catatan = $request->input('catatan');
         $ratings = $request->input('ratings', []);
