@@ -10,11 +10,13 @@ use App\Models\Candidate;
 use App\Models\Employee;
 use App\Models\InterviewCriteria;
 use App\Models\InterviewResult;
+use App\Models\InterviewTemplate;
 use App\Models\Stage;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Models\VacancyInterviewCriteria;
+use App\Models\VacancyInterviewTemplate;
 use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -238,52 +240,113 @@ class InterviewManagementTest extends TestCase
         $response->assertViewIs('vacancy-interview-criteria.show');
     }
 
-    public function test_hr_admin_can_save_vacancy_criteria(): void
+    public function test_hr_admin_can_save_vacancy_template_assignments(): void
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
         $unit = Unit::factory()->create();
         $vacancy = $this->createVacancy($unit);
 
+        $templateA = InterviewTemplate::factory()->kriteriaPenilaian()->create();
+        $templateB = InterviewTemplate::factory()->kesiapan()->create();
+
         $response = $this->actingAs($admin)->post(route('lowongan.kriteria-wawancara.save', $vacancy), [
-            'criteria' => [
-                'wawancara_kepala_unit' => [
-                    ['nama' => 'Kriteria Baru A'],
-                    ['nama' => 'Kriteria Baru B'],
-                ],
-                'wawancara_manajer_hr' => [
-                    ['nama' => 'Kriteria HR A'],
-                ],
-                'wawancara_direktur' => [
-                    ['nama' => 'Kriteria Dir A'],
-                ],
+            'assignments' => [
+                'wawancara_kepala_unit' => [$templateA->id, $templateB->id],
+                'wawancara_manajer_hr' => [$templateA->id],
             ],
         ]);
 
         $response->assertRedirect(route('lowongan.kriteria-wawancara.show', $vacancy));
-        $this->assertDatabaseHas('vacancy_interview_criteria', [
+        $this->assertDatabaseHas('vacancy_interview_templates', [
             'vacancy_id' => $vacancy->id,
+            'interview_template_id' => $templateA->id,
             'stage_key' => 'wawancara_kepala_unit',
-            'nama' => 'Kriteria Baru A',
         ]);
-        $this->assertDatabaseHas('vacancy_interview_criteria', [
+        $this->assertDatabaseHas('vacancy_interview_templates', [
             'vacancy_id' => $vacancy->id,
+            'interview_template_id' => $templateB->id,
             'stage_key' => 'wawancara_kepala_unit',
-            'nama' => 'Kriteria Baru B',
-            'urutan' => 2,
+        ]);
+        $this->assertDatabaseHas('vacancy_interview_templates', [
+            'vacancy_id' => $vacancy->id,
+            'interview_template_id' => $templateA->id,
+            'stage_key' => 'wawancara_manajer_hr',
         ]);
     }
 
-    public function test_vacancy_creation_snapshots_global_criteria(): void
+    public function test_save_with_empty_assignments_clears_all(): void
     {
         $this->seedStages();
         $admin = User::factory()->hrAdmin()->create();
         $unit = Unit::factory()->create();
-
-        $globalCount = InterviewCriteria::count();
         $vacancy = $this->createVacancy($unit);
 
-        $this->assertEquals($globalCount, $vacancy->interviewCriteria()->count());
+        $template = InterviewTemplate::factory()->create();
+        VacancyInterviewTemplate::create([
+            'vacancy_id' => $vacancy->id,
+            'interview_template_id' => $template->id,
+            'stage_key' => 'wawancara_kepala_unit',
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('lowongan.kriteria-wawancara.save', $vacancy), [
+            'assignments' => [],
+        ]);
+
+        $response->assertRedirect(route('lowongan.kriteria-wawancara.show', $vacancy));
+        $this->assertDatabaseMissing('vacancy_interview_templates', [
+            'vacancy_id' => $vacancy->id,
+        ]);
+    }
+
+    public function test_save_ignores_invalid_stage_key(): void
+    {
+        $this->seedStages();
+        $admin = User::factory()->hrAdmin()->create();
+        $unit = Unit::factory()->create();
+        $vacancy = $this->createVacancy($unit);
+
+        $template = InterviewTemplate::factory()->create();
+
+        $response = $this->actingAs($admin)->post(route('lowongan.kriteria-wawancara.save', $vacancy), [
+            'assignments' => [
+                'invalid_stage' => [$template->id],
+                'wawancara_kepala_unit' => [$template->id],
+            ],
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('vacancy_interview_templates', [
+            'vacancy_id' => $vacancy->id,
+            'stage_key' => 'invalid_stage',
+        ]);
+        $this->assertDatabaseHas('vacancy_interview_templates', [
+            'vacancy_id' => $vacancy->id,
+            'stage_key' => 'wawancara_kepala_unit',
+        ]);
+    }
+
+    public function test_save_deduplicates_same_template_in_stage(): void
+    {
+        $this->seedStages();
+        $admin = User::factory()->hrAdmin()->create();
+        $unit = Unit::factory()->create();
+        $vacancy = $this->createVacancy($unit);
+
+        $template = InterviewTemplate::factory()->create();
+
+        $response = $this->actingAs($admin)->post(route('lowongan.kriteria-wawancara.save', $vacancy), [
+            'assignments' => [
+                'wawancara_kepala_unit' => [$template->id, $template->id],
+            ],
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals(1, VacancyInterviewTemplate::where([
+            'vacancy_id' => $vacancy->id,
+            'interview_template_id' => $template->id,
+            'stage_key' => 'wawancara_kepala_unit',
+        ])->count());
     }
 
     public function test_non_admin_cannot_manage_vacancy_criteria(): void
