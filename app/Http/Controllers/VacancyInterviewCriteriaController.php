@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InterviewTemplate;
 use App\Models\Vacancy;
-use App\Models\VacancyInterviewCriteria;
+use App\Models\VacancyInterviewTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,26 +13,27 @@ use Illuminate\View\View;
 
 class VacancyInterviewCriteriaController extends Controller
 {
-    private const STAGE_KEYS = [
-        'wawancara_kepala_unit' => 'Wawancara Kepala Unit',
-        'wawancara_manajer_hr' => 'Wawancara Manajer HR',
-        'wawancara_direktur' => 'Wawancara Direktur',
-    ];
-
     public function show(Vacancy $lowongan): View
     {
         Gate::authorize('manageInterviewCriteria', $lowongan);
 
-        $criteria = $lowongan->interviewCriteria()
-            ->orderBy('stage_key')
-            ->orderBy('urutan')
+        $lowongan->load('workflowTemplateSnapshot.stages');
+
+        $wawancaraStages = $lowongan->workflowTemplateSnapshot->stages
+            ->filter(fn ($s) => str_starts_with($s->key, 'wawancara_'));
+
+        $assigned = VacancyInterviewTemplate::where('vacancy_id', $lowongan->id)
+            ->with('interviewTemplate')
             ->get()
             ->groupBy('stage_key');
 
+        $templates = InterviewTemplate::orderBy('nama')->get();
+
         return view('vacancy-interview-criteria.show', [
             'lowongan' => $lowongan,
-            'criteria' => $criteria,
-            'stageKeys' => self::STAGE_KEYS,
+            'wawancaraStages' => $wawancaraStages,
+            'assigned' => $assigned,
+            'templates' => $templates,
         ]);
     }
 
@@ -39,32 +41,38 @@ class VacancyInterviewCriteriaController extends Controller
     {
         Gate::authorize('manageInterviewCriteria', $lowongan);
 
+        $lowongan->load('workflowTemplateSnapshot.stages');
+
+        $validStageKeys = $lowongan->workflowTemplateSnapshot->stages
+            ->filter(fn ($s) => str_starts_with($s->key, 'wawancara_'))
+            ->pluck('key')
+            ->toArray();
+
         $validated = $request->validate([
-            'criteria' => ['required', 'array'],
-            'criteria.*' => ['array'],
-            'criteria.*.*.nama' => ['required', 'string', 'max:255'],
+            'assignments' => ['nullable', 'array'],
+            'assignments.*' => ['array'],
+            'assignments.*.*' => ['integer', 'exists:interview_templates,id'],
         ]);
 
-        DB::transaction(function () use ($lowongan, $validated): void {
-            $lowongan->interviewCriteria()->delete();
+        DB::transaction(function () use ($lowongan, $validated, $validStageKeys): void {
+            VacancyInterviewTemplate::where('vacancy_id', $lowongan->id)->delete();
 
-            foreach ($validated['criteria'] as $stageKey => $items) {
-                if (! array_key_exists($stageKey, self::STAGE_KEYS)) {
+            foreach ($validated['assignments'] ?? [] as $stageKey => $templateIds) {
+                if (! in_array($stageKey, $validStageKeys, true)) {
                     continue;
                 }
 
-                foreach (array_values($items) as $urutan => $item) {
-                    VacancyInterviewCriteria::create([
+                foreach (array_unique($templateIds) as $templateId) {
+                    VacancyInterviewTemplate::create([
                         'vacancy_id' => $lowongan->id,
+                        'interview_template_id' => $templateId,
                         'stage_key' => $stageKey,
-                        'nama' => $item['nama'],
-                        'urutan' => $urutan + 1,
                     ]);
                 }
             }
         });
 
         return redirect()->route('lowongan.kriteria-wawancara.show', $lowongan)
-            ->with('success', 'Kriteria wawancara berhasil disimpan.');
+            ->with('success', 'Template wawancara berhasil disimpan.');
     }
 }
