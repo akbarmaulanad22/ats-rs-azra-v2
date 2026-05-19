@@ -264,6 +264,47 @@ class CompetencyTestEngineTest extends TestCase
         $this->assertDatabaseHas('vacancy_test_snapshots', ['batas_waktu_menit' => 45]);
     }
 
+    public function test_hr_admin_can_toggle_questions_after_template_selection(): void
+    {
+        $this->seedStages();
+        $admin = $this->hrAdmin();
+        $unit = Unit::factory()->create();
+        ['vacancy' => $vacancy, 'question' => $question, 'essayQuestion' => $essayQuestion] = $this->createVacancyWithTest($unit);
+
+        $response = $this->actingAs($admin)->post(route('lowongan.tes.save', $vacancy), [
+            'batas_waktu_menit' => 30,
+            'question_ids' => [$essayQuestion->id],
+        ]);
+
+        $response->assertRedirect(route('lowongan.tes.show', $vacancy));
+        $vacancy->refresh();
+        $vacancyTest = $vacancy->vacancyTest;
+        $this->assertEquals(1, $vacancyTest->questions()->count());
+        $this->assertDatabaseHas('vacancy_test_questions', ['vacancy_test_id' => $vacancyTest->id, 'question_id' => $essayQuestion->id]);
+        $this->assertDatabaseMissing('vacancy_test_questions', ['vacancy_test_id' => $vacancyTest->id, 'question_id' => $question->id]);
+    }
+
+    public function test_delete_template_used_by_vacancy_preserves_snapshot(): void
+    {
+        $this->seedStages();
+        $admin = $this->hrAdmin();
+        $unit = Unit::factory()->create();
+        ['vacancy' => $vacancy, 'testSnapshot' => $testSnapshot] = $this->createVacancyWithTest($unit);
+
+        $template = QuestionBankTemplate::first();
+        $snapshotQuestionCount = $testSnapshot->questions()->count();
+
+        $response = $this->actingAs($admin)->delete(route('template-bank-soal.destroy', $template));
+
+        $response->assertRedirect(route('template-bank-soal.index'));
+        $this->assertDatabaseMissing('question_bank_templates', ['id' => $template->id]);
+        $this->assertDatabaseMissing('questions', ['question_bank_template_id' => $template->id]);
+
+        $testSnapshot->refresh();
+        $this->assertEquals($snapshotQuestionCount, $testSnapshot->questions()->count());
+        $this->assertDatabaseHas('vacancy_test_snapshots', ['id' => $testSnapshot->id]);
+    }
+
     // ===== Candidate Test-Taking =====
 
     public function test_candidate_can_access_test_via_token(): void
