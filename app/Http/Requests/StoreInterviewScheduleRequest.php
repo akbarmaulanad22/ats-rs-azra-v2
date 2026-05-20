@@ -15,8 +15,8 @@ class StoreInterviewScheduleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'jadwal_interview' => ['required', 'date', 'after:now'],
-            'lokasi_interview' => ['required', 'string', 'max:255'],
+            'jadwal' => ['required', 'date', 'after:now'],
+            'lokasi' => ['required', 'string', 'max:255'],
         ];
     }
 }

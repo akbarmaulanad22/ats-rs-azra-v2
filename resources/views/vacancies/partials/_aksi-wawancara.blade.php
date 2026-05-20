@@ -93,17 +93,17 @@
             <div class="space-y-3 mb-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Tanggal & Waktu <span class="text-red-500">*</span></label>
-                    <input type="datetime-local" name="jadwal_interview" required
+                    <input type="datetime-local" name="jadwal" required
                         class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
-                    @error('jadwal_interview')
+                    @error('jadwal')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Lokasi <span class="text-red-500">*</span></label>
-                    <input type="text" name="lokasi_interview" required placeholder="Ruang Meeting Lt. 3 / Link Google Meet"
+                    <input type="text" name="lokasi" required placeholder="Ruang Meeting Lt. 3 / Link Google Meet"
                         class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
-                    @error('lokasi_interview')
+                    @error('lokasi')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>

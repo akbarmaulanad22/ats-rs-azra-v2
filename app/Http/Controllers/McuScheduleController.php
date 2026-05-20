@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ApplicationStageStatus;
 use App\Http\Requests\StoreMcuScheduleRequest;
 use App\Models\Application;
 use App\Models\Vacancy;
@@ -22,12 +21,9 @@ class McuScheduleController extends Controller
 
         $application->load(['candidate', 'vacancy', 'stages']);
 
-        $mcuStage = $application->stages
-            ->where('key', 'mcu')
-            ->where('status', ApplicationStageStatus::Aktif)
-            ->first();
+        $mcuStage = $application->stages->firstWhere('key', 'mcu');
 
-        if (! $mcuStage) {
+        if (! $mcuStage || ! $mcuStage->status->isAdvanceable()) {
             return back()->withErrors(['jadwal' => 'Tidak ada tahap MCU aktif untuk kandidat ini.']);
         }
 

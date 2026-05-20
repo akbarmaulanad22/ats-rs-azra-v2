@@ -42,8 +42,8 @@ class InterviewScheduleController extends Controller
         }
 
         $stage->update([
-            'jadwal' => $request->input('jadwal_interview'),
-            'lokasi' => $request->input('lokasi_interview'),
+            'jadwal' => $request->input('jadwal'),
+            'lokasi' => $request->input('lokasi'),
         ]);
 
         $stage->refresh();

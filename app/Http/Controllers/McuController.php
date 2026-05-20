@@ -62,7 +62,7 @@ class McuController extends Controller
                     McuStatus::Ditangguhkan => $this->pipelineService->reserve($application),
                 };
             });
-        } catch (\RuntimeException $e) {
+        } catch (\Throwable $e) {
             if ($path) {
                 Storage::disk('public')->delete($path);
             }
