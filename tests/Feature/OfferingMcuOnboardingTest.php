@@ -144,13 +144,18 @@ class OfferingMcuOnboardingTest extends TestCase
         $this->assertDatabaseHas('application_stages', [
             'application_id' => $application->id,
             'key' => 'surat_penawaran',
-            'status' => ApplicationStageStatus::Selesai,
+            'status' => ApplicationStageStatus::Aktif,
+        ]);
+
+        $this->assertDatabaseHas('offering_letters', [
+            'application_id' => $application->id,
+            'status' => 'pending',
         ]);
 
         $this->assertDatabaseHas('application_stages', [
             'application_id' => $application->id,
             'key' => 'mcu',
-            'status' => ApplicationStageStatus::Aktif,
+            'status' => ApplicationStageStatus::Pending,
         ]);
     }
 

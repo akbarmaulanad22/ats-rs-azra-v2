@@ -20,6 +20,7 @@ use App\Http\Controllers\MbtiTestController;
 use App\Http\Controllers\McuController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\OfferingLetterController;
+use App\Http\Controllers\OfferingResponseController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuestionBankTemplateController;
 use App\Http\Controllers\TestController;
@@ -55,6 +56,9 @@ Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])-
 Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])->name('karier.lamar.store')->middleware('throttle:5,1');
 Route::get('/karier/lamaran/{token}', [ApplicationController::class, 'confirmation'])->name('karier.lamaran.konfirmasi');
 Route::get('/lamaran/{token}', [CandidateStatusController::class, 'show'])->name('karier.lamaran.status');
+
+Route::match(['get', 'post'], '/penawaran/{offering}/terima', [OfferingResponseController::class, 'accept'])->name('offering.accept')->middleware('signed');
+Route::match(['get', 'post'], '/penawaran/{offering}/tolak', [OfferingResponseController::class, 'reject'])->name('offering.reject')->middleware('signed');
 
 Route::middleware('auth')->group(function () {
     Route::get('/ubah-password', [PasswordChangeController::class, 'show'])->name('password.change');
