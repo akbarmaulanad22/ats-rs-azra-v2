@@ -93,7 +93,11 @@
         {{-- Right: Stage action panel (3/5 width) --}}
         <div class="lg:col-span-3 space-y-4">
 
-            @if (!$isUserPic && $picLabel)
+            @if (!$currentStage)
+                <div class="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400">
+                    Tidak ada tahap aktif untuk kandidat ini.
+                </div>
+            @elseif (!$isUserPic && $picLabel)
                 <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2.5">
                     <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -101,12 +105,6 @@
                     <p class="text-xs text-amber-700">
                         Anda bukan penanggung jawab tahap ini. Tahap <span class="font-medium">{{ $currentStage->nama }}</span> ditangani oleh <span class="font-medium">{{ $picLabel }}</span>.
                     </p>
-                </div>
-            @endif
-
-            @if (!$currentStage)
-                <div class="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400">
-                    Tidak ada tahap aktif untuk kandidat ini.
                 </div>
             @else
                 @php $stageKey = $currentStage->key; @endphp
