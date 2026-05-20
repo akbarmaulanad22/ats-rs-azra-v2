@@ -252,6 +252,26 @@
                 </div>
             @endif
 
+            @if (session('warning'))
+                <div
+                    class="mb-4 rounded-lg bg-amber-50 border border-amber-200 p-4 flex items-start justify-between gap-3 transition-opacity duration-500 cursor-alias"
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-init="setTimeout(() => show = false, 4000)"
+                >
+                    <p class="text-sm text-amber-700">{{ session('warning') }}</p>
+                    <button
+                        @click="show = false"
+                        class="text-amber-500 hover:text-amber-700 transition-colors shrink-0 -mt-0.5 cursor-pointer"
+                        aria-label="Tutup"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            @endif
+
             {{ $slot }}
         </div>
     </main>

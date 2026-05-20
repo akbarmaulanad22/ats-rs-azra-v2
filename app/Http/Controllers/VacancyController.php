@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EmploymentType;
+use App\Enums\Role;
 use App\Enums\VacancyStatus;
 use App\Http\Requests\StoreVacancyRequest;
 use App\Http\Requests\UpdateVacancyRequest;
@@ -21,7 +22,21 @@ class VacancyController extends Controller
     {
         Gate::authorize('viewAny', Vacancy::class);
 
-        $vacancies = Vacancy::with(['unit', 'workflowTemplateSnapshot'])
+        $user = auth()->user();
+        $query = Vacancy::with(['unit', 'workflowTemplateSnapshot']);
+
+        if ($user->hasRole(Role::UnitHead)) {
+            $employee = $user->employee;
+            $unit = $employee ? Unit::where('nama', $employee->unit)->first() : null;
+
+            if (! $unit) {
+                session()->flash('warning', 'Unit Anda tidak ditemukan. Hubungi Admin HR untuk memperbaiki data.');
+            }
+
+            $query->where('unit_id', $unit?->id ?? 0);
+        }
+
+        $vacancies = $query
             ->when(
                 $request->q,
                 fn ($q, $search) => $q->whereRaw('LOWER(judul_posisi) LIKE ?', ['%'.strtolower(str_replace(['%', '_'], ['\%', '\_'], $search)).'%']),
