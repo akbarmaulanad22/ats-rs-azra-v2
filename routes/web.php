@@ -5,7 +5,6 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationPipelineController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\CandidateExportController;
-use App\Http\Controllers\CandidateMcuController;
 use App\Http\Controllers\CandidateStatusController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CvScreeningController;
@@ -37,9 +36,6 @@ Route::get('/', fn () => auth()->check()
     ? redirect()->route('dashboard')
     : redirect()->route('login')
 );
-
-Route::get('/lamaran/{token}/mcu', [CandidateMcuController::class, 'show'])->name('kandidat.mcu.upload');
-Route::post('/lamaran/{token}/mcu', [CandidateMcuController::class, 'upload'])->name('kandidat.mcu.upload.store')->middleware('throttle:10,1');
 
 Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show');
 Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:5,1');
