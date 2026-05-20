@@ -13,26 +13,35 @@
         </button>
     </div>
 
-    <div class="space-y-2">
+    <div class="space-y-1.5">
         <template x-for="(item, index) in items" :key="index">
-            <div class="flex items-center gap-3">
+            <div
+                class="flex items-center gap-2 px-3 py-2 bg-primary/5 border border-primary/20 rounded-lg transition-colors cursor-grab active:cursor-grabbing"
+                :class="dragOverIndex === index && dragIndex !== index ? 'border-primary border-dashed bg-primary/10' : ''"
+                draggable="true"
+                @dragstart="onDragStart($event, index)"
+                @dragover.prevent="onDragOver($event, index)"
+                @dragleave="dragOverIndex = null"
+                @drop.prevent="onDrop($event, index)"
+                @dragend="dragIndex = null; dragOverIndex = null"
+            >
+                <span class="text-gray-300 shrink-0" title="Seret untuk mengatur ulang">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 6a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4zm8-16a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4z"/>
+                    </svg>
+                </span>
+
                 <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0" x-text="index + 1"></span>
+
                 <input type="text" x-model="item.teks" placeholder="Teks item..."
                     class="flex-1 text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-white focus-ring">
-                <div class="flex items-center gap-1">
-                    <button type="button" @click="moveUp(index)" x-show="index > 0"
-                        class="p-1 text-gray-400 hover:text-primary rounded transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
-                    </button>
-                    <button type="button" @click="moveDown(index)" x-show="index < items.length - 1"
-                        class="p-1 text-gray-400 hover:text-primary rounded transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <button type="button" @click="removeItem(index)" x-show="items.length > 1"
-                        class="p-1 text-red-400 hover:text-red-600 rounded transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
-                </div>
+
+                <button type="button" @click="removeItem(index)" x-show="items.length > 1"
+                    class="p-1 rounded text-red-400/60 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
         </template>
     </div>
@@ -44,21 +53,38 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('itemForm', (initialItems) => ({
             items: initialItems && initialItems.length ? initialItems : [{ id: null, teks: '' }],
+            dragIndex: null,
+            dragOverIndex: null,
+
             addItem() {
                 this.items.push({ id: null, teks: '' });
             },
+
             removeItem(index) {
-                if (this.items.length <= 1) return;
+                if (this.items.length <= 1) { return; }
                 this.items.splice(index, 1);
             },
-            moveUp(index) {
-                if (index <= 0) return;
-                [this.items[index - 1], this.items[index]] = [this.items[index], this.items[index - 1]];
+
+            onDragStart(event, index) {
+                this.dragIndex = index;
+                event.dataTransfer.effectAllowed = 'move';
             },
-            moveDown(index) {
-                if (index >= this.items.length - 1) return;
-                [this.items[index], this.items[index + 1]] = [this.items[index + 1], this.items[index]];
+
+            onDragOver(event, index) {
+                if (this.dragIndex === null || this.dragIndex === index) { return; }
+                this.dragOverIndex = index;
             },
+
+            onDrop(event, dropIndex) {
+                if (this.dragIndex === null || this.dragIndex === dropIndex) { return; }
+                const items = [...this.items];
+                const [moved] = items.splice(this.dragIndex, 1);
+                items.splice(dropIndex, 0, moved);
+                this.items = items;
+                this.dragIndex = null;
+                this.dragOverIndex = null;
+            },
+
             prepareSubmit(event) {
                 const container = document.getElementById('hidden-fields');
                 container.innerHTML = '';
@@ -69,6 +95,7 @@
                     this.addHidden(container, `items[${i}][teks]`, item.teks);
                 });
             },
+
             addHidden(container, name, value) {
                 const input = document.createElement('input');
                 input.type = 'hidden';
