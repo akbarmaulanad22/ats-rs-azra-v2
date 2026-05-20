@@ -11,7 +11,7 @@ class WorkflowTemplateSeeder extends Seeder
     public function run(): void
     {
         $allKeys = [
-            'lamaran', 'skrining_cv_hr', 'skrining_cv_kepala_unit',
+            'lamaran', 'skrining_cv_hr', 'skrining_cv_user',
             'tes_kompetensi', 'wawancara_kepala_unit', 'wawancara_manajer_hr',
             'wawancara_direktur', 'tes_disc', 'tes_mbti', 'surat_penawaran', 'mcu', 'onboarding',
         ];
@@ -20,7 +20,7 @@ class WorkflowTemplateSeeder extends Seeder
 
         $headUnitKeys = array_values(array_filter(
             $allKeys,
-            fn ($k) => ! in_array($k, ['skrining_cv_kepala_unit', 'wawancara_kepala_unit']),
+            fn ($k) => ! in_array($k, ['skrining_cv_user', 'wawancara_kepala_unit']),
         ));
 
         $templates = [

@@ -136,7 +136,7 @@ class ApplicationPipelineService
             ->sortByDesc('position')
             ->first();
 
-        $skriningStages = ['skrining_cv_hr', 'skrining_cv_kepala_unit'];
+        $skriningStages = ['skrining_cv_hr', 'skrining_cv_user'];
         $isFromSkrining = $currentStage && in_array($currentStage->key, $skriningStages, true);
         $nextIsNotSkrining = ! in_array($nextStage->key, $skriningStages, true);
 

@@ -23,6 +23,7 @@ class ApplicationStage extends Model
         'catatan',
         'jadwal',
         'lokasi',
+        'reviewed_by',
     ];
 
     protected function casts(): array
@@ -47,5 +48,10 @@ class ApplicationStage extends Model
     public function mcuResult(): HasOne
     {
         return $this->hasOne(McuResult::class);
+    }
+
+    public function reviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

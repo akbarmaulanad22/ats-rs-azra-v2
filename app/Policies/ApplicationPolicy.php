@@ -24,7 +24,7 @@ class ApplicationPolicy
             return true;
         }
 
-        if ($user->hasRole(Role::UnitHead)) {
+        if ($user->hasRole(Role::UnitHead, Role::Employee)) {
             $employee = $user->employee;
             if (! $employee) {
                 return false;
