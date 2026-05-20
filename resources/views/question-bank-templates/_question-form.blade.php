@@ -1,5 +1,5 @@
-<div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden mb-4">
-    <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200 flex items-center justify-between">
+<div class="px-4 py-5">
+    <div class="flex items-center justify-between mb-3">
         <div>
             <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Daftar Soal</p>
             <p class="text-[10px] text-gray-400 mt-0.5"><span x-text="questions.length"></span> soal &mdash; <span x-text="totalPoin"></span> poin total</p>
@@ -13,9 +13,9 @@
         </button>
     </div>
 
-    <div class="divide-y divide-gray-100 px-4">
+    <div class="space-y-4">
         <template x-for="(question, qIndex) in questions" :key="qIndex">
-            <div class="py-4">
+            <div class="border border-gray-200 rounded p-3 bg-gray-50/50">
                 <div class="flex items-start justify-between gap-3 mb-3">
                     <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0" x-text="qIndex + 1"></span>
                     <div class="flex items-center gap-1">

@@ -32,11 +32,10 @@
 
         <div class="space-y-4">
             @foreach ($wawancaraStages as $stage)
-                <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden">
-                    <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200">
-                        <h2 class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{{ $stage->nama }}</h2>
-                    </div>
+                <div class="bg-white/80 border border-gray-200 rounded-md">
                     <div class="px-4 py-4" x-data="stageDropdown('{{ $stage->key }}')" @click.outside="open = false">
+                        <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3">{{ $stage->nama }}</p>
+
                         {{-- Selected chips --}}
                         <div class="flex flex-wrap gap-2 mb-3" x-show="stages['{{ $stage->key }}'].length > 0">
                             <template x-for="(tpl, index) in stages['{{ $stage->key }}']" :key="tpl.id + '-{{ $stage->key }}'">

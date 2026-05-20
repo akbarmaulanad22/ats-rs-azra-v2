@@ -38,11 +38,9 @@
         {{-- Left: Template Selection + Questions --}}
         <div class="lg:col-span-2 space-y-4">
             {{-- Template Selector --}}
-            <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden">
-                <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200">
-                    <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Pilih Template Bank Soal</p>
-                </div>
+            <div class="bg-white/80 border border-gray-200 rounded-md">
                 <div class="px-4 py-4">
+                    <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Pilih Template Bank Soal</p>
                     <select x-model="selectedTemplate" @change="applyTemplate()"
                         class="w-full text-xs border border-gray-200 rounded px-2.5 py-1.5 focus-ring bg-white">
                         <option value="">-- Pilih template --</option>
@@ -56,7 +54,7 @@
 
             {{-- Questions Preview --}}
             <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden">
-                <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200 flex items-center justify-between">
+                <div class="px-4 py-3 flex items-center justify-between border-b border-gray-200">
                     <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Soal Terpilih</p>
                     <span class="text-[10px] text-gray-400" x-text="selectedIds.length + ' soal'"></span>
                 </div>
@@ -92,15 +90,13 @@
 
         {{-- Right: Config Form --}}
         <div class="space-y-4">
-            <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden">
-                <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200">
-                    <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Pengaturan Tes</p>
-                </div>
-
+            <div class="bg-white/80 border border-gray-200 rounded-md">
                 <form method="POST" action="{{ route('lowongan.tes.save', $lowongan) }}" @submit="prepareSubmit()">
                     @csrf
 
-                    <div class="px-4 py-4 space-y-3">
+                    <div class="px-4 pt-4 pb-5 space-y-3">
+                        <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Pengaturan Tes</p>
+
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Batas Waktu (menit) <span class="text-red-500">*</span></label>
                             <input type="number" name="batas_waktu_menit" min="5" max="480"
@@ -128,11 +124,9 @@
             </div>
 
             @if ($vacancyTest)
-                <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden">
-                    <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200">
-                        <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Konfigurasi Saat Ini</p>
-                    </div>
-                    <div class="px-4 py-3">
+                <div class="bg-white/80 border border-gray-200 rounded-md">
+                    <div class="px-4 py-4">
+                        <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Konfigurasi Saat Ini</p>
                         <p class="text-xs text-gray-700">{{ $vacancyTest->questions->count() }} soal &mdash; {{ $vacancyTest->batas_waktu_menit }} menit</p>
                         <p class="text-xs text-gray-500 mt-0.5">Total: {{ $vacancyTest->totalNilaiMaksimal() }} poin</p>
                     </div>

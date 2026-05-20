@@ -21,15 +21,13 @@
         </div>
     @endif
 
-    <div x-data="templateForm()" class="space-y-4 max-w-4xl">
+    <div x-data="templateForm()" class="max-w-4xl">
         <form method="POST" action="{{ route('template-bank-soal.store') }}" @submit="prepareSubmit($event)">
             @csrf
 
-            <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden mb-4">
-                <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200">
-                    <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Informasi Template</p>
-                </div>
-                <div class="px-4 py-4">
+            <div class="bg-white/80 border border-gray-200 rounded-md">
+                <div class="px-4 pt-4 pb-5">
+                    <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Informasi Template</p>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Nama Template <span class="text-red-500">*</span></label>
                         <input type="text" name="nama" value="{{ old('nama') }}" required
@@ -37,19 +35,21 @@
                             placeholder="Contoh: Tes Kompetensi Perawat">
                     </div>
                 </div>
-            </div>
 
-            @include('question-bank-templates._question-form')
+                <hr class="border-t border-gray-300/80">
 
-            <div class="flex items-center gap-2">
-                <button type="submit"
-                    class="px-4 py-1.5 bg-primary text-white text-xs font-medium rounded hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer">
-                    Simpan Template
-                </button>
-                <a href="{{ route('template-bank-soal.index') }}"
-                    class="px-4 py-1.5 text-xs text-gray-500 border border-gray-300 rounded bg-white hover:bg-gray-50 transition-colors ease-out duration-150">
-                    Batal
-                </a>
+                @include('question-bank-templates._question-form')
+
+                <div class="flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-gray-200/90 rounded-b-md">
+                    <button type="submit"
+                        class="px-4 py-1.5 bg-primary text-white text-xs font-medium rounded hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer">
+                        Simpan Template
+                    </button>
+                    <a href="{{ route('template-bank-soal.index') }}"
+                        class="px-4 py-1.5 text-xs text-gray-500 border border-gray-300 rounded bg-white hover:bg-gray-50 transition-colors ease-out duration-150">
+                        Batal
+                    </a>
+                </div>
             </div>
         </form>
     </div>

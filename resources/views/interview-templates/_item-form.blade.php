@@ -1,5 +1,5 @@
-<div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden mb-4">
-    <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200 flex items-center justify-between">
+<div class="px-4 py-5">
+    <div class="flex items-center justify-between mb-3">
         <div>
             <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Daftar Item</p>
             <p class="text-[10px] text-gray-400 mt-0.5"><span x-text="items.length"></span> item</p>
@@ -13,9 +13,9 @@
         </button>
     </div>
 
-    <div class="divide-y divide-gray-100 px-4">
+    <div class="space-y-2">
         <template x-for="(item, index) in items" :key="index">
-            <div class="flex items-center gap-3 py-2.5">
+            <div class="flex items-center gap-3">
                 <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0" x-text="index + 1"></span>
                 <input type="text" x-model="item.teks" placeholder="Teks item..."
                     class="flex-1 text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-white focus-ring">
