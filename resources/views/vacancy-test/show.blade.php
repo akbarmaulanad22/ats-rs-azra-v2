@@ -36,9 +36,9 @@
          )">
 
         {{-- Left: Template Selection + Questions --}}
-        <div class="lg:col-span-2 space-y-4">
-            {{-- Template Selector --}}
-            <div class="bg-white/80 border border-gray-200 rounded-md">
+        <div class="lg:col-span-2">
+            <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden">
+                {{-- Template Selector --}}
                 <div class="px-4 py-4">
                     <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Pilih Template Bank Soal</p>
                     <select x-model="selectedTemplate" @change="applyTemplate()"
@@ -50,46 +50,48 @@
                     </select>
                     <p class="mt-1.5 text-[10px] text-gray-400">Memilih template akan mengisi daftar soal. Anda masih bisa menambah/menghapus soal setelah memilih.</p>
                 </div>
-            </div>
 
-            {{-- Questions Preview --}}
-            <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden">
-                <div class="px-4 py-3 flex items-center justify-between border-b border-gray-200">
-                    <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Soal Terpilih</p>
-                    <span class="text-[10px] text-gray-400" x-text="selectedIds.length + ' soal'"></span>
-                </div>
+                <hr class="border-t border-gray-300/80">
 
-                <div x-show="selectedIds.length === 0" class="px-4 py-10 text-center">
-                    <p class="text-xs text-gray-400">Belum ada soal dipilih. Pilih template di atas.</p>
-                </div>
+                {{-- Questions Preview --}}
+                <div>
+                    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-200">
+                        <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Soal Terpilih</p>
+                        <span class="text-[10px] text-gray-400" x-text="selectedIds.length + ' soal'"></span>
+                    </div>
 
-                <div class="divide-y divide-gray-100 max-h-[500px] overflow-y-auto" x-show="selectedIds.length > 0">
-                    <template x-for="(qId, index) in selectedIds" :key="qId">
-                        <div class="px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50/50 transition-colors">
-                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5" x-text="index + 1"></span>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-xs text-gray-800" x-text="getQuestion(qId)?.pertanyaan || 'Soal #' + qId"></p>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded"
-                                        :class="getQuestion(qId)?.tipe === 'mc' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'"
-                                        x-text="getQuestion(qId)?.tipe_label || ''"></span>
-                                    <span class="text-[10px] text-gray-400" x-text="(getQuestion(qId)?.nilai_poin || 0) + ' poin'"></span>
+                    <div x-show="selectedIds.length === 0" class="px-4 py-10 text-center">
+                        <p class="text-xs text-gray-400">Belum ada soal dipilih. Pilih template di atas.</p>
+                    </div>
+
+                    <div class="divide-y divide-gray-100 max-h-[500px] overflow-y-auto" x-show="selectedIds.length > 0">
+                        <template x-for="(qId, index) in selectedIds" :key="qId">
+                            <div class="px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50/50 transition-colors">
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5" x-text="index + 1"></span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-gray-800" x-text="getQuestion(qId)?.pertanyaan || 'Soal #' + qId"></p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                                            :class="getQuestion(qId)?.tipe === 'mc' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'"
+                                            x-text="getQuestion(qId)?.tipe_label || ''"></span>
+                                        <span class="text-[10px] text-gray-400" x-text="(getQuestion(qId)?.nilai_poin || 0) + ' poin'"></span>
+                                    </div>
                                 </div>
+                                <button type="button" @click="removeQuestion(index)"
+                                    class="p-1 text-red-400 hover:text-red-600 rounded transition-colors shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
                             </div>
-                            <button type="button" @click="removeQuestion(index)"
-                                class="p-1 text-red-400 hover:text-red-600 rounded transition-colors shrink-0">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
 
         {{-- Right: Config Form --}}
-        <div class="space-y-4">
+        <div>
             <div class="bg-white/80 border border-gray-200 rounded-md">
                 <form method="POST" action="{{ route('lowongan.tes.save', $lowongan) }}" @submit="prepareSubmit()">
                     @csrf
@@ -112,6 +114,15 @@
                             <span x-text="selectedIds.length"></span> soal dipilih
                             &mdash; <span x-text="totalPoin"></span> poin total
                         </p>
+
+                        @if ($vacancyTest)
+                            <hr class="border-t border-gray-300/80">
+                            <div>
+                                <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Konfigurasi Saat Ini</p>
+                                <p class="text-xs text-gray-700">{{ $vacancyTest->questions->count() }} soal &mdash; {{ $vacancyTest->batas_waktu_menit }} menit</p>
+                                <p class="text-xs text-gray-500 mt-0.5">Total: {{ $vacancyTest->totalNilaiMaksimal() }} poin</p>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-gray-200/90 rounded-b-md">
@@ -122,16 +133,6 @@
                     </div>
                 </form>
             </div>
-
-            @if ($vacancyTest)
-                <div class="bg-white/80 border border-gray-200 rounded-md">
-                    <div class="px-4 py-4">
-                        <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Konfigurasi Saat Ini</p>
-                        <p class="text-xs text-gray-700">{{ $vacancyTest->questions->count() }} soal &mdash; {{ $vacancyTest->batas_waktu_menit }} menit</p>
-                        <p class="text-xs text-gray-500 mt-0.5">Total: {{ $vacancyTest->totalNilaiMaksimal() }} poin</p>
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
 

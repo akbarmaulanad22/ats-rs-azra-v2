@@ -30,9 +30,13 @@
     >
         @csrf
 
-        <div class="space-y-4">
-            @foreach ($wawancaraStages as $stage)
-                <div class="bg-white/80 border border-gray-200 rounded-md">
+        @if ($wawancaraStages->isEmpty())
+            <div class="bg-white/80 border border-gray-200 rounded-md px-4 py-10 text-center">
+                <p class="text-xs text-gray-500">Tidak ada tahap wawancara pada workflow lowongan ini.</p>
+            </div>
+        @else
+            <div class="bg-white/80 border border-gray-200 rounded-md">
+                @foreach ($wawancaraStages as $stage)
                     <div class="px-4 py-4" x-data="stageDropdown('{{ $stage->key }}')" @click.outside="open = false">
                         <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3">{{ $stage->nama }}</p>
 
@@ -89,22 +93,19 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
-        </div>
+                    @if (!$loop->last)
+                        <hr class="border-t border-gray-300/80">
+                    @endif
+                @endforeach
 
-        @if ($wawancaraStages->isEmpty())
-            <div class="bg-white/80 border border-gray-200 rounded-md px-4 py-10 text-center">
-                <p class="text-xs text-gray-500">Tidak ada tahap wawancara pada workflow lowongan ini.</p>
-            </div>
-        @else
-            <div class="mt-4 flex items-center gap-2 px-4 py-3 bg-gray-200/90 border border-gray-200 rounded-md">
-                <button
-                    type="submit"
-                    class="px-4 py-1.5 bg-primary text-white text-xs font-medium rounded hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer"
-                >
-                    Simpan Template
-                </button>
+                <div class="flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-gray-200/90 rounded-b-md">
+                    <button
+                        type="submit"
+                        class="px-4 py-1.5 bg-primary text-white text-xs font-medium rounded hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer"
+                    >
+                        Simpan Template
+                    </button>
+                </div>
             </div>
         @endif
     </form>
