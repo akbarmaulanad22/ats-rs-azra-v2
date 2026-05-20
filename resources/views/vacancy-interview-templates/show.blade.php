@@ -1,6 +1,6 @@
 <x-layouts.app title="Template Wawancara - {{ $lowongan->judul_posisi }} - ATS RS Azra">
 
-    <div class="mb-5">
+    <div class="mb-4">
         <a href="{{ route('lowongan.pipeline', $lowongan) }}" class="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors ease-out duration-150 mb-1.5">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -12,13 +12,13 @@
     </div>
 
     @if (session('success'))
-        <div class="mb-4 px-4 py-2.5 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+        <div class="mb-4 px-4 py-2.5 bg-green-50 border border-green-200 rounded text-xs text-green-700">
             {{ session('success') }}
         </div>
     @endif
 
     @if ($errors->any())
-        <div class="mb-4 px-4 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+        <div class="mb-4 px-4 py-2.5 bg-red-50 border border-red-200 rounded text-xs text-red-700">
             {{ $errors->first() }}
         </div>
     @endif
@@ -30,17 +30,17 @@
     >
         @csrf
 
-        <div class="space-y-6">
+        <div class="space-y-4">
             @foreach ($wawancaraStages as $stage)
-                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                    <div class="px-5 py-4 border-b border-gray-100">
-                        <h2 class="text-sm font-semibold text-gray-800">{{ $stage->nama }}</h2>
+                <div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden">
+                    <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200">
+                        <h2 class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{{ $stage->nama }}</h2>
                     </div>
-                    <div class="p-5" x-data="stageDropdown('{{ $stage->key }}')" @click.outside="open = false">
+                    <div class="px-4 py-4" x-data="stageDropdown('{{ $stage->key }}')" @click.outside="open = false">
                         {{-- Selected chips --}}
                         <div class="flex flex-wrap gap-2 mb-3" x-show="stages['{{ $stage->key }}'].length > 0">
                             <template x-for="(tpl, index) in stages['{{ $stage->key }}']" :key="tpl.id + '-{{ $stage->key }}'">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary">
+                                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium bg-primary/10 text-primary">
                                     <span x-text="tpl.nama"></span>
                                     <span class="text-[9px] px-1 py-0.5 rounded"
                                         :class="tpl.tipe === 'kriteria_penilaian' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'"
@@ -59,7 +59,7 @@
                         {{-- Searchable dropdown --}}
                         <div class="relative">
                             <div class="relative">
-                                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                                 <input
@@ -68,15 +68,15 @@
                                     @focus="open = true"
                                     @input="open = true"
                                     placeholder="Cari template..."
-                                    class="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 placeholder:text-gray-400"
+                                    class="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded bg-white focus-ring placeholder:text-gray-400"
                                 >
                             </div>
                             <div x-show="open && filtered().length > 0" x-transition
-                                class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-y-auto">
                                 <template x-for="tpl in filtered()" :key="tpl.id">
                                     <button type="button"
                                         @click="addTemplate('{{ $stage->key }}', tpl); search = ''; open = false"
-                                        class="w-full px-3 py-2 text-left text-sm hover:bg-primary/5 flex items-center justify-between gap-2 transition-colors">
+                                        class="w-full px-3 py-2 text-left text-xs hover:bg-primary/5 flex items-center justify-between gap-2 transition-colors">
                                         <span x-text="tpl.nama" class="text-gray-800"></span>
                                         <span class="text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0"
                                             :class="tpl.tipe === 'kriteria_penilaian' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'"
@@ -85,8 +85,8 @@
                                 </template>
                             </div>
                             <div x-show="open && search.length > 0 && filtered().length === 0"
-                                class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
-                                <p class="px-3 py-2 text-sm text-gray-400">Tidak ada template ditemukan</p>
+                                class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg">
+                                <p class="px-3 py-2 text-xs text-gray-400">Tidak ada template ditemukan</p>
                             </div>
                         </div>
                     </div>
@@ -95,14 +95,14 @@
         </div>
 
         @if ($wawancaraStages->isEmpty())
-            <div class="bg-white rounded-xl border border-gray-100 p-10 text-center">
-                <p class="text-sm text-gray-500">Tidak ada tahap wawancara pada workflow lowongan ini.</p>
+            <div class="bg-white/80 border border-gray-200 rounded-md px-4 py-10 text-center">
+                <p class="text-xs text-gray-500">Tidak ada tahap wawancara pada workflow lowongan ini.</p>
             </div>
         @else
-            <div class="mt-6">
+            <div class="mt-4 flex items-center gap-2">
                 <button
                     type="submit"
-                    class="px-6 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer"
+                    class="px-4 py-1.5 bg-primary text-white text-xs font-medium rounded hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer"
                 >
                     Simpan Template
                 </button>

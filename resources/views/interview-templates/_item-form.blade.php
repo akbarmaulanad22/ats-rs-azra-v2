@@ -1,11 +1,11 @@
-<div class="bg-white rounded-xl border border-gray-100 p-6 mb-4">
-    <div class="flex items-center justify-between mb-4">
+<div class="bg-white/80 border border-gray-200 rounded-md overflow-hidden mb-4">
+    <div class="px-4 py-3 bg-gray-200/90 border-b border-gray-200 flex items-center justify-between">
         <div>
-            <h2 class="text-sm font-semibold text-gray-800">Daftar Item</h2>
-            <p class="text-xs text-gray-400 mt-0.5"><span x-text="items.length"></span> item</p>
+            <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Daftar Item</p>
+            <p class="text-[10px] text-gray-400 mt-0.5"><span x-text="items.length"></span> item</p>
         </div>
         <button type="button" @click="addItem()"
-            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-colors ease-out duration-150">
+            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium border border-gray-300 text-gray-600 rounded bg-white hover:bg-gray-50 transition-colors ease-out duration-150">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
             </svg>
@@ -13,14 +13,12 @@
         </button>
     </div>
 
-    <div class="space-y-3">
+    <div class="divide-y divide-gray-100 px-4">
         <template x-for="(item, index) in items" :key="index">
-            <div class="flex items-center gap-3 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
-                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0" x-text="index + 1"></span>
-
+            <div class="flex items-center gap-3 py-2.5">
+                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0" x-text="index + 1"></span>
                 <input type="text" x-model="item.teks" placeholder="Teks item..."
-                    class="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary/40">
-
+                    class="flex-1 text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-white focus-ring">
                 <div class="flex items-center gap-1">
                     <button type="button" @click="moveUp(index)" x-show="index > 0"
                         class="p-1 text-gray-400 hover:text-primary rounded transition-colors">
