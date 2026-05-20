@@ -5,8 +5,13 @@ namespace App\Http\Controllers;
 use App\Enums\InterviewTemplateType;
 use App\Models\Application;
 use App\Models\Vacancy;
+use Barryvdh\DomPDF\Facade\Pdf;
+use iio\libmergepdf\Merger;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class VacancyPipelineController extends Controller
@@ -131,5 +136,72 @@ class VacancyPipelineController extends Controller
             'priorInterviews',
             'testAllReviewed',
         ));
+    }
+
+    public function exportPdf(Vacancy $lowongan, Application $application): Response
+    {
+        Gate::authorize('viewCandidateDetail', $lowongan);
+        abort_if($application->vacancy_id !== $lowongan->id, 404);
+
+        $lowongan->load(['unit']);
+        $application->load([
+            'candidate.formalEducations',
+            'candidate.informalEducations',
+            'candidate.workExperiences',
+            'candidate.organizationExperiences',
+            'candidate.siblings',
+            'candidate.spouses',
+            'candidate.children',
+            'candidate.languageSkills',
+            'candidate.achievements',
+            'discSubmission.result',
+            'mbtiSubmission.result',
+            'socialMediaAccounts',
+            'references',
+        ]);
+
+        $dataPdf = Pdf::loadView('vacancies.pdf.kandidat', compact('application', 'lowongan'))
+            ->setPaper('a4')
+            ->output();
+
+        $pdfsToMerge = [$dataPdf];
+
+        foreach ([$application->cv_path, $application->str_sip_path] as $path) {
+            if (! $path) {
+                continue;
+            }
+
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            if ($ext !== 'pdf') {
+                continue;
+            }
+
+            $contents = Storage::get($path);
+            if ($contents) {
+                $pdfsToMerge[] = $contents;
+            }
+        }
+
+        if (count($pdfsToMerge) > 1) {
+            try {
+                $merger = new Merger;
+                foreach ($pdfsToMerge as $pdf) {
+                    $merger->addRaw($pdf);
+                }
+                $output = $merger->merge();
+            } catch (\Exception) {
+                $output = $dataPdf;
+            }
+        } else {
+            $output = $dataPdf;
+        }
+
+        $candidate = $application->candidate;
+        $filename = 'Kandidat_'.Str::slug($candidate->nama_lengkap).'_'.Str::slug($lowongan->judul_posisi).'_'.now()->format('Ymd').'.pdf';
+
+        return response($output, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 }

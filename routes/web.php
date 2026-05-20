@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
         ->except(['show']);
     Route::get('/lowongan/{lowongan}/pipeline', [VacancyPipelineController::class, 'index'])->name('lowongan.pipeline');
     Route::get('/lowongan/{lowongan}/pipeline/{application}', [VacancyPipelineController::class, 'showApplication'])->scopeBindings()->name('lowongan.pipeline.show');
+    Route::get('/lowongan/{lowongan}/pipeline/{application}/export-pdf', [VacancyPipelineController::class, 'exportPdf'])->scopeBindings()->name('lowongan.pipeline.show.export-pdf');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/lanjut', [ApplicationPipelineController::class, 'advance'])->scopeBindings()->name('lowongan.lamaran.lanjut');
     Route::post('/lowongan/{lowongan}/lamaran/{application}/gagal', [ApplicationPipelineController::class, 'fail'])->scopeBindings()->name('lowongan.lamaran.gagal');
 
