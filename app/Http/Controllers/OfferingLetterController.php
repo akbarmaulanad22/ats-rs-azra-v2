@@ -5,16 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SendOfferingLetterRequest;
 use App\Models\Application;
 use App\Models\Vacancy;
-use App\Services\ApplicationPipelineService;
 use App\Services\EmailNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 
 class OfferingLetterController extends Controller
 {
     public function __construct(
-        private readonly ApplicationPipelineService $pipelineService,
         private readonly EmailNotificationService $emailNotificationService,
     ) {}
 
@@ -33,6 +32,10 @@ class OfferingLetterController extends Controller
             return back()->withErrors(['offering' => 'Surat penawaran sudah pernah dikirim.']);
         }
 
+        if ($application->offeringLetter?->sent_at) {
+            return back()->withErrors(['offering' => 'Surat penawaran sudah pernah dikirim.']);
+        }
+
         $tanggalMulaiFormatted = Carbon::parse($request->input('tanggal_mulai'))->translatedFormat('d F Y');
 
         $offering = $application->offeringLetter()->updateOrCreate(
@@ -42,8 +45,19 @@ class OfferingLetterController extends Controller
                 'gaji' => $request->input('gaji'),
                 'tanggal_mulai' => $request->input('tanggal_mulai'),
                 'catatan' => $request->input('catatan'),
+                'status' => 'pending',
             ]
         );
+
+        $expiry = now()->addDays(7);
+
+        $acceptUrl = URL::temporarySignedRoute('offering.accept', $expiry, [
+            'offering' => $offering->id,
+        ]);
+
+        $rejectUrl = URL::temporarySignedRoute('offering.reject', $expiry, [
+            'offering' => $offering->id,
+        ]);
 
         try {
             $this->emailNotificationService->dispatch('surat_penawaran', $application->candidate->email, [
@@ -52,17 +66,15 @@ class OfferingLetterController extends Controller
                 'jabatan_ditawarkan' => $offering->jabatan_ditawarkan,
                 'gaji' => $offering->gaji,
                 'tanggal_mulai' => $tanggalMulaiFormatted,
+                'link_terima' => $acceptUrl,
+                'link_tolak' => $rejectUrl,
             ]);
+
+            $offering->update(['sent_at' => now()]);
         } catch (\Throwable $e) {
             report($e);
-        }
 
-        $offering->update(['sent_at' => now()]);
-
-        try {
-            $this->pipelineService->advance($application);
-        } catch (\RuntimeException $e) {
-            return back()->withErrors(['offering' => $e->getMessage()]);
+            return back()->withErrors(['offering' => 'Gagal mengirim email penawaran. Silakan coba lagi.']);
         }
 
         return redirect()
