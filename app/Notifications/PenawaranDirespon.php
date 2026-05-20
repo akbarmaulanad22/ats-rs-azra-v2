@@ -3,13 +3,10 @@
 namespace App\Notifications;
 
 use App\Models\OfferingLetter;
-use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
 class PenawaranDirespon extends Notification
 {
-    use Queueable;
-
     public function __construct(public readonly OfferingLetter $offeringLetter) {}
 
     /** @return array<int, string> */

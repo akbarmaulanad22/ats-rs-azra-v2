@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\PenawaranDirespon;
 use App\Services\ApplicationPipelineService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
@@ -19,6 +20,19 @@ class OfferingResponseController extends Controller
         private readonly ApplicationPipelineService $pipelineService,
     ) {}
 
+    public function showAcceptForm(OfferingLetter $offering): View
+    {
+        if ($offering->isResponded()) {
+            return view('offering.already-responded', [
+                'offering' => $offering->load('application.vacancy'),
+            ]);
+        }
+
+        return view('offering.accept-form', [
+            'offering' => $offering->load('application.vacancy', 'application.candidate'),
+        ]);
+    }
+
     public function accept(Request $request, OfferingLetter $offering): View
     {
         if ($offering->isResponded()) {
@@ -27,30 +41,35 @@ class OfferingResponseController extends Controller
             ]);
         }
 
-        if ($request->isMethod('GET')) {
-            return view('offering.accept-form', [
-                'offering' => $offering->load('application.vacancy', 'application.candidate'),
-            ]);
-        }
-
-        $offering->update([
-            'status' => OfferingLetterStatus::Accepted,
-            'responded_at' => now(),
-        ]);
-
         $offering->load('application.candidate', 'application.vacancy', 'application.stages');
 
-        try {
+        DB::transaction(function () use ($offering): void {
+            $offering->update([
+                'status' => OfferingLetterStatus::Accepted,
+                'responded_at' => now(),
+            ]);
+
             $this->pipelineService->advance($offering->application);
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        });
 
         $hrAdmins = User::where('role', Role::HrAdmin)->where('is_active', true)->get();
         Notification::send($hrAdmins, new PenawaranDirespon($offering));
 
         return view('offering.accepted', [
             'offering' => $offering,
+        ]);
+    }
+
+    public function showRejectForm(OfferingLetter $offering): View
+    {
+        if ($offering->isResponded()) {
+            return view('offering.already-responded', [
+                'offering' => $offering->load('application.vacancy'),
+            ]);
+        }
+
+        return view('offering.reject-form', [
+            'offering' => $offering->load('application.vacancy', 'application.candidate'),
         ]);
     }
 
@@ -62,24 +81,23 @@ class OfferingResponseController extends Controller
             ]);
         }
 
-        if ($request->isMethod('GET')) {
-            return view('offering.reject-form', [
-                'offering' => $offering->load('application.vacancy', 'application.candidate'),
-            ]);
-        }
-
-        $offering->update([
-            'status' => OfferingLetterStatus::Rejected,
-            'responded_at' => now(),
-            'rejection_reason' => $request->input('rejection_reason'),
+        $request->validate([
+            'rejection_reason' => 'nullable|string|max:1000',
         ]);
 
         $offering->load('application.candidate', 'application.vacancy', 'application.stages');
 
-        $application = $offering->application;
-        $stages = $application->stages()->orderBy('position')->get();
-        $offeringStage = $stages->firstWhere('key', 'surat_penawaran');
-        $offeringStage?->update(['status' => ApplicationStageStatus::Gagal]);
+        DB::transaction(function () use ($offering, $request): void {
+            $offering->update([
+                'status' => OfferingLetterStatus::Rejected,
+                'responded_at' => now(),
+                'rejection_reason' => $request->input('rejection_reason'),
+            ]);
+
+            $application = $offering->application;
+            $offeringStage = $application->stages()->where('key', 'surat_penawaran')->first();
+            $offeringStage?->update(['status' => ApplicationStageStatus::Gagal]);
+        });
 
         $hrAdmins = User::where('role', Role::HrAdmin)->where('is_active', true)->get();
         Notification::send($hrAdmins, new PenawaranDirespon($offering));

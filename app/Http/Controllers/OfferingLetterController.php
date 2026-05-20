@@ -49,8 +49,6 @@ class OfferingLetterController extends Controller
             ]
         );
 
-        $offering->update(['sent_at' => now()]);
-
         $expiry = now()->addDays(7);
 
         $acceptUrl = URL::temporarySignedRoute('offering.accept', $expiry, [
@@ -71,8 +69,12 @@ class OfferingLetterController extends Controller
                 'link_terima' => $acceptUrl,
                 'link_tolak' => $rejectUrl,
             ]);
+
+            $offering->update(['sent_at' => now()]);
         } catch (\Throwable $e) {
             report($e);
+
+            return back()->withErrors(['offering' => 'Gagal mengirim email penawaran. Silakan coba lagi.']);
         }
 
         return redirect()

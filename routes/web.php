@@ -57,8 +57,10 @@ Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])-
 Route::get('/karier/lamaran/{token}', [ApplicationController::class, 'confirmation'])->name('karier.lamaran.konfirmasi');
 Route::get('/lamaran/{token}', [CandidateStatusController::class, 'show'])->name('karier.lamaran.status');
 
-Route::match(['get', 'post'], '/penawaran/{offering}/terima', [OfferingResponseController::class, 'accept'])->name('offering.accept')->middleware('signed');
-Route::match(['get', 'post'], '/penawaran/{offering}/tolak', [OfferingResponseController::class, 'reject'])->name('offering.reject')->middleware('signed');
+Route::get('/penawaran/{offering}/terima', [OfferingResponseController::class, 'showAcceptForm'])->name('offering.accept')->middleware('signed');
+Route::post('/penawaran/{offering}/terima', [OfferingResponseController::class, 'accept'])->name('offering.accept.submit')->middleware('signed');
+Route::get('/penawaran/{offering}/tolak', [OfferingResponseController::class, 'showRejectForm'])->name('offering.reject')->middleware('signed');
+Route::post('/penawaran/{offering}/tolak', [OfferingResponseController::class, 'reject'])->name('offering.reject.submit')->middleware('signed');
 
 Route::middleware('auth')->group(function () {
     Route::get('/ubah-password', [PasswordChangeController::class, 'show'])->name('password.change');
