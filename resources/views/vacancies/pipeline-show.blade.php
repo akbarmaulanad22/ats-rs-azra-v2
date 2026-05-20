@@ -97,6 +97,18 @@
                 <div class="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400">
                     Tidak ada tahap aktif untuk kandidat ini.
                 </div>
+            @elseif (!$isUserPic && $picLabel)
+                <div class="bg-white rounded-xl border border-gray-100 p-8 flex flex-col items-center justify-center text-center min-h-48 gap-4">
+                    <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800 mb-1">Bukan Penanggung Jawab Tahap Ini</p>
+                        <p class="text-xs text-gray-500">Tahap <span class="font-medium text-gray-700">{{ $currentStage->nama }}</span> ditangani oleh <span class="font-medium text-gray-700">{{ $picLabel }}</span>.</p>
+                    </div>
+                </div>
             @else
                 @php $stageKey = $currentStage->key; @endphp
 
