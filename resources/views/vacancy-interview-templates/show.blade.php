@@ -98,7 +98,7 @@
                 <p class="text-xs text-gray-500">Tidak ada tahap wawancara pada workflow lowongan ini.</p>
             </div>
         @else
-            <div class="mt-4 flex items-center gap-2">
+            <div class="mt-4 flex items-center gap-2 px-4 py-3 bg-gray-200/90 border border-gray-200 rounded-md">
                 <button
                     type="submit"
                     class="px-4 py-1.5 bg-primary text-white text-xs font-medium rounded hover:bg-primary-dark transition-colors ease-out duration-150 cursor-pointer"
