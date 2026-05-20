@@ -21,8 +21,8 @@ class ApplicationStage extends Model
         'nama',
         'status',
         'catatan',
-        'jadwal_interview',
-        'lokasi_interview',
+        'jadwal',
+        'lokasi',
     ];
 
     protected function casts(): array
@@ -30,7 +30,7 @@ class ApplicationStage extends Model
         return [
             'status' => ApplicationStageStatus::class,
             'position' => 'integer',
-            'jadwal_interview' => 'datetime',
+            'jadwal' => 'datetime',
         ];
     }
 
@@ -42,5 +42,10 @@ class ApplicationStage extends Model
     public function interviewResult(): HasOne
     {
         return $this->hasOne(InterviewResult::class);
+    }
+
+    public function mcuResult(): HasOne
+    {
+        return $this->hasOne(McuResult::class);
     }
 }

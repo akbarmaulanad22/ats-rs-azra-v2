@@ -104,8 +104,8 @@ class InterviewScheduleTest extends TestCase
         $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $stage = $application->stages()->where('key', 'wawancara_kepala_unit')->first();
-        $this->assertNotNull($stage->jadwal_interview);
-        $this->assertEquals('Ruang Meeting Lt. 3', $stage->lokasi_interview);
+        $this->assertNotNull($stage->jadwal);
+        $this->assertEquals('Ruang Meeting Lt. 3', $stage->lokasi);
 
         Mail::assertQueued(TemplatedMail::class, 1);
         Notification::assertSentTo($unitHead, WawancaraDijadwalkan::class);

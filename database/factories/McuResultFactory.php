@@ -4,7 +4,9 @@ namespace Database\Factories;
 
 use App\Enums\McuStatus;
 use App\Models\Application;
+use App\Models\ApplicationStage;
 use App\Models\McuResult;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -12,18 +14,17 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class McuResultFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function definition(): array
     {
         return [
             'application_id' => Application::factory(),
-            'status' => McuStatus::Dijadwalkan,
+            'application_stage_id' => ApplicationStage::factory(),
+            'reviewer_id' => User::factory(),
+            'keputusan' => McuStatus::Lulus,
             'dokumen_path' => null,
             'catatan' => null,
+            'submitted_at' => now(),
         ];
     }
 }

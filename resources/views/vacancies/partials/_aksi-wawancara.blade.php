@@ -81,7 +81,7 @@
 
 @php
     $existingResult = $currentStage?->interviewResult;
-    $hasSchedule = (bool) $currentStage?->jadwal_interview;
+    $hasSchedule = (bool) $currentStage?->jadwal;
 @endphp
 
 {{-- Phase 1: No schedule yet --}}
@@ -125,11 +125,11 @@
         <dl class="space-y-1">
             <div>
                 <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Waktu</dt>
-                <dd class="text-xs text-gray-800">{{ $currentStage->jadwal_interview->translatedFormat('d M Y, H:i') }}</dd>
+                <dd class="text-xs text-gray-800">{{ $currentStage->jadwal->translatedFormat('d M Y, H:i') }}</dd>
             </div>
             <div>
                 <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Lokasi</dt>
-                <dd class="text-xs text-gray-800">{{ $currentStage->lokasi_interview }}</dd>
+                <dd class="text-xs text-gray-800">{{ $currentStage->lokasi }}</dd>
             </div>
         </dl>
     </div>
@@ -285,15 +285,15 @@
     <div class="bg-white rounded-xl border border-gray-100 p-5">
         <h2 class="text-sm font-semibold text-gray-800 mb-3">Hasil Wawancara</h2>
 
-        @if ($currentStage?->jadwal_interview)
+        @if ($currentStage?->jadwal)
             <dl class="space-y-1 mb-4">
                 <div>
                     <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Waktu</dt>
-                    <dd class="text-xs text-gray-800">{{ $currentStage->jadwal_interview->translatedFormat('d M Y, H:i') }}</dd>
+                    <dd class="text-xs text-gray-800">{{ $currentStage->jadwal->translatedFormat('d M Y, H:i') }}</dd>
                 </div>
                 <div>
                     <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Lokasi</dt>
-                    <dd class="text-xs text-gray-800">{{ $currentStage->lokasi_interview }}</dd>
+                    <dd class="text-xs text-gray-800">{{ $currentStage->lokasi }}</dd>
                 </div>
             </dl>
         @endif

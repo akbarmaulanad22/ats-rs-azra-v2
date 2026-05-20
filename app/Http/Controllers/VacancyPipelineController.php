@@ -78,6 +78,7 @@ class VacancyPipelineController extends Controller
             'candidate.applications.vacancy.unit',
             'stages.interviewResult.ratings.interviewTemplate',
             'stages.interviewResult.readinessAnswers.interviewTemplate',
+            'stages.mcuResult',
             'testSubmission.answers.question.options',
             'testSubmission.answers.selectedOption',
             'testSubmission.snapshot',

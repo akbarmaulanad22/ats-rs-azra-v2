@@ -390,7 +390,7 @@
         @php $mcu = $application->mcuResult; @endphp
         @if($mcu)
             <table class="data-table">
-                <tr><td class="label">Status</td><td class="value">{{ $mcu->status?->label() ?? '-' }}</td></tr>
+                <tr><td class="label">Keputusan</td><td class="value">{{ $mcu->keputusan?->label() ?? '-' }}</td></tr>
                 <tr><td class="label">Catatan</td><td class="value">{{ $mcu->catatan ?? '-' }}</td></tr>
                 <tr><td class="label">Dokumen</td><td class="value">{{ $mcu->dokumen_path ? 'Tersedia' : 'Belum diunggah' }}</td></tr>
             </table>

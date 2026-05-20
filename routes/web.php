@@ -17,6 +17,7 @@ use App\Http\Controllers\InterviewScheduleController;
 use App\Http\Controllers\InterviewTemplateController;
 use App\Http\Controllers\MbtiTestController;
 use App\Http\Controllers\McuController;
+use App\Http\Controllers\McuScheduleController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\OfferingLetterController;
 use App\Http\Controllers\OfferingResponseController;
@@ -116,8 +117,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/lowongan/{lowongan}/surat-penawaran/{application}/kirim', [OfferingLetterController::class, 'send'])->scopeBindings()->name('lowongan.surat-penawaran.kirim');
 
-    Route::post('/lowongan/{lowongan}/mcu/{application}/status', [McuController::class, 'updateStatus'])->scopeBindings()->name('lowongan.mcu.status');
-    Route::post('/lowongan/{lowongan}/mcu/{application}/dokumen', [McuController::class, 'uploadDocument'])->scopeBindings()->name('lowongan.mcu.dokumen');
+    Route::post('/lowongan/{lowongan}/mcu/{application}/jadwal', [McuScheduleController::class, 'store'])->scopeBindings()->name('lowongan.mcu.jadwal');
+    Route::post('/lowongan/{lowongan}/mcu/{application}/keputusan', [McuController::class, 'store'])->scopeBindings()->name('lowongan.mcu.keputusan');
 
     Route::post('/lowongan/{lowongan}/onboarding/{application}/undangan', [OnboardingController::class, 'sendInvitation'])->scopeBindings()->name('lowongan.onboarding.undangan');
     Route::post('/lowongan/{lowongan}/onboarding/{application}/selesai', [OnboardingController::class, 'complete'])->scopeBindings()->name('lowongan.onboarding.selesai');

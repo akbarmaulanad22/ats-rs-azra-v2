@@ -56,7 +56,7 @@ class EmailTemplateSeeder extends Seeder
                 'key' => 'instruksi_mcu',
                 'deskripsi' => 'Dikirim ke kandidat dengan instruksi pemeriksaan kesehatan (MCU)',
                 'subjek' => 'Instruksi Medical Check-Up (MCU) — {judul_lowongan}',
-                'isi' => "Yth. {nama_kandidat},\n\nSebagai bagian dari proses rekrutmen untuk posisi {judul_lowongan}, Anda diwajibkan mengikuti pemeriksaan kesehatan (MCU).\n\nDetail MCU akan disampaikan oleh tim HR kami. Mohon segera hubungi kami untuk informasi lebih lanjut.\n\nPantau status lamaran Anda di:\n{link_status}\n\nSalam,\nTim HR RS Azra",
+                'isi' => "Yth. {nama_kandidat},\n\nSebagai bagian dari proses rekrutmen untuk posisi {judul_lowongan}, Anda diwajibkan mengikuti pemeriksaan kesehatan (MCU).\n\nDetail MCU:\nTanggal & Waktu: {jadwal_mcu}\nLokasi: {lokasi_mcu}\n\nMohon hadir tepat waktu. Jika ada kendala, segera hubungi tim HR kami.\n\nPantau status lamaran Anda di:\n{link_status}\n\nSalam,\nTim HR RS Azra",
             ],
             [
                 'key' => 'undangan_onboarding',
