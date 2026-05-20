@@ -32,8 +32,8 @@ class WawancaraDijadwalkan extends Notification
             'vacancy_id' => $this->application->vacancy_id,
             'judul_posisi' => $this->application->vacancy->judul_posisi,
             'nama_kandidat' => $this->application->candidate->nama_lengkap,
-            'jadwal_interview' => $this->stage->jadwal_interview->toDateTimeString(),
-            'lokasi_interview' => $this->stage->lokasi_interview,
+            'jadwal_interview' => $this->stage->jadwal->toDateTimeString(),
+            'lokasi_interview' => $this->stage->lokasi,
         ];
     }
 }

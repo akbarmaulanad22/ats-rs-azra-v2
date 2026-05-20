@@ -96,16 +96,16 @@ class InterviewScheduleTest extends TestCase
         $response = $this->actingAs($admin)->post(
             route('lowongan.wawancara.jadwal', [$vacancy, $application]),
             [
-                'jadwal_interview' => now()->addDays(3)->format('Y-m-d\TH:i'),
-                'lokasi_interview' => 'Ruang Meeting Lt. 3',
+                'jadwal' => now()->addDays(3)->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Meeting Lt. 3',
             ]
         );
 
         $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $stage = $application->stages()->where('key', 'wawancara_kepala_unit')->first();
-        $this->assertNotNull($stage->jadwal_interview);
-        $this->assertEquals('Ruang Meeting Lt. 3', $stage->lokasi_interview);
+        $this->assertNotNull($stage->jadwal);
+        $this->assertEquals('Ruang Meeting Lt. 3', $stage->lokasi);
 
         Mail::assertQueued(TemplatedMail::class, 1);
         Notification::assertSentTo($unitHead, WawancaraDijadwalkan::class);
@@ -127,8 +127,8 @@ class InterviewScheduleTest extends TestCase
         $response = $this->actingAs($manager)->post(
             route('lowongan.wawancara.jadwal', [$vacancy, $application]),
             [
-                'jadwal_interview' => now()->addDays(3)->format('Y-m-d\TH:i'),
-                'lokasi_interview' => 'Ruang Meeting Lt. 2',
+                'jadwal' => now()->addDays(3)->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Meeting Lt. 2',
             ]
         );
 
@@ -147,8 +147,8 @@ class InterviewScheduleTest extends TestCase
         $response = $this->actingAs($unitHead)->post(
             route('lowongan.wawancara.jadwal', [$vacancy, $application]),
             [
-                'jadwal_interview' => now()->addDays(3)->format('Y-m-d\TH:i'),
-                'lokasi_interview' => 'Ruang Meeting',
+                'jadwal' => now()->addDays(3)->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Meeting',
             ]
         );
 
@@ -167,8 +167,8 @@ class InterviewScheduleTest extends TestCase
         $response = $this->actingAs($admin)->post(
             route('lowongan.wawancara.jadwal', [$vacancy, $application]),
             [
-                'jadwal_interview' => now()->addDays(3)->format('Y-m-d\TH:i'),
-                'lokasi_interview' => 'Ruang Meeting',
+                'jadwal' => now()->addDays(3)->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Meeting',
             ]
         );
 
@@ -191,16 +191,16 @@ class InterviewScheduleTest extends TestCase
         $this->actingAs($admin)->post(
             route('lowongan.wawancara.jadwal', [$vacancy, $application]),
             [
-                'jadwal_interview' => now()->addDays(3)->format('Y-m-d\TH:i'),
-                'lokasi_interview' => 'Ruang Meeting Lt. 3',
+                'jadwal' => now()->addDays(3)->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Meeting Lt. 3',
             ]
         );
 
         $response = $this->actingAs($admin)->post(
             route('lowongan.wawancara.jadwal', [$vacancy, $application]),
             [
-                'jadwal_interview' => now()->addDays(5)->format('Y-m-d\TH:i'),
-                'lokasi_interview' => 'Ruang Lain',
+                'jadwal' => now()->addDays(5)->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Lain',
             ]
         );
 
@@ -221,7 +221,7 @@ class InterviewScheduleTest extends TestCase
             []
         );
 
-        $response->assertSessionHasErrors(['jadwal_interview', 'lokasi_interview']);
+        $response->assertSessionHasErrors(['jadwal', 'lokasi']);
     }
 
     public function test_jadwal_must_be_future_date(): void
@@ -236,12 +236,12 @@ class InterviewScheduleTest extends TestCase
         $response = $this->actingAs($admin)->post(
             route('lowongan.wawancara.jadwal', [$vacancy, $application]),
             [
-                'jadwal_interview' => now()->subDay()->format('Y-m-d\TH:i'),
-                'lokasi_interview' => 'Ruang Meeting',
+                'jadwal' => now()->subDay()->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Meeting',
             ]
         );
 
-        $response->assertSessionHasErrors('jadwal_interview');
+        $response->assertSessionHasErrors('jadwal');
     }
 
     public function test_returns_404_for_mismatched_vacancy(): void
@@ -257,8 +257,8 @@ class InterviewScheduleTest extends TestCase
         $response = $this->actingAs($admin)->post(
             route('lowongan.wawancara.jadwal', [$otherVacancy, $application]),
             [
-                'jadwal_interview' => now()->addDays(3)->format('Y-m-d\TH:i'),
-                'lokasi_interview' => 'Ruang Meeting',
+                'jadwal' => now()->addDays(3)->format('Y-m-d\TH:i'),
+                'lokasi' => 'Ruang Meeting',
             ]
         );
 

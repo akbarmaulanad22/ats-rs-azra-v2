@@ -37,13 +37,13 @@ class InterviewScheduleController extends Controller
             return back()->withErrors(['jadwal' => 'Tidak ada tahap wawancara aktif untuk kandidat ini.']);
         }
 
-        if ($stage->jadwal_interview) {
+        if ($stage->jadwal) {
             return back()->withErrors(['jadwal' => 'Wawancara sudah dijadwalkan sebelumnya.']);
         }
 
         $stage->update([
-            'jadwal_interview' => $request->input('jadwal_interview'),
-            'lokasi_interview' => $request->input('lokasi_interview'),
+            'jadwal' => $request->input('jadwal'),
+            'lokasi' => $request->input('lokasi'),
         ]);
 
         $stage->refresh();
@@ -52,8 +52,8 @@ class InterviewScheduleController extends Controller
             $this->emailNotificationService->dispatch('wawancara_dijadwalkan', $application->candidate->email, [
                 'nama_kandidat' => $application->candidate->nama_lengkap,
                 'judul_lowongan' => $application->vacancy->judul_posisi,
-                'tanggal_interview' => $stage->jadwal_interview->translatedFormat('l, d F Y H:i'),
-                'lokasi_interview' => $stage->lokasi_interview,
+                'tanggal_interview' => $stage->jadwal->translatedFormat('l, d F Y H:i'),
+                'lokasi_interview' => $stage->lokasi,
             ]);
         } catch (\Throwable $e) {
             report($e);

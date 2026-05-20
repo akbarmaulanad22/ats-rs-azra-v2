@@ -475,8 +475,8 @@ class InterviewManagementTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $application->stages()->where('key', 'wawancara_kepala_unit')->update([
-            'jadwal_interview' => now()->addDays(2),
-            'lokasi_interview' => 'Ruang Meeting',
+            'jadwal' => now()->addDays(2),
+            'lokasi' => 'Ruang Meeting',
         ]);
 
         $response = $this->actingAs($unitHead)->get(route('lowongan.pipeline.show', [$vacancy, $application]));
@@ -493,8 +493,8 @@ class InterviewManagementTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $application->stages()->where('key', 'wawancara_kepala_unit')->update([
-            'jadwal_interview' => now()->addDays(2),
-            'lokasi_interview' => 'Ruang Meeting',
+            'jadwal' => now()->addDays(2),
+            'lokasi' => 'Ruang Meeting',
         ]);
         $template = $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit'], 'Kriteria Umum');
 
@@ -854,8 +854,8 @@ class InterviewManagementTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeAtInterviewStage($vacancy, 'wawancara_kepala_unit');
         $application->stages()->where('key', 'wawancara_kepala_unit')->update([
-            'jadwal_interview' => now()->addDays(2),
-            'lokasi_interview' => 'Ruang Meeting',
+            'jadwal' => now()->addDays(2),
+            'lokasi' => 'Ruang Meeting',
         ]);
         $this->assignCriteriaTemplate($vacancy, ['wawancara_kepala_unit']);
         $readinessTemplate = $this->assignReadinessTemplate($vacancy, ['wawancara_kepala_unit'], 'Kesiapan Perawat');

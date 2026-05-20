@@ -15,20 +15,34 @@ class McuResult extends Model
 
     protected $fillable = [
         'application_id',
-        'status',
+        'application_stage_id',
+        'reviewer_id',
+        'keputusan',
         'dokumen_path',
         'catatan',
+        'submitted_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'status' => McuStatus::class,
+            'keputusan' => McuStatus::class,
+            'submitted_at' => 'datetime',
         ];
     }
 
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
+    }
+
+    public function applicationStage(): BelongsTo
+    {
+        return $this->belongsTo(ApplicationStage::class);
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewer_id');
     }
 }

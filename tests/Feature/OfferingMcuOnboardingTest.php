@@ -238,33 +238,7 @@ class OfferingMcuOnboardingTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_hr_admin_can_update_mcu_status_to_scheduled(): void
-    {
-        $this->seedStages();
-        $admin = $this->makeHrAdmin();
-        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
-        $application = $this->makeApplicationAtStage($vacancy, 'mcu');
-
-        $response = $this->actingAs($admin)->post(route('lowongan.mcu.status', [$vacancy, $application]), [
-            'status' => McuStatus::Selesai->value,
-            'catatan' => 'MCU dilakukan di RS Azra.',
-        ]);
-
-        $response->assertRedirect(route('lowongan.pipeline.show', [$vacancy, $application]));
-
-        $this->assertDatabaseHas('mcu_results', [
-            'application_id' => $application->id,
-            'status' => McuStatus::Selesai->value,
-        ]);
-
-        $this->assertDatabaseHas('application_stages', [
-            'application_id' => $application->id,
-            'key' => 'mcu',
-            'status' => ApplicationStageStatus::Aktif,
-        ]);
-    }
-
-    public function test_mcu_lulus_advances_candidate_to_onboarding(): void
+    public function test_hr_admin_can_schedule_mcu(): void
     {
         $this->seedStages();
         Mail::fake();
@@ -272,8 +246,71 @@ class OfferingMcuOnboardingTest extends TestCase
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
-        $this->actingAs($admin)->post(route('lowongan.mcu.status', [$vacancy, $application]), [
-            'status' => McuStatus::Lulus->value,
+        $response = $this->actingAs($admin)->post(route('lowongan.mcu.jadwal', [$vacancy, $application]), [
+            'jadwal' => now()->addDays(3)->format('Y-m-d\TH:i'),
+            'lokasi' => 'RS Azra Lt. 2',
+        ]);
+
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
+
+        $stage = $application->stages()->where('key', 'mcu')->first();
+        $this->assertNotNull($stage->jadwal);
+        $this->assertEquals('RS Azra Lt. 2', $stage->lokasi);
+    }
+
+    public function test_cannot_schedule_mcu_twice(): void
+    {
+        $this->seedStages();
+        Mail::fake();
+        $admin = $this->makeHrAdmin();
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
+        $application = $this->makeApplicationAtStage($vacancy, 'mcu');
+
+        $this->actingAs($admin)->post(route('lowongan.mcu.jadwal', [$vacancy, $application]), [
+            'jadwal' => now()->addDays(3)->format('Y-m-d\TH:i'),
+            'lokasi' => 'RS Azra Lt. 2',
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('lowongan.mcu.jadwal', [$vacancy, $application]), [
+            'jadwal' => now()->addDays(5)->format('Y-m-d\TH:i'),
+            'lokasi' => 'Lokasi Lain',
+        ]);
+
+        $response->assertSessionHasErrors('jadwal');
+    }
+
+    public function test_mcu_schedule_validation_requires_fields(): void
+    {
+        $this->seedStages();
+        $admin = $this->makeHrAdmin();
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
+        $application = $this->makeApplicationAtStage($vacancy, 'mcu');
+
+        $response = $this->actingAs($admin)->post(route('lowongan.mcu.jadwal', [$vacancy, $application]), []);
+
+        $response->assertSessionHasErrors(['jadwal', 'lokasi']);
+    }
+
+    public function test_mcu_lulus_advances_candidate_to_onboarding(): void
+    {
+        $this->seedStages();
+        Mail::fake();
+        Storage::fake('public');
+        $admin = $this->makeHrAdmin();
+        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
+        $application = $this->makeApplicationAtStage($vacancy, 'mcu');
+
+        $application->stages()->where('key', 'mcu')->update([
+            'jadwal' => now()->addDays(2),
+            'lokasi' => 'RS Azra',
+        ]);
+
+        $file = UploadedFile::fake()->create('mcu-result.pdf', 500, 'application/pdf');
+
+        $this->actingAs($admin)->post(route('lowongan.mcu.keputusan', [$vacancy, $application]), [
+            'keputusan' => McuStatus::Lulus->value,
+            'dokumen' => $file,
+            'catatan' => 'Hasil MCU baik.',
         ]);
 
         $this->assertDatabaseHas('application_stages', [
@@ -287,6 +324,14 @@ class OfferingMcuOnboardingTest extends TestCase
             'key' => 'onboarding',
             'status' => ApplicationStageStatus::Aktif,
         ]);
+
+        $mcuResult = McuResult::where('application_id', $application->id)->first();
+        $this->assertNotNull($mcuResult);
+        $this->assertEquals(McuStatus::Lulus, $mcuResult->keputusan);
+        $this->assertEquals($admin->id, $mcuResult->reviewer_id);
+        $this->assertNotNull($mcuResult->submitted_at);
+        $this->assertNotNull($mcuResult->dokumen_path);
+        Storage::disk('public')->assertExists($mcuResult->dokumen_path);
     }
 
     public function test_mcu_tidak_lulus_rejects_candidate(): void
@@ -297,8 +342,13 @@ class OfferingMcuOnboardingTest extends TestCase
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
-        $this->actingAs($admin)->post(route('lowongan.mcu.status', [$vacancy, $application]), [
-            'status' => McuStatus::TidakLulus->value,
+        $application->stages()->where('key', 'mcu')->update([
+            'jadwal' => now()->addDays(2),
+            'lokasi' => 'RS Azra',
+        ]);
+
+        $this->actingAs($admin)->post(route('lowongan.mcu.keputusan', [$vacancy, $application]), [
+            'keputusan' => McuStatus::TidakLulus->value,
         ]);
 
         $this->assertDatabaseHas('application_stages', [
@@ -308,60 +358,67 @@ class OfferingMcuOnboardingTest extends TestCase
         ]);
     }
 
-    public function test_hr_admin_can_upload_mcu_document(): void
+    public function test_mcu_ditangguhkan_reserves_candidate(): void
     {
         $this->seedStages();
-        Storage::fake('public');
         $admin = $this->makeHrAdmin();
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
-        $file = UploadedFile::fake()->create('mcu-result.pdf', 500, 'application/pdf');
-
-        $response = $this->actingAs($admin)->post(route('lowongan.mcu.dokumen', [$vacancy, $application]), [
-            'dokumen' => $file,
+        $application->stages()->where('key', 'mcu')->update([
+            'jadwal' => now()->addDays(2),
+            'lokasi' => 'RS Azra',
         ]);
 
-        $response->assertRedirect(route('lowongan.pipeline.show', [$vacancy, $application]));
+        $this->actingAs($admin)->post(route('lowongan.mcu.keputusan', [$vacancy, $application]), [
+            'keputusan' => McuStatus::Ditangguhkan->value,
+            'catatan' => 'Perlu pemeriksaan tambahan.',
+        ]);
 
-        $mcuResult = McuResult::where('application_id', $application->id)->first();
-        $this->assertNotNull($mcuResult);
-        $this->assertNotNull($mcuResult->dokumen_path);
-        Storage::disk('public')->assertExists($mcuResult->dokumen_path);
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'mcu',
+            'status' => ApplicationStageStatus::Reserved,
+        ]);
     }
 
-    public function test_mcu_document_upload_rejects_non_pdf(): void
+    public function test_cannot_submit_mcu_result_twice(): void
     {
         $this->seedStages();
-        Storage::fake('public');
+        Mail::fake();
         $admin = $this->makeHrAdmin();
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
-        $file = UploadedFile::fake()->create('mcu-result.docx', 200, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-
-        $response = $this->actingAs($admin)->post(route('lowongan.mcu.dokumen', [$vacancy, $application]), [
-            'dokumen' => $file,
+        $application->stages()->where('key', 'mcu')->update([
+            'jadwal' => now()->addDays(2),
+            'lokasi' => 'RS Azra',
         ]);
 
-        $response->assertSessionHasErrors(['dokumen']);
+        $this->actingAs($admin)->post(route('lowongan.mcu.keputusan', [$vacancy, $application]), [
+            'keputusan' => McuStatus::Lulus->value,
+        ]);
+
+        $application->load('stages');
+        $application->stages()->where('key', 'mcu')->update(['status' => ApplicationStageStatus::Aktif]);
+
+        $response = $this->actingAs($admin)->post(route('lowongan.mcu.keputusan', [$vacancy, $application]), [
+            'keputusan' => McuStatus::TidakLulus->value,
+        ]);
+
+        $response->assertSessionHasErrors('mcu');
     }
 
-    public function test_mcu_document_upload_rejects_oversized_file(): void
+    public function test_mcu_keputusan_validation_requires_keputusan(): void
     {
         $this->seedStages();
-        Storage::fake('public');
         $admin = $this->makeHrAdmin();
         $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
         $application = $this->makeApplicationAtStage($vacancy, 'mcu');
 
-        $file = UploadedFile::fake()->create('mcu-result.pdf', 4096, 'application/pdf');
+        $response = $this->actingAs($admin)->post(route('lowongan.mcu.keputusan', [$vacancy, $application]), []);
 
-        $response = $this->actingAs($admin)->post(route('lowongan.mcu.dokumen', [$vacancy, $application]), [
-            'dokumen' => $file,
-        ]);
-
-        $response->assertSessionHasErrors(['dokumen']);
+        $response->assertSessionHasErrors(['keputusan']);
     }
 
     // ── Onboarding ────────────────────────────────────────────────────────────

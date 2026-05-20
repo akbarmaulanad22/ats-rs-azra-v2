@@ -81,7 +81,7 @@
 
 @php
     $existingResult = $currentStage?->interviewResult;
-    $hasSchedule = (bool) $currentStage?->jadwal_interview;
+    $hasSchedule = (bool) $currentStage?->jadwal;
 @endphp
 
 {{-- Phase 1: No schedule yet --}}
@@ -93,17 +93,17 @@
             <div class="space-y-3 mb-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Tanggal & Waktu <span class="text-red-500">*</span></label>
-                    <input type="datetime-local" name="jadwal_interview" required
+                    <input type="datetime-local" name="jadwal" required
                         class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
-                    @error('jadwal_interview')
+                    @error('jadwal')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Lokasi <span class="text-red-500">*</span></label>
-                    <input type="text" name="lokasi_interview" required placeholder="Ruang Meeting Lt. 3 / Link Google Meet"
+                    <input type="text" name="lokasi" required placeholder="Ruang Meeting Lt. 3 / Link Google Meet"
                         class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
-                    @error('lokasi_interview')
+                    @error('lokasi')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -125,11 +125,11 @@
         <dl class="space-y-1">
             <div>
                 <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Waktu</dt>
-                <dd class="text-xs text-gray-800">{{ $currentStage->jadwal_interview->translatedFormat('d M Y, H:i') }}</dd>
+                <dd class="text-xs text-gray-800">{{ $currentStage->jadwal->translatedFormat('d M Y, H:i') }}</dd>
             </div>
             <div>
                 <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Lokasi</dt>
-                <dd class="text-xs text-gray-800">{{ $currentStage->lokasi_interview }}</dd>
+                <dd class="text-xs text-gray-800">{{ $currentStage->lokasi }}</dd>
             </div>
         </dl>
     </div>
@@ -285,15 +285,15 @@
     <div class="bg-white rounded-xl border border-gray-100 p-5">
         <h2 class="text-sm font-semibold text-gray-800 mb-3">Hasil Wawancara</h2>
 
-        @if ($currentStage?->jadwal_interview)
+        @if ($currentStage?->jadwal)
             <dl class="space-y-1 mb-4">
                 <div>
                     <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Waktu</dt>
-                    <dd class="text-xs text-gray-800">{{ $currentStage->jadwal_interview->translatedFormat('d M Y, H:i') }}</dd>
+                    <dd class="text-xs text-gray-800">{{ $currentStage->jadwal->translatedFormat('d M Y, H:i') }}</dd>
                 </div>
                 <div>
                     <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Lokasi</dt>
-                    <dd class="text-xs text-gray-800">{{ $currentStage->lokasi_interview }}</dd>
+                    <dd class="text-xs text-gray-800">{{ $currentStage->lokasi }}</dd>
                 </div>
             </dl>
         @endif
