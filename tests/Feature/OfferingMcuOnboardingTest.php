@@ -364,62 +364,6 @@ class OfferingMcuOnboardingTest extends TestCase
         $response->assertSessionHasErrors(['dokumen']);
     }
 
-    public function test_candidate_can_upload_mcu_document_via_token(): void
-    {
-        $this->seedStages();
-        Storage::fake('public');
-        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
-        $application = $this->makeApplicationAtStage($vacancy, 'mcu');
-
-        $file = UploadedFile::fake()->create('my-mcu.pdf', 1024, 'application/pdf');
-
-        $response = $this->post(route('kandidat.mcu.upload.store', $application->token), [
-            'dokumen' => $file,
-        ]);
-
-        $response->assertRedirect(route('kandidat.mcu.upload', $application->token));
-
-        $mcuResult = McuResult::where('application_id', $application->id)->first();
-        $this->assertNotNull($mcuResult);
-        Storage::disk('public')->assertExists($mcuResult->dokumen_path);
-    }
-
-    public function test_candidate_cannot_upload_mcu_when_stage_not_active(): void
-    {
-        $this->seedStages();
-        Storage::fake('public');
-        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
-        $application = $this->makeApplicationAtStage($vacancy, 'onboarding');
-
-        $file = UploadedFile::fake()->create('my-mcu.pdf', 500, 'application/pdf');
-
-        $response = $this->post(route('kandidat.mcu.upload.store', $application->token), [
-            'dokumen' => $file,
-        ]);
-
-        $response->assertNotFound();
-    }
-
-    public function test_candidate_mcu_upload_replaces_previous_document(): void
-    {
-        $this->seedStages();
-        Storage::fake('public');
-        $vacancy = $this->createVacancy(['lamaran', 'surat_penawaran', 'mcu', 'onboarding']);
-        $application = $this->makeApplicationAtStage($vacancy, 'mcu');
-
-        $firstFile = UploadedFile::fake()->create('first.pdf', 500, 'application/pdf');
-        $this->post(route('kandidat.mcu.upload.store', $application->token), ['dokumen' => $firstFile]);
-
-        $firstPath = McuResult::where('application_id', $application->id)->first()->dokumen_path;
-
-        $secondFile = UploadedFile::fake()->create('second.pdf', 500, 'application/pdf');
-        $this->post(route('kandidat.mcu.upload.store', $application->token), ['dokumen' => $secondFile]);
-
-        $mcuResult = McuResult::where('application_id', $application->id)->first();
-        $this->assertNotEquals($firstPath, $mcuResult->dokumen_path);
-        Storage::disk('public')->assertMissing($firstPath);
-    }
-
     // ── Onboarding ────────────────────────────────────────────────────────────
 
     public function test_hr_admin_can_view_onboarding_page(): void

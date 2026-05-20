@@ -58,18 +58,10 @@
     @endif
 
     @if ($currentStage->status->isAdvanceable())
-        <p class="text-[10px] text-gray-500 mb-2">Link upload untuk kandidat:</p>
-        <input
-            type="text"
-            readonly
-            value="{{ route('kandidat.mcu.upload', $application->token) }}"
-            class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg bg-gray-50 text-gray-600 mb-3"
-        >
-
         <form method="POST" action="{{ route('lowongan.mcu.dokumen', [$lowongan, $application]) }}" enctype="multipart/form-data">
             @csrf
             <label class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1">
-                Unggah Dokumen (HR Admin)
+                Unggah Dokumen MCU
             </label>
             <input
                 type="file"
