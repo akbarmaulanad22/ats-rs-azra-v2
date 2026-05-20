@@ -37,13 +37,21 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Tipe <span class="text-red-500">*</span></label>
-                            <select name="tipe" required
-                                class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded bg-white focus-ring">
-                                <option value="">Pilih tipe...</option>
+                            <div class="flex flex-wrap gap-2">
                                 @foreach (\App\Enums\InterviewTemplateType::cases() as $type)
-                                    <option value="{{ $type->value }}" {{ old('tipe') === $type->value ? 'selected' : '' }}>{{ $type->label() }}</option>
+                                    <label class="bg-white flex items-center gap-1.5 px-3 py-1.5 rounded border cursor-pointer text-xs font-medium transition-colors ease-out duration-150 has-[:checked]:bg-primary has-[:checked]:text-white has-[:checked]:border-primary border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 has-[:checked]:hover:bg-primary">
+                                        <input
+                                            type="radio"
+                                            name="tipe"
+                                            value="{{ $type->value }}"
+                                            {{ old('tipe') === $type->value ? 'checked' : '' }}
+                                            required
+                                            class="sr-only"
+                                        >
+                                        {{ $type->label() }}
+                                    </label>
                                 @endforeach
-                            </select>
+                            </div>
                         </div>
                     </div>
                 </div>

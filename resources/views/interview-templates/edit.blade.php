@@ -42,8 +42,13 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Tipe</label>
-                            <input type="text" value="{{ $template->tipe->label() }}" disabled
-                                class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded bg-gray-50 text-gray-500 cursor-not-allowed">
+                            <div class="flex flex-wrap gap-2">
+                                @foreach (\App\Enums\InterviewTemplateType::cases() as $type)
+                                    <span class="flex items-center gap-1.5 px-3 py-1.5 rounded border text-xs font-medium {{ $template->tipe === $type ? 'bg-primary text-white border-primary' : 'bg-gray-50 text-gray-400 border-gray-200' }}">
+                                        {{ $type->label() }}
+                                    </span>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 </div>

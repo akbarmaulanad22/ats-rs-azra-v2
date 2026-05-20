@@ -37,11 +37,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
                     <div class="md:col-span-1">
                         <label class="block text-[10px] font-medium text-gray-500 uppercase tracking-wide mb-1">Tipe</label>
-                        <select x-model="question.tipe"
-                            class="w-full text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-white focus-ring">
-                            <option value="mc">Pilihan Ganda</option>
-                            <option value="essay">Esai</option>
-                        </select>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" @click="question.tipe = 'mc'"
+                                :class="question.tipe === 'mc' ? 'bg-primary text-white border-primary hover:bg-primary' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'"
+                                class="px-3 py-1.5 rounded border text-xs font-medium transition-colors ease-out duration-150 cursor-pointer">
+                                Pilihan Ganda
+                            </button>
+                            <button type="button" @click="question.tipe = 'essay'"
+                                :class="question.tipe === 'essay' ? 'bg-primary text-white border-primary hover:bg-primary' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'"
+                                class="px-3 py-1.5 rounded border text-xs font-medium transition-colors ease-out duration-150 cursor-pointer">
+                                Esai
+                            </button>
+                        </div>
                     </div>
                     <div class="md:col-span-1">
                         <label class="block text-[10px] font-medium text-gray-500 uppercase tracking-wide mb-1">Poin</label>
