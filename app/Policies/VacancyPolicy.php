@@ -10,11 +10,7 @@ class VacancyPolicy
 {
     public function viewAny(User $user): bool
     {
-        if ($user->isHrAdmin()) {
-            return true;
-        }
-
-        if ($user->hasRole(Role::HrManager, Role::Director)) {
+        if ($user->hasRole(Role::HrAdmin, Role::HrManager, Role::Director)) {
             return true;
         }
 

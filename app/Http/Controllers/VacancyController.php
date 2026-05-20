@@ -28,6 +28,11 @@ class VacancyController extends Controller
         if ($user->hasRole(Role::UnitHead)) {
             $employee = $user->employee;
             $unit = $employee ? Unit::where('nama', $employee->unit)->first() : null;
+
+            if (! $unit) {
+                session()->flash('warning', 'Unit Anda tidak ditemukan. Hubungi Admin HR untuk memperbaiki data.');
+            }
+
             $query->where('unit_id', $unit?->id ?? 0);
         }
 

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\EmploymentType;
 use App\Enums\Role;
 use App\Enums\VacancyStatus;
+use App\Models\Employee;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -95,13 +96,94 @@ class VacancyManagementTest extends TestCase
         $response->assertDontSee('Dokter Umum');
     }
 
-    public function test_non_hr_admin_cannot_view_vacancy_list(): void
+    public function test_hr_manager_can_view_vacancy_list(): void
     {
-        foreach ([Role::HrManager, Role::UnitHead, Role::Director, Role::Employee] as $role) {
-            $user = User::factory()->create(['role' => $role]);
-            $response = $this->actingAs($user)->get(route('lowongan.index'));
-            $response->assertStatus(403);
-        }
+        $user = User::factory()->create(['role' => Role::HrManager]);
+        $this->seedStages();
+        Vacancy::factory()->create(['judul_posisi' => 'Dokter Umum']);
+
+        $response = $this->actingAs($user)->get(route('lowongan.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Dokter Umum');
+    }
+
+    public function test_director_can_view_vacancy_list(): void
+    {
+        $user = User::factory()->create(['role' => Role::Director]);
+        $this->seedStages();
+        Vacancy::factory()->create(['judul_posisi' => 'Dokter Umum']);
+
+        $response = $this->actingAs($user)->get(route('lowongan.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Dokter Umum');
+    }
+
+    public function test_unit_head_with_employee_can_view_vacancy_list_scoped_to_own_unit(): void
+    {
+        $this->seedStages();
+        $ownUnit = Unit::factory()->create(['nama' => 'ICU']);
+        $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
+
+        $user = User::factory()->create(['role' => Role::UnitHead]);
+        Employee::factory()->create(['user_id' => $user->id, 'unit' => 'ICU']);
+
+        Vacancy::factory()->create(['judul_posisi' => 'Perawat ICU', 'unit_id' => $ownUnit->id]);
+        Vacancy::factory()->create(['judul_posisi' => 'Perawat IGD', 'unit_id' => $otherUnit->id]);
+
+        $response = $this->actingAs($user)->get(route('lowongan.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Perawat ICU');
+        $response->assertDontSee('Perawat IGD');
+    }
+
+    public function test_unit_head_without_employee_cannot_view_vacancy_list(): void
+    {
+        $user = User::factory()->create(['role' => Role::UnitHead]);
+
+        $response = $this->actingAs($user)->get(route('lowongan.index'));
+
+        $response->assertStatus(403);
+    }
+
+    public function test_unit_head_with_unknown_unit_sees_warning(): void
+    {
+        $this->seedStages();
+        $user = User::factory()->create(['role' => Role::UnitHead]);
+        Employee::factory()->create(['user_id' => $user->id, 'unit' => 'NonExistentUnit']);
+
+        $response = $this->actingAs($user)->get(route('lowongan.index'));
+
+        $response->assertStatus(200);
+        $response->assertSessionHas('warning');
+    }
+
+    public function test_unit_head_cannot_escape_scope_via_unit_id_param(): void
+    {
+        $this->seedStages();
+        $ownUnit = Unit::factory()->create(['nama' => 'ICU']);
+        $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
+
+        $user = User::factory()->create(['role' => Role::UnitHead]);
+        Employee::factory()->create(['user_id' => $user->id, 'unit' => 'ICU']);
+
+        Vacancy::factory()->create(['judul_posisi' => 'Perawat IGD', 'unit_id' => $otherUnit->id]);
+
+        $response = $this->actingAs($user)->get(route('lowongan.index', ['unit_id' => $otherUnit->id]));
+
+        $response->assertStatus(200);
+        $response->assertDontSee('Perawat IGD');
+    }
+
+    public function test_employee_cannot_view_vacancy_list(): void
+    {
+        $user = User::factory()->create(['role' => Role::Employee]);
+
+        $response = $this->actingAs($user)->get(route('lowongan.index'));
+
+        $response->assertStatus(403);
     }
 
     public function test_guest_is_redirected_from_vacancy_list(): void

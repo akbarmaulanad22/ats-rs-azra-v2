@@ -88,7 +88,7 @@
                     label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
                 />
 
-                @if(auth()->user()->role !== \App\Enums\Role::UnitHead)
+                @unless(auth()->user()->hasRole(\App\Enums\Role::UnitHead))
                 <x-autocomplete-select
                     name="unit_id"
                     label="Unit"
@@ -97,7 +97,7 @@
                     placeholder="Semua Unit"
                     label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
                 />
-                @endif
+                @endunless
             </div>
 
         </form>
