@@ -8,6 +8,7 @@ use App\Enums\Role;
 use App\Enums\VacancyStatus;
 use App\Models\Application;
 use App\Models\Candidate;
+use App\Models\Employee;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -21,7 +22,7 @@ class DummyCandidateSeeder extends Seeder
 {
     public function run(): void
     {
-        User::firstOrCreate(
+        $kepalaUnit = User::firstOrCreate(
             ['username' => 'kepala_unit'],
             [
                 'name' => 'Kepala Unit Demo',
@@ -39,6 +40,18 @@ class DummyCandidateSeeder extends Seeder
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
 
         $unit = Unit::first();
+
+        Employee::firstOrCreate(
+            ['user_id' => $kepalaUnit->id],
+            [
+                'nip' => '000000',
+                'nama_karyawan' => $kepalaUnit->name,
+                'unit' => $unit->nama,
+                'posisi_pekerjaan' => 'Kepala Unit',
+                'profesi' => '-',
+                'jabatan' => 'Kepala Unit',
+            ]
+        );
         $vacancy = Vacancy::create([
             'judul_posisi' => 'Koordinator Medis (Demo)',
             'unit_id' => $unit->id,

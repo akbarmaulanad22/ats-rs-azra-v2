@@ -5,6 +5,7 @@
             <h1 class="text-xl font-semibold text-gray-900">Lowongan Kerja</h1>
             <p class="text-xs text-gray-500 mt-0.5">Kelola lowongan kerja RS Azra</p>
         </div>
+        @can('create', App\Models\Vacancy::class)
         <a
             href="{{ route('lowongan.create') }}"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
@@ -14,6 +15,7 @@
             </svg>
             Buat Lowongan
         </a>
+        @endcan
     </div>
 
     @php
@@ -86,6 +88,7 @@
                     label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
                 />
 
+                @if(auth()->user()->role !== \App\Enums\Role::UnitHead)
                 <x-autocomplete-select
                     name="unit_id"
                     label="Unit"
@@ -94,6 +97,7 @@
                     placeholder="Semua Unit"
                     label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
                 />
+                @endif
             </div>
 
         </form>
@@ -154,6 +158,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                         </svg>
                                     </a>
+                                    @can('update', $vacancy)
                                     <a
                                         href="{{ route('lowongan.edit', $vacancy) }}"
                                         class="p-1.5 rounded text-amber-400/60 hover:text-amber-500 hover:bg-amber-50 transition-colors ease-out duration-150"
@@ -164,6 +169,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                         </svg>
                                     </a>
+                                    @endcan
+                                    @can('delete', $vacancy)
                                     <form method="POST" action="{{ route('lowongan.destroy', $vacancy) }}" onsubmit="return confirm('Hapus lowongan ' + @js($vacancy->judul_posisi) + '?')">
                                         @csrf
                                         @method('DELETE')
@@ -178,6 +185,7 @@
                                             </svg>
                                         </button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
@@ -203,6 +211,7 @@
                                             <p class="text-sm font-medium text-gray-700">Belum ada lowongan</p>
                                             <p class="text-xs text-gray-400 mt-0.5">Buat lowongan kerja pertama RS Azra</p>
                                         </div>
+                                        @can('create', App\Models\Vacancy::class)
                                         <a
                                             href="{{ route('lowongan.create') }}"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
@@ -212,6 +221,7 @@
                                             </svg>
                                             Buat Lowongan
                                         </a>
+                                        @endcan
                                     @endif
                                 </div>
                             </td>
