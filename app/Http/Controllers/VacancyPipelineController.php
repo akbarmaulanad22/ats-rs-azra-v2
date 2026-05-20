@@ -166,7 +166,7 @@ class VacancyPipelineController extends Controller
 
         $pdfsToMerge = [$dataPdf];
 
-        foreach (['cv_path' => $application->cv_path, 'str_sip_path' => $application->str_sip_path] as $field => $path) {
+        foreach ([$application->cv_path, $application->str_sip_path] as $path) {
             if (! $path) {
                 continue;
             }
@@ -183,11 +183,15 @@ class VacancyPipelineController extends Controller
         }
 
         if (count($pdfsToMerge) > 1) {
-            $merger = new Merger;
-            foreach ($pdfsToMerge as $pdf) {
-                $merger->addRaw($pdf);
+            try {
+                $merger = new Merger;
+                foreach ($pdfsToMerge as $pdf) {
+                    $merger->addRaw($pdf);
+                }
+                $output = $merger->merge();
+            } catch (\Exception) {
+                $output = $dataPdf;
             }
-            $output = $merger->merge();
         } else {
             $output = $dataPdf;
         }

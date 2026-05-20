@@ -24,10 +24,7 @@
     */
 
     @page {
-        margin-top: 20mm;
-        margin-right: 18mm;
-        margin-bottom: 24mm;
-        margin-left: 18mm;
+        margin: 0;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -101,7 +98,7 @@
 {{-- ===== HEADER ===== --}}
 <div class="header">
     <h1>{{ $candidate->nama_lengkap }}</h1>
-    <div class="sub">{{ $lowongan->judul_posisi }} &mdash; {{ $lowongan->unit->nama }}</div>
+    <div class="sub">{{ $lowongan->judul_posisi }} &mdash; {{ $lowongan->unit?->nama }}</div>
     <div class="meta">Dicetak: {{ now()->format('d M Y') }}</div>
 </div>
 
@@ -223,7 +220,7 @@
                 <div class="label">Usia Ayah</div>
                 <div class="value">{{ $val($candidate->ayah_usia) }}</div>
                 <div class="label">Pendidikan Ayah</div>
-                <div class="value">{{ $val($candidate->ayah_pendidikan_terakhir?->label() ?? $candidate->ayah_pendidikan_terakhir) }}</div>
+                <div class="value">{{ $val($candidate->ayah_pendidikan_terakhir?->label()) }}</div>
                 <div class="label">Pekerjaan Ayah</div>
                 <div class="value">{{ $val($candidate->ayah_pekerjaan) }}</div>
             </td>
@@ -233,7 +230,7 @@
                 <div class="label">Usia Ibu</div>
                 <div class="value">{{ $val($candidate->ibu_usia) }}</div>
                 <div class="label">Pendidikan Ibu</div>
-                <div class="value">{{ $val($candidate->ibu_pendidikan_terakhir?->label() ?? $candidate->ibu_pendidikan_terakhir) }}</div>
+                <div class="value">{{ $val($candidate->ibu_pendidikan_terakhir?->label()) }}</div>
                 <div class="label">Pekerjaan Ibu</div>
                 <div class="value">{{ $val($candidate->ibu_pekerjaan) }}</div>
             </td>
@@ -372,7 +369,7 @@
         @foreach ($candidate->workExperiences as $work)
             <div class="border-left">
                 <div style="font-weight:bold; font-size:9.5pt; color:#0d1614;">{{ $work->jabatan }} &mdash; {{ $work->nama_perusahaan }}</div>
-                <div style="font-size:8pt; color:#8a948f;">{{ $work->periode_mulai->format('M Y') }} &ndash; {{ $work->periode_selesai ? $work->periode_selesai->format('M Y') : 'Sekarang' }}</div>
+                <div style="font-size:8pt; color:#8a948f;">{{ $work->periode_mulai?->format('M Y') ?? '—' }} &ndash; {{ $work->periode_selesai?->format('M Y') ?? 'Sekarang' }}</div>
                 @if ($work->rincian_tugas)
                     <div style="font-size:8.5pt; color:#2a3835; margin-top:3px;">{{ $work->rincian_tugas }}</div>
                 @endif
@@ -391,7 +388,7 @@
         @foreach ($candidate->organizationExperiences as $org)
             <div class="border-left">
                 <div style="font-weight:bold; font-size:9.5pt; color:#0d1614;">{{ $org->jabatan }} &mdash; {{ $org->nama_organisasi }}</div>
-                <div style="font-size:8pt; color:#8a948f;">{{ $org->periode_mulai->format('M Y') }} &ndash; {{ $org->periode_selesai ? $org->periode_selesai->format('M Y') : 'Sekarang' }}</div>
+                <div style="font-size:8pt; color:#8a948f;">{{ $org->periode_mulai?->format('M Y') ?? '—' }} &ndash; {{ $org->periode_selesai?->format('M Y') ?? 'Sekarang' }}</div>
                 @if ($org->keterangan)
                     <div style="font-size:8.5pt; color:#2a3835;">{{ $org->keterangan }}</div>
                 @endif
@@ -553,7 +550,7 @@
             <td class="footer-right">
                 {{ $candidate->nama_lengkap }}
                 &nbsp;&bull;&nbsp;
-                {{ $lowongan->judul_posisi }}, {{ $lowongan->unit->nama }}
+                {{ $lowongan->judul_posisi }}, {{ $lowongan->unit?->nama }}
                 &nbsp;&bull;&nbsp;
                 Dicetak: {{ now()->format('d M Y') }}
             </td>
