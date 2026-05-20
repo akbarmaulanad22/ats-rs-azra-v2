@@ -108,7 +108,7 @@ class ApplicationPipelineTest extends TestCase
 
         $admin = User::factory()->hrAdmin()->create();
         // Use a non-onboarding next stage so generic transisi_tahap fires
-        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'skrining_cv_kepala_unit', 'onboarding']);
+        $vacancy = $this->createVacancyWithStages(['lamaran', 'skrining_cv_hr', 'skrining_cv_user', 'onboarding']);
         $application = $this->makeApplication($vacancy);
 
         $this->actingAs($admin)->post(

@@ -27,7 +27,7 @@ class CvScreeningTest extends TestCase
         $this->artisan('db:seed', ['--class' => 'EmailTemplateSeeder']);
     }
 
-    private function createVacancy(Unit $unit, array $stageKeys = ['lamaran', 'skrining_cv_hr', 'skrining_cv_kepala_unit', 'onboarding']): Vacancy
+    private function createVacancy(Unit $unit, array $stageKeys = ['lamaran', 'skrining_cv_hr', 'skrining_cv_user', 'onboarding']): Vacancy
     {
         $template = WorkflowTemplate::factory()->create();
 
@@ -77,6 +77,17 @@ class CvScreeningTest extends TestCase
     private function makeUnitHead(Unit $unit): User
     {
         $user = User::factory()->withRole(Role::UnitHead)->create();
+        Employee::factory()->create([
+            'user_id' => $user->id,
+            'unit' => $unit->nama,
+        ]);
+
+        return $user;
+    }
+
+    private function makeEmployee(Unit $unit): User
+    {
+        $user = User::factory()->withRole(Role::Employee)->create();
         Employee::factory()->create([
             'user_id' => $user->id,
             'unit' => $unit->nama,
@@ -144,11 +155,42 @@ class CvScreeningTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_employee_role_cannot_view_screening(): void
+    public function test_employee_same_unit_can_view_pipeline(): void
     {
         $this->seedStages();
-        $employee = User::factory()->create();
         $unit = Unit::factory()->create();
+        $employee = $this->makeEmployee($unit);
+        $vacancy = $this->createVacancy($unit);
+        $this->makeApplication($vacancy, [
+            0 => ApplicationStageStatus::Selesai,
+            1 => ApplicationStageStatus::Selesai,
+            2 => ApplicationStageStatus::Aktif,
+            3 => ApplicationStageStatus::Pending,
+        ]);
+
+        $response = $this->actingAs($employee)->get(route('lowongan.pipeline', $vacancy));
+
+        $response->assertOk();
+    }
+
+    public function test_employee_different_unit_cannot_view_pipeline(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $otherUnit = Unit::factory()->create();
+        $employee = $this->makeEmployee($unit);
+        $vacancy = $this->createVacancy($otherUnit);
+
+        $response = $this->actingAs($employee)->get(route('lowongan.pipeline', $vacancy));
+
+        $response->assertForbidden();
+    }
+
+    public function test_employee_without_employee_record_cannot_view_pipeline(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $employee = User::factory()->withRole(Role::Employee)->create();
         $vacancy = $this->createVacancy($unit);
 
         $response = $this->actingAs($employee)->get(route('lowongan.pipeline', $vacancy));
@@ -270,7 +312,7 @@ class CvScreeningTest extends TestCase
 
         $application->load('stages');
         $skriningStage = $application->stages->firstWhere('key', 'skrining_cv_hr');
-        $nextStage = $application->stages->firstWhere('key', 'skrining_cv_kepala_unit');
+        $nextStage = $application->stages->firstWhere('key', 'skrining_cv_user');
 
         $this->assertEquals(ApplicationStageStatus::Selesai, $skriningStage->status);
         $this->assertEquals('CV bagus.', $skriningStage->catatan);
@@ -316,7 +358,7 @@ class CvScreeningTest extends TestCase
 
         $application->load('stages');
         $skriningStage = $application->stages->firstWhere('key', 'skrining_cv_hr');
-        $nextStage = $application->stages->firstWhere('key', 'skrining_cv_kepala_unit');
+        $nextStage = $application->stages->firstWhere('key', 'skrining_cv_user');
 
         $this->assertEquals(ApplicationStageStatus::Reserved, $skriningStage->status);
         $this->assertEquals('Dipertimbangkan.', $skriningStage->catatan);
@@ -346,7 +388,7 @@ class CvScreeningTest extends TestCase
         $response->assertRedirect(route('lowongan.pipeline', $vacancy));
 
         $application->load('stages');
-        $unitHeadStage = $application->stages->firstWhere('key', 'skrining_cv_kepala_unit');
+        $unitHeadStage = $application->stages->firstWhere('key', 'skrining_cv_user');
         $this->assertEquals(ApplicationStageStatus::Selesai, $unitHeadStage->status);
         $this->assertEquals('Kandidat potensial.', $unitHeadStage->catatan);
     }
@@ -367,7 +409,7 @@ class CvScreeningTest extends TestCase
         ]);
 
         $response = $this->actingAs($unitHead)->get(
-            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'stage' => 'skrining_cv_kepala_unit'])
+            route('lowongan.pipeline', ['lowongan' => $vacancy->id, 'stage' => 'skrining_cv_user'])
         );
 
         $response->assertOk();
@@ -383,8 +425,8 @@ class CvScreeningTest extends TestCase
         $vacancy = $this->createVacancy($unit);
         $application = $this->makeApplication($vacancy);
 
-        // candidate only has skrining_cv_hr active; unit head's stageKey is skrining_cv_kepala_unit
-        // skrining_cv_kepala_unit stage exists but is Pending → not advanceable
+        // candidate only has skrining_cv_hr active; unit head's stageKey is skrining_cv_user
+        // skrining_cv_user stage exists but is Pending → not advanceable
         $response = $this->actingAs($unitHead)->post(
             route('lowongan.skrining.keputusan', [$vacancy, $application]),
             ['keputusan' => 'lulus']
@@ -415,8 +457,99 @@ class CvScreeningTest extends TestCase
         $response->assertForbidden();
 
         $application->load('stages');
-        $stage = $application->stages->firstWhere('key', 'skrining_cv_kepala_unit');
+        $stage = $application->stages->firstWhere('key', 'skrining_cv_user');
         $this->assertEquals(ApplicationStageStatus::Aktif, $stage->status);
+    }
+
+    // ── Employee screening flow ───────────────────────────────────────────────
+
+    public function test_employee_same_unit_can_pass_candidate_at_user_screening(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $employee = $this->makeEmployee($unit);
+        $vacancy = $this->createVacancy($unit);
+        $application = $this->makeApplication($vacancy, [
+            0 => ApplicationStageStatus::Selesai,
+            1 => ApplicationStageStatus::Selesai,
+            2 => ApplicationStageStatus::Aktif,
+            3 => ApplicationStageStatus::Pending,
+        ]);
+
+        $response = $this->actingAs($employee)->post(
+            route('lowongan.skrining.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus', 'catatan' => 'Kandidat cocok.']
+        );
+
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
+
+        $application->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'skrining_cv_user');
+        $this->assertEquals(ApplicationStageStatus::Selesai, $userStage->status);
+        $this->assertEquals('Kandidat cocok.', $userStage->catatan);
+    }
+
+    public function test_employee_different_unit_cannot_submit_cv_screening(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $otherUnit = Unit::factory()->create();
+        $employee = $this->makeEmployee($unit);
+        $vacancy = $this->createVacancy($otherUnit);
+        $application = $this->makeApplication($vacancy, [
+            0 => ApplicationStageStatus::Selesai,
+            1 => ApplicationStageStatus::Selesai,
+            2 => ApplicationStageStatus::Aktif,
+            3 => ApplicationStageStatus::Pending,
+        ]);
+
+        $response = $this->actingAs($employee)->post(
+            route('lowongan.skrining.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus']
+        );
+
+        $response->assertForbidden();
+    }
+
+    public function test_reviewed_by_recorded_when_employee_submits_user_screening(): void
+    {
+        $this->seedStages();
+        $unit = Unit::factory()->create();
+        $employee = $this->makeEmployee($unit);
+        $vacancy = $this->createVacancy($unit);
+        $application = $this->makeApplication($vacancy, [
+            0 => ApplicationStageStatus::Selesai,
+            1 => ApplicationStageStatus::Selesai,
+            2 => ApplicationStageStatus::Aktif,
+            3 => ApplicationStageStatus::Pending,
+        ]);
+
+        $this->actingAs($employee)->post(
+            route('lowongan.skrining.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus']
+        );
+
+        $application->load('stages');
+        $userStage = $application->stages->firstWhere('key', 'skrining_cv_user');
+        $this->assertEquals($employee->id, $userStage->reviewed_by);
+    }
+
+    public function test_reviewed_by_recorded_when_hr_admin_submits_hr_screening(): void
+    {
+        $this->seedStages();
+        $admin = User::factory()->hrAdmin()->create();
+        $unit = Unit::factory()->create();
+        $vacancy = $this->createVacancy($unit);
+        $application = $this->makeApplication($vacancy);
+
+        $this->actingAs($admin)->post(
+            route('lowongan.skrining.keputusan', [$vacancy, $application]),
+            ['keputusan' => 'lulus']
+        );
+
+        $application->load('stages');
+        $hrStage = $application->stages->firstWhere('key', 'skrining_cv_hr');
+        $this->assertEquals($admin->id, $hrStage->reviewed_by);
     }
 
     // ── Sequential access ─────────────────────────────────────────────────────

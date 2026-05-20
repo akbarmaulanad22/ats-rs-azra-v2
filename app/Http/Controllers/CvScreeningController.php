@@ -37,8 +37,8 @@ class CvScreeningController extends Controller
         $keputusan = $request->input('keputusan');
 
         try {
-            DB::transaction(function () use ($screeningStage, $catatan, $keputusan, $application): void {
-                $screeningStage->update(['catatan' => $catatan]);
+            DB::transaction(function () use ($screeningStage, $catatan, $keputusan, $application, $user): void {
+                $screeningStage->update(['catatan' => $catatan, 'reviewed_by' => $user->id]);
 
                 match ($keputusan) {
                     'lulus' => $this->pipelineService->advance($application),
@@ -63,6 +63,6 @@ class CvScreeningController extends Controller
 
     private function resolveStageKey(Role $role): string
     {
-        return $role === Role::UnitHead ? 'skrining_cv_kepala_unit' : 'skrining_cv_hr';
+        return in_array($role, [Role::UnitHead, Role::Employee], true) ? 'skrining_cv_user' : 'skrining_cv_hr';
     }
 }

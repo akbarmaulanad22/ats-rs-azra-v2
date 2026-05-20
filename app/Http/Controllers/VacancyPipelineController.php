@@ -135,9 +135,9 @@ class VacancyPipelineController extends Controller
         if ($currentStage) {
             [$isUserPic, $picLabel] = match (true) {
                 $currentStage->key === 'skrining_cv_hr' => [$user->isHrAdmin(), 'Admin HR'],
-                $currentStage->key === 'skrining_cv_kepala_unit' => [
-                    $user->hasRole(Role::UnitHead) && $user->employee?->unit === $lowongan->unit->nama,
-                    'Kepala Unit '.$lowongan->unit->nama,
+                $currentStage->key === 'skrining_cv_user' => [
+                    $user->hasRole(Role::UnitHead, Role::Employee) && $user->employee?->unit === $lowongan->unit->nama,
+                    'Tim Unit '.$lowongan->unit->nama,
                 ],
                 $currentStage->key === 'tes_kompetensi' => [$user->isHrAdmin(), 'Admin HR'],
                 $currentStage->key === 'wawancara_kepala_unit' => [
