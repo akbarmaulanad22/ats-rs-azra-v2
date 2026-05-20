@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InterviewTemplateType;
+use App\Enums\Role;
 use App\Models\Application;
 use App\Models\Vacancy;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -126,6 +127,30 @@ class VacancyPipelineController extends Controller
             $testAllReviewed = $application->testSubmission->answers->every(fn ($a) => $a->is_reviewed);
         }
 
+        $user = $request->user();
+        $isUserPic = true;
+        $picLabel = null;
+
+        if ($currentStage) {
+            [$isUserPic, $picLabel] = match (true) {
+                str_starts_with($currentStage->key, 'skrining_cv') => [
+                    $user->isHrAdmin() || ($user->hasRole(Role::UnitHead) && $user->employee?->unit === $lowongan->unit->nama),
+                    'Admin HR atau Kepala Unit '.$lowongan->unit->nama,
+                ],
+                $currentStage->key === 'tes_kompetensi' => [$user->isHrAdmin(), 'Admin HR'],
+                $currentStage->key === 'wawancara_kepala_unit' => [
+                    $user->hasRole(Role::UnitHead) && $user->employee?->unit === $lowongan->unit->nama,
+                    'Kepala Unit '.$lowongan->unit->nama,
+                ],
+                $currentStage->key === 'wawancara_manajer_hr' => [$user->hasRole(Role::HrManager), 'Manajer HR'],
+                $currentStage->key === 'wawancara_direktur' => [$user->hasRole(Role::Director), 'Direktur'],
+                $currentStage->key === 'surat_penawaran' => [$user->isHrAdmin(), 'Admin HR'],
+                $currentStage->key === 'mcu' => [$user->isHrAdmin(), 'Admin HR'],
+                $currentStage->key === 'onboarding' => [$user->isHrAdmin(), 'Admin HR'],
+                default => [true, null],
+            };
+        }
+
         return view('vacancies.pipeline-show', compact(
             'lowongan',
             'application',
@@ -135,6 +160,8 @@ class VacancyPipelineController extends Controller
             'assignedReadinessTemplates',
             'priorInterviews',
             'testAllReviewed',
+            'isUserPic',
+            'picLabel',
         ));
     }
 
