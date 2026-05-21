@@ -81,7 +81,7 @@
                 <x-autocomplete-select
                     name="unit"
                     label="Unit"
-                    :options="$filters['units']->map(fn ($u) => ['id' => $u, 'label' => $u])"
+                    :options="$filters['units']->map(fn ($u) => ['id' => $u->id, 'label' => $u->nama])"
                     :value="request('unit')"
                     placeholder="Semua Unit"
                     label-class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1"
@@ -143,7 +143,7 @@
                                 </a>
                             </td>
                             <td class="px-3 py-1.5 text-gray-500 text-xs">{{ $employee->profesi }}</td>
-                            <td class="px-3 py-1.5 text-gray-500 text-xs">{{ $employee->unit }}</td>
+                            <td class="px-3 py-1.5 text-gray-500 text-xs">{{ $employee->unit->nama }}</td>
                             <td class="px-3 py-1.5 text-gray-500 text-xs">{{ $employee->posisi_pekerjaan }}</td>
                             <td class="px-3 py-1.5">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary/10 text-primary font-medium">

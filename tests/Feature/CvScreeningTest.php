@@ -79,7 +79,7 @@ class CvScreeningTest extends TestCase
         $user = User::factory()->withRole(Role::UnitHead)->create();
         Employee::factory()->create([
             'user_id' => $user->id,
-            'unit' => $unit->nama,
+            'unit_id' => $unit->id,
         ]);
 
         return $user;
@@ -90,7 +90,7 @@ class CvScreeningTest extends TestCase
         $user = User::factory()->withRole(Role::Employee)->create();
         Employee::factory()->create([
             'user_id' => $user->id,
-            'unit' => $unit->nama,
+            'unit_id' => $unit->id,
         ]);
 
         return $user;

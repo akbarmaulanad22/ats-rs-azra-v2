@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
+use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -18,6 +19,7 @@ class EmployeeController extends Controller
         Gate::authorize('viewAny', Employee::class);
 
         $employees = Employee::query()
+            ->with('unit')
             ->when(
                 $request->q,
                 fn ($q, $search) => $q->where(function ($q) use ($search) {
@@ -26,7 +28,7 @@ class EmployeeController extends Controller
                         ->orWhereRaw('LOWER(nip) LIKE ?', ["%{$lower}%"]);
                 }),
             )
-            ->when($request->unit, fn ($q, $unit) => $q->where('unit', $unit))
+            ->when($request->unit, fn ($q, $unit) => $q->where('unit_id', $unit))
             ->when(
                 $request->posisi,
                 fn ($q, $posisi) => $q->where('posisi_pekerjaan', $posisi),
@@ -44,7 +46,7 @@ class EmployeeController extends Controller
             ->withQueryString();
 
         $filters = [
-            'units' => Employee::distinct()->orderBy('unit')->pluck('unit'),
+            'units' => Unit::orderBy('nama')->get(['id', 'nama']),
             'posisi' => Employee::distinct()
                 ->orderBy('posisi_pekerjaan')
                 ->pluck('posisi_pekerjaan'),
@@ -83,12 +85,16 @@ class EmployeeController extends Controller
     {
         Gate::authorize('view', $employee);
 
+        $employee->load('unit');
+
         return view('employees.show', compact('employee'));
     }
 
     public function edit(Employee $employee): View
     {
         Gate::authorize('update', $employee);
+
+        $employee->load('unit');
 
         return view('employees.edit', compact('employee'));
     }

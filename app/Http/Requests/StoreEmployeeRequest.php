@@ -21,7 +21,7 @@ class StoreEmployeeRequest extends FormRequest
         return [
             'nip' => ['required', 'string', 'max:50', 'unique:employees,nip'],
             'nama_karyawan' => ['required', 'string', 'max:255'],
-            'unit' => ['required', 'string', 'max:100'],
+            'unit_id' => ['required', 'integer', 'exists:units,id'],
             'posisi_pekerjaan' => ['required', 'string', 'max:100'],
             'profesi' => ['required', 'string', 'max:100'],
             'jabatan' => ['required', 'string', 'max:100'],
@@ -36,7 +36,7 @@ class StoreEmployeeRequest extends FormRequest
         return [
             'nip' => 'NIP',
             'nama_karyawan' => 'Nama Karyawan',
-            'unit' => 'Unit',
+            'unit_id' => 'Unit',
             'posisi_pekerjaan' => 'Posisi Pekerjaan',
             'profesi' => 'Profesi',
             'jabatan' => 'Jabatan',

@@ -49,7 +49,7 @@ class VacancyPolicy
             }
             $vacancy->loadMissing('unit');
 
-            return $employee->unit === $vacancy->unit->nama;
+            return $employee->unit_id === $vacancy->unit_id;
         }
 
         return false;
@@ -68,7 +68,7 @@ class VacancyPolicy
             }
             $vacancy->loadMissing('unit');
 
-            return $employee->unit === $vacancy->unit->nama;
+            return $employee->unit_id === $vacancy->unit_id;
         }
 
         return false;
@@ -91,7 +91,7 @@ class VacancyPolicy
             }
             $vacancy->loadMissing('unit');
 
-            return $employee->unit === $vacancy->unit->nama;
+            return $employee->unit_id === $vacancy->unit_id;
         }
 
         return false;

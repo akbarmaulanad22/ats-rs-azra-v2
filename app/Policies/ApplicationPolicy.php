@@ -31,7 +31,7 @@ class ApplicationPolicy
             }
             $application->loadMissing('vacancy.unit');
 
-            return $employee->unit === $application->vacancy->unit->nama;
+            return $employee->unit_id === $application->vacancy->unit_id;
         }
 
         return false;
@@ -47,7 +47,7 @@ class ApplicationPolicy
         $application->loadMissing('vacancy.unit');
 
         return match ($user->role) {
-            Role::UnitHead, Role::Employee => $user->employee && $user->employee->unit === $application->vacancy->unit->nama,
+            Role::UnitHead, Role::Employee => $user->employee && $user->employee->unit_id === $application->vacancy->unit_id,
             Role::HrManager, Role::Director => true,
             default => false,
         };

@@ -290,7 +290,7 @@ class DiscTestSubmissionTest extends TestCase
         $unitHead = User::factory()->withRole(Role::UnitHead)->create();
         Employee::factory()->create([
             'user_id' => $unitHead->id,
-            'unit' => $unit->nama,
+            'unit_id' => $unit->id,
         ]);
 
         $response = $this->actingAs($unitHead)->get(

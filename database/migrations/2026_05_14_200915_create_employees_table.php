@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('nip')->unique();
             $table->string('nama_karyawan');
-            $table->string('unit');
+            $table->foreignId('unit_id')->constrained()->restrictOnDelete();
             $table->string('posisi_pekerjaan');
             $table->string('profesi');
             $table->string('jabatan');
