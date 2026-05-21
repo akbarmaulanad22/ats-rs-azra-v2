@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 
 class ModelActivityObserver
 {
+    public static bool $enabled = true;
+
     /**
      * Fields that indicate a sensitive status or assignment change (logged at notice level).
      *
@@ -35,8 +37,14 @@ class ModelActivityObserver
         'api_token',
     ];
 
+    private const MAX_FIELD_LENGTH = 200;
+
     public function created(Model $model): void
     {
+        if (! static::$enabled) {
+            return;
+        }
+
         Log::info('Model created', array_merge(LogContext::make(), [
             'model' => class_basename($model),
             'model_id' => $model->getKey(),
@@ -45,6 +53,10 @@ class ModelActivityObserver
 
     public function updated(Model $model): void
     {
+        if (! static::$enabled) {
+            return;
+        }
+
         $dirty = $this->sanitizeDirty($model->getDirty());
 
         $hasSensitiveChange = count(array_intersect(array_keys($dirty), self::SENSITIVE_FIELDS)) > 0;
@@ -64,6 +76,10 @@ class ModelActivityObserver
 
     public function deleted(Model $model): void
     {
+        if (! static::$enabled) {
+            return;
+        }
+
         Log::info('Model deleted', array_merge(LogContext::make(), [
             'model' => class_basename($model),
             'model_id' => $model->getKey(),
@@ -78,6 +94,14 @@ class ModelActivityObserver
      */
     private function sanitizeDirty(array $dirty): array
     {
-        return array_diff_key($dirty, array_flip(self::REDACTED_FIELDS));
+        $filtered = array_diff_key($dirty, array_flip(self::REDACTED_FIELDS));
+
+        return array_map(function (mixed $value): mixed {
+            if (is_string($value) && mb_strlen($value) > self::MAX_FIELD_LENGTH) {
+                return mb_substr($value, 0, self::MAX_FIELD_LENGTH).'… [truncated]';
+            }
+
+            return $value;
+        }, $filtered);
     }
 }
