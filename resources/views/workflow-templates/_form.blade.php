@@ -7,7 +7,7 @@
             type="text"
             id="nama"
             name="nama"
-            value="{{ old('nama', $templateAlur->nama ?? '') }}"
+            value="{{ old('nama', $templateAlur->nama ?? request('prefill', '')) }}"
             placeholder="mis. Koordinator, Staf, Kepala Unit"
             required
             class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-md focus-ring bg-white placeholder:text-gray-400 @error('nama') border-red-400 @enderror"

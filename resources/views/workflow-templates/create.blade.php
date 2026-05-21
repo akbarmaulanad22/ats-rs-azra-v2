@@ -16,6 +16,9 @@
     >
         <form method="POST" action="{{ route('template-alur.store') }}" @submit="prepareSubmit">
             @csrf
+            @if(old('popup', request('popup')))
+                <input type="hidden" name="popup" value="1">
+            @endif
 
             @include('workflow-templates._form')
 

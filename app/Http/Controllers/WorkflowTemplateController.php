@@ -9,6 +9,7 @@ use App\Models\WorkflowTemplate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -55,7 +56,7 @@ class WorkflowTemplateController extends Controller
         return view('workflow-templates.create', compact('stages'));
     }
 
-    public function store(StoreWorkflowTemplateRequest $request): RedirectResponse
+    public function store(StoreWorkflowTemplateRequest $request): RedirectResponse|Response
     {
         $stageIds = $request->validated()['stages'];
 
@@ -64,6 +65,10 @@ class WorkflowTemplateController extends Controller
         $template = WorkflowTemplate::create(['nama' => $request->validated()['nama']]);
 
         $this->syncStages($template, $stageIds);
+
+        if ($request->boolean('popup')) {
+            return response('<script>window.close()</script>');
+        }
 
         return redirect()->route('template-alur.index')
             ->with('status', 'Template alur kerja berhasil dibuat.');
