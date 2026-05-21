@@ -7,6 +7,7 @@ use App\Enums\Role;
 use App\Http\Requests\StoreInterviewScheduleRequest;
 use App\Http\Requests\UpdateInterviewScheduleRequest;
 use App\Models\Application;
+use App\Models\ApplicationStage;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Notifications\WawancaraDijadwalkan;
@@ -43,6 +44,11 @@ class InterviewScheduleController extends Controller
             return back()->withErrors(['jadwal' => 'Wawancara sudah dijadwalkan sebelumnya.']);
         }
 
+        $updateData = [
+            'jadwal' => $request->input('jadwal'),
+            'lokasi' => $request->input('lokasi'),
+        ];
+
         if ($stage->key === 'wawancara_user') {
             $interviewer = User::find($request->interviewer_id);
 
@@ -50,45 +56,17 @@ class InterviewScheduleController extends Controller
                 return back()->withErrors(['interviewer_id' => 'Pewawancara harus berasal dari unit yang sama dengan lowongan.']);
             }
 
-            $stage->update([
-                'jadwal' => $request->input('jadwal'),
-                'lokasi' => $request->input('lokasi'),
-                'interviewer_id' => $interviewer->id,
-            ]);
+            $updateData['interviewer_id'] = $interviewer->id;
+        }
 
-            $stage->refresh();
+        $stage->update($updateData);
+        $stage->refresh();
 
-            try {
-                $this->emailNotificationService->dispatch('wawancara_dijadwalkan', $application->candidate->email, [
-                    'nama_kandidat' => $application->candidate->nama_lengkap,
-                    'judul_lowongan' => $application->vacancy->judul_posisi,
-                    'tanggal_interview' => $stage->jadwal->translatedFormat('l, d F Y H:i'),
-                    'lokasi_interview' => $stage->lokasi,
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
+        $this->notifyCandidateScheduled($application, $stage);
 
+        if ($stage->key === 'wawancara_user') {
             Notification::send([$interviewer], new WawancaraDijadwalkan($application, $stage));
         } else {
-            $stage->update([
-                'jadwal' => $request->input('jadwal'),
-                'lokasi' => $request->input('lokasi'),
-            ]);
-
-            $stage->refresh();
-
-            try {
-                $this->emailNotificationService->dispatch('wawancara_dijadwalkan', $application->candidate->email, [
-                    'nama_kandidat' => $application->candidate->nama_lengkap,
-                    'judul_lowongan' => $application->vacancy->judul_posisi,
-                    'tanggal_interview' => $stage->jadwal->translatedFormat('l, d F Y H:i'),
-                    'lokasi_interview' => $stage->lokasi,
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
             $interviewerRole = match ($stage->key) {
                 'wawancara_manajer_hr' => Role::HrManager,
                 'wawancara_direktur' => Role::Director,
@@ -128,7 +106,7 @@ class InterviewScheduleController extends Controller
 
         $newJadwal = $request->input('jadwal');
         $newLokasi = $request->input('lokasi');
-        $newInterviewerId = $request->input('interviewer_id') ? (int) $request->input('interviewer_id') : $oldInterviewerId;
+        $newInterviewerId = $request->integer('interviewer_id') ?: $oldInterviewerId;
 
         if ($newInterviewerId !== $oldInterviewerId) {
             $newInterviewer = User::find($newInterviewerId);
@@ -150,16 +128,7 @@ class InterviewScheduleController extends Controller
         $stage->refresh();
 
         if ($scheduleChanged) {
-            try {
-                $this->emailNotificationService->dispatch('wawancara_dijadwalkan', $application->candidate->email, [
-                    'nama_kandidat' => $application->candidate->nama_lengkap,
-                    'judul_lowongan' => $application->vacancy->judul_posisi,
-                    'tanggal_interview' => $stage->jadwal->translatedFormat('l, d F Y H:i'),
-                    'lokasi_interview' => $stage->lokasi,
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            $this->notifyCandidateScheduled($application, $stage);
         }
 
         if ($interviewerChanged || $scheduleChanged) {
@@ -173,5 +142,19 @@ class InterviewScheduleController extends Controller
         return redirect()
             ->route('lowongan.pipeline', $lowongan)
             ->with('success', 'Jadwal wawancara berhasil diperbarui.');
+    }
+
+    private function notifyCandidateScheduled(Application $application, ApplicationStage $stage): void
+    {
+        try {
+            $this->emailNotificationService->dispatch('wawancara_dijadwalkan', $application->candidate->email, [
+                'nama_kandidat' => $application->candidate->nama_lengkap,
+                'judul_lowongan' => $application->vacancy->judul_posisi,
+                'tanggal_interview' => $stage->jadwal->translatedFormat('l, d F Y H:i'),
+                'lokasi_interview' => $stage->lokasi,
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

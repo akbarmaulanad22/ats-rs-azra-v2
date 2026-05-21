@@ -186,16 +186,10 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Pewawancara</label>
-                            @php
-                                $rescheduleInterviewers = \App\Models\User::where('is_active', true)
-                                    ->whereIn('role', [\App\Enums\Role::UnitHead->value, \App\Enums\Role::Employee->value])
-                                    ->whereHas('employee', fn ($q) => $q->where('unit', $lowongan->unit->nama))
-                                    ->get();
-                            @endphp
                             <select name="interviewer_id"
                                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
                                 <option value="">Tetap sama</option>
-                                @foreach ($rescheduleInterviewers as $interviewer)
+                                @foreach ($eligibleInterviewers as $interviewer)
                                     <option value="{{ $interviewer->id }}" @if ($currentStage->interviewer_id == $interviewer->id) selected @endif>
                                         {{ $interviewer->name }} ({{ $interviewer->role->label() }})
                                     </option>

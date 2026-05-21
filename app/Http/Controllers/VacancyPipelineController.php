@@ -156,7 +156,7 @@ class VacancyPipelineController extends Controller
         }
 
         $eligibleInterviewers = collect();
-        if ($currentStage?->key === 'wawancara_user' && ! $currentStage->jadwal) {
+        if ($currentStage?->key === 'wawancara_user') {
             $eligibleInterviewers = User::where('is_active', true)
                 ->whereIn('role', [Role::UnitHead->value, Role::Employee->value])
                 ->whereHas('employee', fn ($q) => $q->where('unit', $lowongan->unit->nama))
