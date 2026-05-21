@@ -264,6 +264,7 @@
                 if (!this.createUrl) return;
                 const url = new URL(this.createUrl, window.location.href);
                 url.searchParams.set('popup', '1');
+                if (this.query) url.searchParams.set('prefill', this.query);
                 const popup = window.open(url.toString(), '_blank');
                 if (!popup) return;
                 const poll = setInterval(() => {
