@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Role;
 use App\Http\Requests\StoreInterviewResultRequest;
+use App\Logging\LogContext;
 use App\Models\Application;
 use App\Models\InterviewResult;
 use App\Models\Vacancy;
@@ -11,6 +12,7 @@ use App\Services\ApplicationPipelineService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class InterviewController extends Controller
 {
@@ -83,6 +85,12 @@ class InterviewController extends Controller
         } catch (\RuntimeException $e) {
             return back()->withErrors(['interview' => $e->getMessage()]);
         }
+
+        Log::notice('Interview decision recorded', array_merge(LogContext::make(), [
+            'application_id' => $application->id,
+            'stage_key' => $stageKey,
+            'keputusan' => $keputusan,
+        ]));
 
         $label = match ($keputusan) {
             'lulus' => 'diloloskan ke tahap berikutnya',

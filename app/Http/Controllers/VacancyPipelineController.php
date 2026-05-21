@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\InterviewTemplateType;
 use App\Enums\Role;
+use App\Logging\LogContext;
 use App\Models\Application;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -12,6 +13,7 @@ use iio\libmergepdf\Merger;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -182,6 +184,11 @@ class VacancyPipelineController extends Controller
     {
         Gate::authorize('viewCandidateDetail', $lowongan);
         abort_if($application->vacancy_id !== $lowongan->id, 404);
+
+        Log::info('Candidate pipeline PDF exported', array_merge(LogContext::make(), [
+            'vacancy_id' => $lowongan->id,
+            'application_id' => $application->id,
+        ]));
 
         $lowongan->load(['unit']);
         $application->load([
