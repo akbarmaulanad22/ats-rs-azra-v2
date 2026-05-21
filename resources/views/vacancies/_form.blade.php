@@ -35,6 +35,7 @@
                 name="workflow_template_id"
                 label="Template Alur Kerja"
                 search-url="{{ route('template-alur.cari') }}"
+                create-url="{{ route('template-alur.create') }}"
                 :value="old('workflow_template_id', $lowongan->workflowTemplateSnapshot->workflow_template_id ?? null)"
                 :selected-label="($lowongan ?? null)?->workflowTemplateSnapshot?->workflowTemplate?->nama ?? ($lowongan ?? null)?->workflowTemplateSnapshot?->nama ?? ''"
                 :required="true"
