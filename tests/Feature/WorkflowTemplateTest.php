@@ -33,14 +33,14 @@ class WorkflowTemplateTest extends TestCase
     {
         $keys = [
             'lamaran', 'skrining_cv_hr', 'skrining_cv_user',
-            'tes_kompetensi', 'wawancara_kepala_unit', 'wawancara_manajer_hr',
+            'tes_kompetensi', 'wawancara_user', 'wawancara_manajer_hr',
             'wawancara_direktur', 'tes_disc', 'tes_mbti', 'surat_penawaran', 'mcu', 'onboarding',
         ];
 
         return $this->stageIds($keys);
     }
 
-    // ── Index ─────────────────────────────────────────────────────────────────
+    // â”€â”€ Index â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function test_hr_admin_can_view_template_list(): void
     {
@@ -84,7 +84,7 @@ class WorkflowTemplateTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    // ── Create ────────────────────────────────────────────────────────────────
+    // â”€â”€ Create â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function test_hr_admin_can_view_create_form(): void
     {
@@ -107,7 +107,7 @@ class WorkflowTemplateTest extends TestCase
         $response->assertStatus(403);
     }
 
-    // ── Store ─────────────────────────────────────────────────────────────────
+    // â”€â”€ Store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function test_hr_admin_can_create_template(): void
     {
@@ -223,7 +223,7 @@ class WorkflowTemplateTest extends TestCase
         $response->assertStatus(403);
     }
 
-    // ── Edit ──────────────────────────────────────────────────────────────────
+    // â”€â”€ Edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function test_hr_admin_can_view_edit_form(): void
     {
@@ -237,7 +237,7 @@ class WorkflowTemplateTest extends TestCase
         $response->assertViewIs('workflow-templates.edit');
     }
 
-    // ── Update ────────────────────────────────────────────────────────────────
+    // â”€â”€ Update â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function test_hr_admin_can_update_template(): void
     {
@@ -293,7 +293,7 @@ class WorkflowTemplateTest extends TestCase
         $response->assertStatus(403);
     }
 
-    // ── Destroy ───────────────────────────────────────────────────────────────
+    // â”€â”€ Destroy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function test_hr_admin_can_delete_template(): void
     {

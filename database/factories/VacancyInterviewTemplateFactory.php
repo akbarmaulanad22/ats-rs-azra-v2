@@ -17,7 +17,7 @@ class VacancyInterviewTemplateFactory extends Factory
      */
     public function definition(): array
     {
-        static $stageKeys = ['wawancara_kepala_unit', 'wawancara_manajer_hr', 'wawancara_direktur'];
+        static $stageKeys = ['wawancara_user', 'wawancara_manajer_hr', 'wawancara_direktur'];
 
         return [
             'vacancy_id' => Vacancy::factory(),

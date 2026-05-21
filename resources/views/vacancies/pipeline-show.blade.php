@@ -143,7 +143,7 @@
                         'lowongan' => $lowongan,
                         'currentStage' => $currentStage,
                     ])
-                @elseif (in_array($stageKey, ['wawancara_kepala_unit', 'wawancara_manajer_hr', 'wawancara_direktur']))
+                @elseif (in_array($stageKey, ['wawancara_user', 'wawancara_manajer_hr', 'wawancara_direktur']))
                     @include('vacancies.partials._aksi-wawancara', [
                         'application' => $application,
                         'lowongan' => $lowongan,

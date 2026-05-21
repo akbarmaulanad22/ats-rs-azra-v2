@@ -222,7 +222,7 @@ class MbtiTestSubmissionTest extends TestCase
         $vacancy = $this->createVacancyWithMbtiStage();
         $unit = $vacancy->unit;
 
-        $stageKeys = ['lamaran', 'tes_mbti', 'wawancara_kepala_unit', 'onboarding'];
+        $stageKeys = ['lamaran', 'tes_mbti', 'wawancara_user', 'onboarding'];
         $template = WorkflowTemplate::factory()->create();
         collect($stageKeys)->each(function (string $key, int $index) use ($template) {
             $stage = Stage::where('key', $key)->firstOrFail();
@@ -243,7 +243,7 @@ class MbtiTestSubmissionTest extends TestCase
         $stages = $vacancyWithInterview->workflowTemplateSnapshot->stages()->orderBy('position')->get();
         foreach ($stages as $index => $stage) {
             $status = match ($stage->key) {
-                'wawancara_kepala_unit' => ApplicationStageStatus::Aktif,
+                'wawancara_user' => ApplicationStageStatus::Aktif,
                 'lamaran', 'tes_mbti' => ApplicationStageStatus::Selesai,
                 default => ApplicationStageStatus::Pending,
             };

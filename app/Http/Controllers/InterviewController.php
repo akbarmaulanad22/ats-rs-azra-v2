@@ -38,6 +38,10 @@ class InterviewController extends Controller
             return back()->withErrors(['interview' => 'Hasil wawancara sudah direkam sebelumnya.']);
         }
 
+        if ($interviewStage->key === 'wawancara_user' && $interviewStage->interviewer_id !== $user->id) {
+            abort(403);
+        }
+
         $keputusan = $request->input('keputusan');
         $catatan = $request->input('catatan');
         $ratings = $request->input('ratings', []);
@@ -94,10 +98,10 @@ class InterviewController extends Controller
     private function resolveStageKey(Role $role): string
     {
         return match ($role) {
-            Role::UnitHead => 'wawancara_kepala_unit',
+            Role::UnitHead, Role::Employee => 'wawancara_user',
             Role::HrManager => 'wawancara_manajer_hr',
             Role::Director => 'wawancara_direktur',
-            default => 'wawancara_kepala_unit',
+            default => 'wawancara_user',
         };
     }
 }
