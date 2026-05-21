@@ -73,6 +73,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('unit', UnitController::class)->except(['show']);
 
     Route::get('/akun/karyawan-tersedia', [AccountController::class, 'availableEmployees'])->name('akun.karyawan-tersedia');
+    Route::get('/akun/karyawan-cari', [AccountController::class, 'searchAvailableEmployees'])->name('akun.karyawan-cari');
+    Route::get('/unit/cari', [UnitController::class, 'search'])->name('unit.cari');
+    Route::get('/template-alur/cari', [WorkflowTemplateController::class, 'search'])->name('template-alur.cari');
     Route::resource('akun', AccountController::class)
         ->parameters(['akun' => 'user'])
         ->only(['index', 'create', 'store', 'edit', 'update']);

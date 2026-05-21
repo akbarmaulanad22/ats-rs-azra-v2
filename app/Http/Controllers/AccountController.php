@@ -59,17 +59,35 @@ class AccountController extends Controller
         );
     }
 
+    public function searchAvailableEmployees(Request $request): JsonResponse
+    {
+        Gate::authorize('create', User::class);
+
+        $q = strtolower($request->string('q'));
+        $query = Employee::whereNull('user_id')
+            ->when($q, fn ($query) => $query->where(function ($query) use ($q) {
+                $query->whereRaw('LOWER(nama_karyawan) LIKE ?', ["%{$q}%"])
+                    ->orWhereRaw('LOWER(nip) LIKE ?', ["%{$q}%"]);
+            }))
+            ->orderBy('nama_karyawan');
+
+        $total = $query->count();
+        $results = $query->limit(10)->get()->map(fn ($e) => [
+            'id' => $e->id,
+            'label' => $e->nama_karyawan.' ('.$e->nip.')',
+            'employeeName' => $e->nama_karyawan,
+        ]);
+
+        return response()->json(['results' => $results, 'has_more' => $total > 10]);
+    }
+
     public function create(): View
     {
         Gate::authorize('create', User::class);
 
-        $employees = Employee::whereNull('user_id')
-            ->orderBy('nama_karyawan')
-            ->get();
-
         $roles = Role::cases();
 
-        return view('accounts.create', compact('employees', 'roles'));
+        return view('accounts.create', compact('roles'));
     }
 
     public function store(StoreAccountRequest $request): RedirectResponse

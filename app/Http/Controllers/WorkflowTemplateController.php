@@ -6,6 +6,7 @@ use App\Http\Requests\StoreWorkflowTemplateRequest;
 use App\Http\Requests\UpdateWorkflowTemplateRequest;
 use App\Models\Stage;
 use App\Models\WorkflowTemplate;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -28,6 +29,20 @@ class WorkflowTemplateController extends Controller
             ->withQueryString();
 
         return view('workflow-templates.index', compact('templates'));
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        Gate::authorize('viewAny', WorkflowTemplate::class);
+
+        $q = strtolower($request->string('q'));
+        $query = WorkflowTemplate::when($q, fn ($query) => $query->whereRaw('LOWER(nama) LIKE ?', ["%{$q}%"]))
+            ->orderBy('nama');
+
+        $total = $query->count();
+        $results = $query->limit(10)->get()->map(fn ($t) => ['id' => $t->id, 'label' => $t->nama]);
+
+        return response()->json(['results' => $results, 'has_more' => $total > 10]);
     }
 
     public function create(): View

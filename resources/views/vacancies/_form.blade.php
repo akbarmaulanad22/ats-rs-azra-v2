@@ -22,8 +22,9 @@
             <x-autocomplete-select
                 name="unit_id"
                 label="Unit"
-                :options="$units->map(fn ($u) => ['id' => $u->id, 'label' => $u->nama])"
+                search-url="{{ route('unit.cari') }}"
                 :value="old('unit_id', $lowongan->unit_id ?? null)"
+                :selected-label="($lowongan ?? null)?->unit?->nama ?? ''"
                 :required="true"
                 placeholder="Cari unit..."
                 label-class="block text-xs font-medium text-gray-700 mb-1"
@@ -32,8 +33,9 @@
             <x-autocomplete-select
                 name="workflow_template_id"
                 label="Template Alur Kerja"
-                :options="$templates->map(fn ($t) => ['id' => $t->id, 'label' => $t->nama])"
+                search-url="{{ route('template-alur.cari') }}"
                 :value="old('workflow_template_id', $lowongan->workflowTemplateSnapshot->workflow_template_id ?? null)"
+                :selected-label="($lowongan ?? null)?->workflowTemplateSnapshot?->workflowTemplate?->nama ?? ($lowongan ?? null)?->workflowTemplateSnapshot?->nama ?? ''"
                 :required="true"
                 placeholder="Cari template..."
                 label-class="block text-xs font-medium text-gray-700 mb-1"

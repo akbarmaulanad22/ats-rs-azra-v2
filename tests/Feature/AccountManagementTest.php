@@ -101,19 +101,20 @@ class AccountManagementTest extends TestCase
         $response->assertViewIs('accounts.create');
     }
 
-    public function test_create_form_only_shows_employees_without_accounts(): void
+    public function test_search_available_employees_excludes_employees_with_accounts(): void
     {
         $admin = User::factory()->hrAdmin()->create();
         $employeeWithAccount = Employee::factory()->create();
         $employeeWithAccount->update(['user_id' => User::factory()->create()->id]);
         $employeeWithoutAccount = Employee::factory()->create(['nama_karyawan' => 'Karyawan Tanpa Akun']);
 
-        $response = $this->actingAs($admin)->get(route('akun.create'));
+        $response = $this->actingAs($admin)->get(route('akun.karyawan-cari'));
 
         $response->assertStatus(200);
-        $employees = $response->viewData('employees');
-        $this->assertTrue($employees->contains($employeeWithoutAccount));
-        $this->assertFalse($employees->contains($employeeWithAccount));
+        $response->assertJsonStructure(['results', 'has_more']);
+        $ids = collect($response->json('results'))->pluck('id');
+        $this->assertTrue($ids->contains($employeeWithoutAccount->id));
+        $this->assertFalse($ids->contains($employeeWithAccount->id));
     }
 
     // ── Store ──────────────────────────────────────────────────────────────────

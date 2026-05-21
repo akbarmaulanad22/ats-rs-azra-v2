@@ -21,14 +21,13 @@
                     <x-autocomplete-select
                         name="employee_id"
                         label="Karyawan"
-                        :options="$employees->map(fn ($e) => ['id' => $e->id, 'label' => $e->nama_karyawan.' ('.$e->nip.')', 'employeeName' => $e->nama_karyawan])"
+                        search-url="{{ route('akun.karyawan-cari') }}"
                         :value="old('employee_id')"
                         :required="true"
                         placeholder="Cari nama atau NIP karyawan..."
                         create-url="{{ route('karyawan.create') }}"
-                        refresh-url="{{ route('akun.karyawan-tersedia') }}"
                         create-label="Tambah Karyawan Baru"
-                        empty-message="{{ $employees->isEmpty() ? 'Semua karyawan sudah memiliki akun.' : 'Tidak ada karyawan yang cocok.' }}"
+                        empty-message="Tidak ada karyawan tersedia."
                     />
                 </div>
             </div>
