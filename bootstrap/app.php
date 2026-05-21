@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ForcePasswordChange;
+use App\Http\Middleware\LogRequestMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->web(prepend: [
+            LogRequestMiddleware::class,
+        ]);
+
         $middleware->web(append: [
             ForcePasswordChange::class,
         ]);

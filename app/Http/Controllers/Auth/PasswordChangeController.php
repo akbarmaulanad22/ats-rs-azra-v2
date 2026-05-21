@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Logging\LogContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -31,6 +33,8 @@ class PasswordChangeController extends Controller
             'password' => Hash::make($request->password),
             'must_change_password' => false,
         ]);
+
+        Log::notice('User changed password', LogContext::make());
 
         return redirect()->route('dashboard')->with('status', 'Kata sandi berhasil diubah.');
     }

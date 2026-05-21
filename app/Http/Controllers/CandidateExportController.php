@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Actions\BuildCandidateProfileData;
 use App\Exports\CandidateListExport;
+use App\Logging\LogContext;
 use App\Models\Application;
 use App\Models\Vacancy;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -33,6 +35,13 @@ class CandidateExportController extends Controller
         $date = now()->format('d-m-Y');
         $slug = str($lowongan->judul_posisi)->slug();
 
+        Log::info('Candidate list exported', array_merge(LogContext::make(), [
+            'vacancy_id' => $lowongan->id,
+            'vacancy_title' => $lowongan->judul_posisi,
+            'format' => $format,
+            'filters' => $filters,
+        ]));
+
         if ($format === 'csv') {
             return Excel::download($export, "daftar-kandidat-{$slug}-{$date}.csv", \Maatwebsite\Excel\Excel::CSV);
         }
@@ -46,6 +55,12 @@ class CandidateExportController extends Controller
         abort_if($application->vacancy_id !== $lowongan->id, 404);
 
         $application = $this->buildProfileData->execute($application);
+
+        Log::info('Candidate profile exported', array_merge(LogContext::make(), [
+            'vacancy_id' => $lowongan->id,
+            'application_id' => $application->id,
+            'candidate_id' => $application->candidate->id,
+        ]));
 
         $pdf = Pdf::loadView('exports.candidate-profile', compact('application', 'lowongan'));
         $pdf->setPaper('a4', 'portrait');

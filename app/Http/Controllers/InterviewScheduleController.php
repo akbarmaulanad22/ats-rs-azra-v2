@@ -6,6 +6,7 @@ use App\Enums\ApplicationStageStatus;
 use App\Enums\Role;
 use App\Http\Requests\StoreInterviewScheduleRequest;
 use App\Http\Requests\UpdateInterviewScheduleRequest;
+use App\Logging\LogContext;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\User;
@@ -15,6 +16,7 @@ use App\Services\EmailNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
 class InterviewScheduleController extends Controller
@@ -61,6 +63,15 @@ class InterviewScheduleController extends Controller
 
         $stage->update($updateData);
         $stage->refresh();
+
+        Log::notice('Interview scheduled', array_merge(LogContext::make(), [
+            'application_id' => $application->id,
+            'stage_key' => $stage->key,
+            'stage_id' => $stage->id,
+            'jadwal' => $stage->jadwal?->toIso8601String(),
+            'lokasi' => $stage->lokasi,
+            'interviewer_id' => $stage->interviewer_id,
+        ]));
 
         $this->notifyCandidateScheduled($application, $stage);
 
@@ -127,6 +138,16 @@ class InterviewScheduleController extends Controller
 
         $stage->refresh();
 
+        Log::notice('Interview schedule updated', array_merge(LogContext::make(), [
+            'application_id' => $application->id,
+            'stage_id' => $stage->id,
+            'schedule_changed' => $scheduleChanged,
+            'interviewer_changed' => $interviewerChanged,
+            'jadwal' => $stage->jadwal?->toIso8601String(),
+            'lokasi' => $stage->lokasi,
+            'interviewer_id' => $newInterviewerId,
+        ]));
+
         if ($scheduleChanged) {
             $this->notifyCandidateScheduled($application, $stage);
         }
@@ -153,7 +174,19 @@ class InterviewScheduleController extends Controller
                 'tanggal_interview' => $stage->jadwal->translatedFormat('l, d F Y H:i'),
                 'lokasi_interview' => $stage->lokasi,
             ]);
+
+            Log::info('Interview schedule email sent to candidate', array_merge(LogContext::make(), [
+                'application_id' => $application->id,
+                'candidate_id' => $application->candidate->id,
+                'stage_key' => $stage->key,
+            ]));
         } catch (\Throwable $e) {
+            Log::error('Failed to send interview schedule email', array_merge(LogContext::make(), [
+                'application_id' => $application->id,
+                'candidate_id' => $application->candidate->id,
+                'error' => $e->getMessage(),
+            ]));
+
             report($e);
         }
     }

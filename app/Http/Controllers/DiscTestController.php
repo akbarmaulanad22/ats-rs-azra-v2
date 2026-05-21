@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SubmitDiscTestRequest;
+use App\Logging\LogContext;
 use App\Models\DiscQuestion;
 use App\Models\DiscSubmission;
 use App\Services\ApplicationPipelineService;
 use App\Services\DiscScoringService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class DiscTestController extends Controller
@@ -97,6 +99,11 @@ class DiscTestController extends Controller
             $locked->load('application');
             $this->pipelineService->advance($locked->application);
         });
+
+        Log::info('DISC test submitted', array_merge(LogContext::make(), [
+            'submission_id' => $submission->id,
+            'application_id' => $submission->application_id,
+        ]));
 
         return redirect()->route('tes-disc.show', $submission->token);
     }

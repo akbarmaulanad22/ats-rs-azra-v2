@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\QuestionType;
+use App\Logging\LogContext;
 use App\Models\TestSubmission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class TestController extends Controller
@@ -104,6 +106,11 @@ class TestController extends Controller
                 'total_skor' => $hasEssay ? null : $totalSkor,
             ]);
         });
+
+        Log::info('Competency test submitted', array_merge(LogContext::make(), [
+            'submission_id' => $submission->id,
+            'application_id' => $submission->application_id,
+        ]));
 
         return redirect()->route('tes.show', $submission->token);
     }
