@@ -38,30 +38,34 @@ Route::get('/', fn () => auth()->check()
     : redirect()->route('login')
 );
 
-Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show');
-Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:5,1');
+Route::get('/tes/{token}', [TestController::class, 'show'])->name('tes.show')->middleware('throttle:token-access');
+Route::post('/tes/{token}', [TestController::class, 'submit'])->name('tes.submit')->middleware('throttle:public-submit');
 
-Route::get('/tes-disc/{token}', [DiscTestController::class, 'show'])->name('tes-disc.show');
-Route::post('/tes-disc/{token}', [DiscTestController::class, 'submit'])->name('tes-disc.submit')->middleware('throttle:5,1');
+Route::get('/tes-disc/{token}', [DiscTestController::class, 'show'])->name('tes-disc.show')->middleware('throttle:token-access');
+Route::post('/tes-disc/{token}', [DiscTestController::class, 'submit'])->name('tes-disc.submit')->middleware('throttle:public-submit');
 
-Route::get('/tes-mbti/{token}', [MbtiTestController::class, 'show'])->name('tes-mbti.show');
-Route::post('/tes-mbti/{token}', [MbtiTestController::class, 'submit'])->name('tes-mbti.submit')->middleware('throttle:5,1');
+Route::get('/tes-mbti/{token}', [MbtiTestController::class, 'show'])->name('tes-mbti.show')->middleware('throttle:token-access');
+Route::post('/tes-mbti/{token}', [MbtiTestController::class, 'submit'])->name('tes-mbti.submit')->middleware('throttle:public-submit');
 
-Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
-Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
-Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])->name('karier.lamar');
-Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])->name('karier.lamar.store')->middleware('throttle:5,1');
-Route::get('/karier/lamaran/{token}', [ApplicationController::class, 'confirmation'])->name('karier.lamaran.konfirmasi');
-Route::get('/lamaran/{token}', [CandidateStatusController::class, 'show'])->name('karier.lamaran.status');
+Route::middleware('throttle:public-browse')->group(function () {
+    Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
+    Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
+    Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])->name('karier.lamar');
+});
+Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])->name('karier.lamar.store')->middleware('throttle:public-submit');
+Route::get('/karier/lamaran/{token}', [ApplicationController::class, 'confirmation'])->name('karier.lamaran.konfirmasi')->middleware('throttle:token-access');
+Route::get('/lamaran/{token}', [CandidateStatusController::class, 'show'])->name('karier.lamaran.status')->middleware('throttle:token-access');
 
-Route::get('/penawaran/{offering}/terima', [OfferingResponseController::class, 'showAcceptForm'])->name('offering.accept')->middleware('signed');
-Route::post('/penawaran/{offering}/terima', [OfferingResponseController::class, 'accept'])->name('offering.accept.submit')->middleware('signed');
-Route::get('/penawaran/{offering}/tolak', [OfferingResponseController::class, 'showRejectForm'])->name('offering.reject')->middleware('signed');
-Route::post('/penawaran/{offering}/tolak', [OfferingResponseController::class, 'reject'])->name('offering.reject.submit')->middleware('signed');
+Route::middleware(['signed', 'throttle:signed-access'])->group(function () {
+    Route::get('/penawaran/{offering}/terima', [OfferingResponseController::class, 'showAcceptForm'])->name('offering.accept');
+    Route::post('/penawaran/{offering}/terima', [OfferingResponseController::class, 'accept'])->name('offering.accept.submit');
+    Route::get('/penawaran/{offering}/tolak', [OfferingResponseController::class, 'showRejectForm'])->name('offering.reject');
+    Route::post('/penawaran/{offering}/tolak', [OfferingResponseController::class, 'reject'])->name('offering.reject.submit');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/ubah-password', [PasswordChangeController::class, 'show'])->name('password.change');
-    Route::post('/ubah-password', [PasswordChangeController::class, 'update'])->name('password.update');
+    Route::post('/ubah-password', [PasswordChangeController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
