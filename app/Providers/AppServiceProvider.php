@@ -27,9 +27,13 @@ use App\Policies\ApplicationPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -44,8 +48,31 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(User::class, AccountPolicy::class);
         Gate::policy(Application::class, ApplicationPolicy::class);
 
+        $this->registerRateLimiters();
         $this->registerObservers();
         $this->registerAuthEventListeners();
+    }
+
+    private function registerRateLimiters(): void
+    {
+        RateLimiter::for('public-browse', function (Request $request) {
+            return Limit::perMinute(30)->by($request->ip());
+        });
+
+        RateLimiter::for('token-access', function (Request $request) {
+            return Limit::perMinute(10)->by($request->route('token') ?? $request->ip());
+        });
+
+        RateLimiter::for('public-submit', function (Request $request) {
+            return Limit::perMinute(5)->by($request->route('token') ?? $request->ip());
+        });
+
+        RateLimiter::for('signed-access', function (Request $request) {
+            $offering = $request->route('offering');
+            $key = $offering instanceof Model ? $offering->getKey() : $offering;
+
+            return Limit::perMinute(10)->by('signed:'.$key);
+        });
     }
 
     private function registerObservers(): void
