@@ -44,7 +44,7 @@
                                 type="text"
                                 id="nama_karyawan"
                                 name="nama_karyawan"
-                                value="{{ old('nama_karyawan') }}"
+                                value="{{ old('nama_karyawan', request('prefill')) }}"
                                 placeholder="Nama lengkap karyawan"
                                 class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('nama_karyawan') border-red-400 @else border-gray-200 @enderror"
                             >
