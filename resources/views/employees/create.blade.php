@@ -67,6 +67,7 @@
                             name="unit_id"
                             label="Unit"
                             search-url="{{ route('unit.cari') }}"
+                            create-url="{{ route('unit.create') }}"
                             :value="old('unit_id')"
                             :required="true"
                             placeholder="Cari unit..."
