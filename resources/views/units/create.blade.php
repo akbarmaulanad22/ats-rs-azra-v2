@@ -26,7 +26,7 @@
                             type="text"
                             id="nama"
                             name="nama"
-                            value="{{ old('nama') }}"
+                            value="{{ old('nama', request('prefill')) }}"
                             placeholder="Contoh: ICU, HR, Finance"
                             class="w-full px-2.5 py-1.5 text-xs border rounded bg-white focus-ring @error('nama') border-red-400 @else border-gray-200 @enderror"
                         >
