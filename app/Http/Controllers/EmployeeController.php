@@ -64,9 +64,7 @@ class EmployeeController extends Controller
     {
         Gate::authorize('create', Employee::class);
 
-        $units = Unit::orderBy('nama')->get(['id', 'nama']);
-
-        return view('employees.create', compact('units'));
+        return view('employees.create');
     }
 
     public function store(StoreEmployeeRequest $request): RedirectResponse|Response
@@ -93,9 +91,7 @@ class EmployeeController extends Controller
     {
         Gate::authorize('update', $employee);
 
-        $units = Unit::orderBy('nama')->get(['id', 'nama']);
-
-        return view('employees.edit', compact('employee', 'units'));
+        return view('employees.edit', compact('employee'));
     }
 
     public function update(
