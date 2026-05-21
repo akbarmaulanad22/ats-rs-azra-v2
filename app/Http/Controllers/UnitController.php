@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUnitRequest;
 use App\Http\Requests\UpdateUnitRequest;
 use App\Models\Unit;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -26,6 +27,21 @@ class UnitController extends Controller
             ->withQueryString();
 
         return view('units.index', compact('units'));
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        Gate::authorize('viewAny', Unit::class);
+
+        $q = strtolower(str_replace(['%', '_'], ['\\%', '\\_'], $request->string('q')));
+        $query = Unit::when($q, fn ($query) => $query->whereRaw('LOWER(nama) LIKE ?', ["%{$q}%"]))
+            ->orderBy('nama');
+
+        $results = $query->limit(11)->get();
+        $hasMore = $results->count() > 10;
+        $results = $results->take(10)->map(fn ($u) => ['id' => $u->id, 'label' => $u->nama]);
+
+        return response()->json(['results' => $results, 'has_more' => $hasMore]);
     }
 
     public function create(): View

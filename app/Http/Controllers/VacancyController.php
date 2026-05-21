@@ -62,12 +62,10 @@ class VacancyController extends Controller
     {
         Gate::authorize('create', Vacancy::class);
 
-        $units = Unit::orderBy('nama')->get();
-        $templates = WorkflowTemplate::orderBy('nama')->get();
         $employmentTypes = EmploymentType::cases();
         $statuses = [VacancyStatus::Draft, VacancyStatus::Published];
 
-        return view('vacancies.create', compact('units', 'templates', 'employmentTypes', 'statuses'));
+        return view('vacancies.create', compact('employmentTypes', 'statuses'));
     }
 
     public function store(StoreVacancyRequest $request): RedirectResponse
@@ -100,14 +98,12 @@ class VacancyController extends Controller
     {
         Gate::authorize('update', $lowongan);
 
-        $units = Unit::orderBy('nama')->get();
-        $templates = WorkflowTemplate::orderBy('nama')->get();
         $employmentTypes = EmploymentType::cases();
         $statuses = VacancyStatus::cases();
 
-        $lowongan->load('workflowTemplateSnapshot');
+        $lowongan->load('unit', 'workflowTemplateSnapshot.workflowTemplate');
 
-        return view('vacancies.edit', compact('lowongan', 'units', 'templates', 'employmentTypes', 'statuses'));
+        return view('vacancies.edit', compact('lowongan', 'employmentTypes', 'statuses'));
     }
 
     public function update(UpdateVacancyRequest $request, Vacancy $lowongan): RedirectResponse

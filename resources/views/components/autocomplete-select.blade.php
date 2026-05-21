@@ -1,11 +1,13 @@
 @props([
     'name',
     'label',
-    'options',        // Collection or array of objects with ->id and ->label (or 'id'/'label' keys)
-    'value' => null,  // Selected ID (e.g. old('name'))
+    'options' => [],      // Client-side mode: collection or array of objects with ->id and ->label (or 'id'/'label' keys)
+    'searchUrl' => null,  // AJAX mode: endpoint returning { results: [{id, label, ...}], has_more: bool }
+    'value' => null,      // Selected ID (e.g. old('name'))
+    'selectedLabel' => null,  // AJAX mode: initial display label for the selected value
     'required' => false,
-    'createUrl' => null,    // URL opened in new tab when creating a new item
-    'refreshUrl' => null,   // JSON endpoint called after the new tab closes to reload options
+    'createUrl' => null,
+    'refreshUrl' => null,
     'createLabel' => 'Buat Baru',
     'placeholder' => 'Ketik untuk mencari...',
     'emptyMessage' => 'Tidak ada data yang cocok.',
@@ -14,22 +16,27 @@
 
 @php
     $selectedId = old($name, $value);
-    // Preserve all keys from array options; objects only get id + label
-    $optionsList = collect($options)->map(fn ($o) => is_array($o)
-        ? $o
-        : ['id' => $o->id, 'label' => $o->label]
-    )->values()->all();
-    $selectedLabel = collect($optionsList)->firstWhere('id', $selectedId)['label'] ?? '';
+    if ($searchUrl) {
+        $optionsList = [];
+        $displayLabel = $selectedLabel ?? '';
+    } else {
+        $optionsList = collect($options)->map(fn ($o) => is_array($o)
+            ? $o
+            : ['id' => $o->id, 'label' => $o->label]
+        )->values()->all();
+        $displayLabel = collect($optionsList)->firstWhere('id', $selectedId)['label'] ?? '';
+    }
 @endphp
 
 <div
     x-data="autocompleteSelect({
         options: @js($optionsList),
         selectedId: @js((string) $selectedId),
-        selectedLabel: @js($selectedLabel),
+        selectedLabel: @js($displayLabel),
         fieldName: @js($name),
         createUrl: @js($createUrl),
         refreshUrl: @js($refreshUrl),
+        searchUrl: @js($searchUrl),
     })"
     @click.outside="close()"
     class="relative"
@@ -49,8 +56,8 @@
             type="text"
             x-ref="searchInput"
             x-model="query"
-            @focus="open = true"
-            @input="open = true; selectedId = ''; highlighted = 0"
+            @focus="onFocus()"
+            @input="onInput()"
             @keydown.escape="close()"
             @keydown.enter.prevent="selectHighlighted()"
             @keydown.arrow-down.prevent="moveDown()"
@@ -86,20 +93,33 @@
         class="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg max-h-52 overflow-y-auto"
         style="display: none;"
     >
-        <template x-if="filtered.length > 0">
-            <ul>
-                <template x-for="(opt, i) in filtered" :key="opt.id">
-                    <li
-                        @click="select(opt)"
-                        @mouseenter="highlighted = i"
-                        :class="highlighted === i ? 'bg-primary/10 text-primary' : 'text-gray-700'"
-                        class="px-3 py-2 text-xs cursor-pointer select-none"
-                        x-text="opt.label"
-                    ></li>
+        {{-- Loading indicator --}}
+        <div x-show="loading" class="px-3 py-3 text-xs text-gray-500">Mencari...</div>
+
+        {{-- Results list --}}
+        <template x-if="!loading && filtered.length > 0">
+            <div>
+                <ul>
+                    <template x-for="(opt, i) in filtered" :key="opt.id">
+                        <li
+                            @click="select(opt)"
+                            @mouseenter="highlighted = i"
+                            :class="highlighted === i ? 'bg-primary/10 text-primary' : 'text-gray-700'"
+                            class="px-3 py-2 text-xs cursor-pointer select-none"
+                            x-text="opt.label"
+                        ></li>
+                    </template>
+                </ul>
+                <template x-if="hasMore">
+                    <p class="px-3 py-2 text-[10px] text-gray-400 border-t border-gray-100 italic">
+                        Menampilkan 10 hasil. Ketik lebih spesifik untuk mempersempit.
+                    </p>
                 </template>
-            </ul>
+            </div>
         </template>
-        <template x-if="filtered.length === 0">
+
+        {{-- Empty state --}}
+        <template x-if="!loading && filtered.length === 0">
             <div class="px-3 py-3 text-xs text-gray-500 flex items-center justify-between gap-2">
                 <span x-text="refreshing ? 'Memperbarui data...' : '{{ $emptyMessage }}'"></span>
                 @if($createUrl)
@@ -126,24 +146,80 @@
 </div>
 
 <script>
-    window.autocompleteSelect = window.autocompleteSelect || function ({ options, selectedId, selectedLabel, fieldName, createUrl, refreshUrl }) {
+    window.autocompleteSelect = window.autocompleteSelect || function ({ options, selectedId, selectedLabel, fieldName, createUrl, refreshUrl, searchUrl }) {
         return {
             options,
             selectedId,
             fieldName,
             createUrl,
             refreshUrl,
+            searchUrl,
             query: selectedLabel,
             open: false,
             highlighted: 0,
             refreshing: false,
+            loading: false,
+            hasMore: false,
+            _debounceTimer: null,
+            _abortController: null,
 
             get filtered() {
+                if (this.searchUrl) {
+                    return this.options;
+                }
                 if (!this.query) {
                     return this.options;
                 }
                 const q = this.query.toLowerCase();
                 return this.options.filter(o => o.label.toLowerCase().includes(q));
+            },
+
+            async fetchOptions() {
+                if (!this.searchUrl) return;
+                if (this._abortController) {
+                    this._abortController.abort();
+                }
+                this._abortController = new AbortController();
+                this.loading = true;
+                try {
+                    const url = new URL(this.searchUrl, window.location.href);
+                    if (this.query) url.searchParams.set('q', this.query);
+                    const res = await fetch(url.toString(), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        signal: this._abortController.signal,
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.options = data.results;
+                        this.hasMore = data.has_more;
+                        this.highlighted = 0;
+                    }
+                } catch (e) {
+                    if (e.name !== 'AbortError') { /* silently fail */ }
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            debouncedFetch() {
+                clearTimeout(this._debounceTimer);
+                this._debounceTimer = setTimeout(() => this.fetchOptions(), 250);
+            },
+
+            onFocus() {
+                this.open = true;
+                if (this.searchUrl && this.options.length === 0) {
+                    this.fetchOptions();
+                }
+            },
+
+            onInput() {
+                this.open = true;
+                this.selectedId = '';
+                this.highlighted = 0;
+                if (this.searchUrl) {
+                    this.debouncedFetch();
+                }
             },
 
             select(opt) {
@@ -170,6 +246,10 @@
             clear() {
                 this.selectedId = '';
                 this.query = '';
+                if (this.searchUrl) {
+                    this.options = [];
+                    this.hasMore = false;
+                }
                 this.$refs.searchInput.focus();
             },
 
@@ -189,7 +269,9 @@
                 const poll = setInterval(() => {
                     if (popup.closed) {
                         clearInterval(poll);
-                        if (this.refreshUrl) {
+                        if (this.searchUrl) {
+                            this.fetchOptions();
+                        } else if (this.refreshUrl) {
                             this.refreshOptions();
                         }
                     }
