@@ -140,7 +140,7 @@ class VacancyPipelineController extends Controller
             [$isUserPic, $picLabel] = match (true) {
                 $currentStage->key === 'skrining_cv_hr' => [$user->isHrAdmin(), 'Admin HR'],
                 $currentStage->key === 'skrining_cv_user' => [
-                    $user->hasRole(Role::UnitHead, Role::Employee) && $user->employee?->unit === $lowongan->unit->nama,
+                    $user->hasRole(Role::UnitHead, Role::Employee) && $user->employee?->unit_id === $lowongan->unit_id,
                     'Tim Unit '.$lowongan->unit->nama,
                 ],
                 $currentStage->key === 'tes_kompetensi' => [$user->isHrAdmin(), 'Admin HR'],
@@ -161,7 +161,7 @@ class VacancyPipelineController extends Controller
         if ($currentStage?->key === 'wawancara_user') {
             $eligibleInterviewers = User::where('is_active', true)
                 ->whereIn('role', [Role::UnitHead->value, Role::Employee->value])
-                ->whereHas('employee', fn ($q) => $q->where('unit', $lowongan->unit->nama))
+                ->whereHas('employee', fn ($q) => $q->where('unit_id', $lowongan->unit_id))
                 ->get();
         }
 

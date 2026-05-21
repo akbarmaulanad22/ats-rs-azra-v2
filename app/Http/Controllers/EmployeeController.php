@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
+use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -26,7 +27,7 @@ class EmployeeController extends Controller
                         ->orWhereRaw('LOWER(nip) LIKE ?', ["%{$lower}%"]);
                 }),
             )
-            ->when($request->unit, fn ($q, $unit) => $q->where('unit', $unit))
+            ->when($request->unit, fn ($q, $unit) => $q->where('unit_id', $unit))
             ->when(
                 $request->posisi,
                 fn ($q, $posisi) => $q->where('posisi_pekerjaan', $posisi),
@@ -44,7 +45,7 @@ class EmployeeController extends Controller
             ->withQueryString();
 
         $filters = [
-            'units' => Employee::distinct()->orderBy('unit')->pluck('unit'),
+            'units' => Unit::orderBy('nama')->get(['id', 'nama']),
             'posisi' => Employee::distinct()
                 ->orderBy('posisi_pekerjaan')
                 ->pluck('posisi_pekerjaan'),
@@ -63,7 +64,9 @@ class EmployeeController extends Controller
     {
         Gate::authorize('create', Employee::class);
 
-        return view('employees.create');
+        $units = Unit::orderBy('nama')->get(['id', 'nama']);
+
+        return view('employees.create', compact('units'));
     }
 
     public function store(StoreEmployeeRequest $request): RedirectResponse|Response
@@ -90,7 +93,9 @@ class EmployeeController extends Controller
     {
         Gate::authorize('update', $employee);
 
-        return view('employees.edit', compact('employee'));
+        $units = Unit::orderBy('nama')->get(['id', 'nama']);
+
+        return view('employees.edit', compact('employee', 'units'));
     }
 
     public function update(

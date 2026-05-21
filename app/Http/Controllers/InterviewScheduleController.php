@@ -54,7 +54,7 @@ class InterviewScheduleController extends Controller
         if ($stage->key === 'wawancara_user') {
             $interviewer = User::find($request->interviewer_id);
 
-            if (! $interviewer || $interviewer->employee?->unit !== $application->vacancy->unit->nama) {
+            if (! $interviewer || $interviewer->employee?->unit_id !== $application->vacancy->unit_id) {
                 return back()->withErrors(['interviewer_id' => 'Pewawancara harus berasal dari unit yang sama dengan lowongan.']);
             }
 
@@ -122,7 +122,7 @@ class InterviewScheduleController extends Controller
         if ($newInterviewerId !== $oldInterviewerId) {
             $newInterviewer = User::find($newInterviewerId);
 
-            if (! $newInterviewer || $newInterviewer->employee?->unit !== $application->vacancy->unit->nama) {
+            if (! $newInterviewer || $newInterviewer->employee?->unit_id !== $application->vacancy->unit_id) {
                 return back()->withErrors(['interviewer_id' => 'Pewawancara harus berasal dari unit yang sama dengan lowongan.']);
             }
         }

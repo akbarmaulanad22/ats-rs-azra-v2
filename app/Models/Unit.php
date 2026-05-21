@@ -18,4 +18,9 @@ class Unit extends Model
     {
         return $this->hasMany(Vacancy::class);
     }
+
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
+    }
 }

@@ -46,7 +46,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
                     <p class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-1">Unit</p>
-                    <p class="text-xs font-medium text-gray-800">{{ $employee->unit }}</p>
+                    <p class="text-xs font-medium text-gray-800">{{ $employee->unit->nama }}</p>
                 </div>
                 <div>
                     <p class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-1">Posisi</p>

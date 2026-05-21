@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\Role;
 use App\Models\Employee;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -57,10 +58,12 @@ class EmployeeDirectoryTest extends TestCase
     public function test_employee_list_is_filterable_by_unit(): void
     {
         $admin = User::factory()->hrAdmin()->create();
-        Employee::factory()->create(['unit' => 'ICU', 'nip' => '00000001', 'nama_karyawan' => 'Karyawan ICU']);
-        Employee::factory()->create(['unit' => 'FinanceOnly', 'nip' => '00000002', 'nama_karyawan' => 'Karyawan Finance']);
+        $icuUnit = Unit::factory()->create(['nama' => 'ICU']);
+        $financeUnit = Unit::factory()->create(['nama' => 'Finance']);
+        Employee::factory()->create(['unit_id' => $icuUnit->id, 'nip' => '00000001', 'nama_karyawan' => 'Karyawan ICU']);
+        Employee::factory()->create(['unit_id' => $financeUnit->id, 'nip' => '00000002', 'nama_karyawan' => 'Karyawan Finance']);
 
-        $response = $this->actingAs($admin)->get(route('karyawan.index', ['unit' => 'ICU']));
+        $response = $this->actingAs($admin)->get(route('karyawan.index', ['unit' => $icuUnit->id]));
 
         $response->assertStatus(200);
         $response->assertSee('Karyawan ICU');
@@ -70,11 +73,13 @@ class EmployeeDirectoryTest extends TestCase
     public function test_search_combined_with_unit_filter_respects_both_constraints(): void
     {
         $admin = User::factory()->hrAdmin()->create();
-        Employee::factory()->create(['nama_karyawan' => 'Ahmad ICU', 'unit' => 'ICU', 'nip' => '00000010']);
-        Employee::factory()->create(['nama_karyawan' => 'Ahmad HR', 'unit' => 'HR', 'nip' => '00000011']);
-        Employee::factory()->create(['nama_karyawan' => 'Budi ICU', 'unit' => 'ICU', 'nip' => '00000012']);
+        $icuUnit = Unit::factory()->create(['nama' => 'ICU']);
+        $hrUnit = Unit::factory()->create(['nama' => 'HR']);
+        Employee::factory()->create(['nama_karyawan' => 'Ahmad ICU', 'unit_id' => $icuUnit->id, 'nip' => '00000010']);
+        Employee::factory()->create(['nama_karyawan' => 'Ahmad HR', 'unit_id' => $hrUnit->id, 'nip' => '00000011']);
+        Employee::factory()->create(['nama_karyawan' => 'Budi ICU', 'unit_id' => $icuUnit->id, 'nip' => '00000012']);
 
-        $response = $this->actingAs($admin)->get(route('karyawan.index', ['q' => 'Ahmad', 'unit' => 'ICU']));
+        $response = $this->actingAs($admin)->get(route('karyawan.index', ['q' => 'Ahmad', 'unit' => $icuUnit->id]));
 
         $response->assertStatus(200);
         $response->assertSee('Ahmad ICU');
@@ -106,11 +111,12 @@ class EmployeeDirectoryTest extends TestCase
     public function test_hr_admin_can_create_employee(): void
     {
         $admin = User::factory()->hrAdmin()->create();
+        $unit = Unit::factory()->create();
 
         $response = $this->actingAs($admin)->post(route('karyawan.store'), [
             'nip' => '12345678',
             'nama_karyawan' => 'Ahmad Fauzi',
-            'unit' => 'ICU',
+            'unit_id' => $unit->id,
             'posisi_pekerjaan' => 'Perawat Primer',
             'profesi' => 'Perawat',
             'jabatan' => 'Staf',
@@ -129,7 +135,7 @@ class EmployeeDirectoryTest extends TestCase
 
         $response = $this->actingAs($admin)->post(route('karyawan.store'), []);
 
-        $response->assertSessionHasErrors(['nip', 'nama_karyawan', 'unit', 'posisi_pekerjaan', 'profesi', 'jabatan']);
+        $response->assertSessionHasErrors(['nip', 'nama_karyawan', 'unit_id', 'posisi_pekerjaan', 'profesi', 'jabatan']);
     }
 
     public function test_create_employee_fails_with_duplicate_nip(): void
@@ -137,10 +143,11 @@ class EmployeeDirectoryTest extends TestCase
         $admin = User::factory()->hrAdmin()->create();
         Employee::factory()->create(['nip' => '99999999']);
 
+        $unit = Unit::factory()->create();
         $response = $this->actingAs($admin)->post(route('karyawan.store'), [
             'nip' => '99999999',
             'nama_karyawan' => 'Other Name',
-            'unit' => 'HR',
+            'unit_id' => $unit->id,
             'posisi_pekerjaan' => 'Staf',
             'profesi' => 'Staf Administrasi',
             'jabatan' => 'Staf',
@@ -153,10 +160,11 @@ class EmployeeDirectoryTest extends TestCase
     {
         $user = User::factory()->create(['role' => Role::Employee]);
 
+        $unit = Unit::factory()->create();
         $response = $this->actingAs($user)->post(route('karyawan.store'), [
             'nip' => '11111111',
             'nama_karyawan' => 'Test',
-            'unit' => 'ICU',
+            'unit_id' => $unit->id,
             'posisi_pekerjaan' => 'Test',
             'profesi' => 'Test',
             'jabatan' => 'Test',
@@ -226,12 +234,13 @@ class EmployeeDirectoryTest extends TestCase
     public function test_hr_admin_can_update_employee(): void
     {
         $admin = User::factory()->hrAdmin()->create();
+        $unit = Unit::factory()->create();
         $employee = Employee::factory()->create(['nip' => '10000001']);
 
         $response = $this->actingAs($admin)->put(route('karyawan.update', $employee), [
             'nip' => '10000001',
             'nama_karyawan' => 'Updated Name',
-            'unit' => 'HR',
+            'unit_id' => $unit->id,
             'posisi_pekerjaan' => 'Updated Posisi',
             'profesi' => 'Updated Profesi',
             'jabatan' => 'Koordinator',
@@ -247,10 +256,11 @@ class EmployeeDirectoryTest extends TestCase
         Employee::factory()->create(['nip' => '20000001']);
         $employee = Employee::factory()->create(['nip' => '20000002']);
 
+        $unit = Unit::factory()->create();
         $response = $this->actingAs($admin)->put(route('karyawan.update', $employee), [
             'nip' => '20000001',
             'nama_karyawan' => 'Test',
-            'unit' => 'HR',
+            'unit_id' => $unit->id,
             'posisi_pekerjaan' => 'Test',
             'profesi' => 'Test',
             'jabatan' => 'Test',
@@ -264,10 +274,11 @@ class EmployeeDirectoryTest extends TestCase
         $user = User::factory()->create(['role' => Role::Employee]);
         $employee = Employee::factory()->create(['nip' => '30000001']);
 
+        $unit = Unit::factory()->create();
         $response = $this->actingAs($user)->put(route('karyawan.update', $employee), [
             'nip' => '30000001',
             'nama_karyawan' => 'Hack',
-            'unit' => 'HR',
+            'unit_id' => $unit->id,
             'posisi_pekerjaan' => 'Test',
             'profesi' => 'Test',
             'jabatan' => 'Test',
@@ -294,7 +305,7 @@ class EmployeeDirectoryTest extends TestCase
         $response = $this->actingAs($user)->put(route('karyawan.update', $employee), [
             'nip' => $employee->nip,
             'nama_karyawan' => 'Self Update',
-            'unit' => $employee->unit,
+            'unit_id' => $employee->unit_id,
             'posisi_pekerjaan' => $employee->posisi_pekerjaan,
             'profesi' => $employee->profesi,
             'jabatan' => $employee->jabatan,

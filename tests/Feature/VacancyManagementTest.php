@@ -127,7 +127,7 @@ class VacancyManagementTest extends TestCase
         $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
 
         $user = User::factory()->create(['role' => Role::UnitHead]);
-        Employee::factory()->create(['user_id' => $user->id, 'unit' => 'ICU']);
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $ownUnit->id]);
 
         Vacancy::factory()->create(['judul_posisi' => 'Perawat ICU', 'unit_id' => $ownUnit->id]);
         Vacancy::factory()->create(['judul_posisi' => 'Perawat IGD', 'unit_id' => $otherUnit->id]);
@@ -148,16 +148,17 @@ class VacancyManagementTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_unit_head_with_unknown_unit_sees_warning(): void
+    public function test_unit_head_with_valid_unit_sees_no_warning(): void
     {
         $this->seedStages();
+        $unit = Unit::factory()->create();
         $user = User::factory()->create(['role' => Role::UnitHead]);
-        Employee::factory()->create(['user_id' => $user->id, 'unit' => 'NonExistentUnit']);
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unit->id]);
 
         $response = $this->actingAs($user)->get(route('lowongan.index'));
 
         $response->assertStatus(200);
-        $response->assertSessionHas('warning');
+        $response->assertSessionMissing('warning');
     }
 
     public function test_unit_head_cannot_escape_scope_via_unit_id_param(): void
@@ -167,7 +168,7 @@ class VacancyManagementTest extends TestCase
         $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
 
         $user = User::factory()->create(['role' => Role::UnitHead]);
-        Employee::factory()->create(['user_id' => $user->id, 'unit' => 'ICU']);
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $ownUnit->id]);
 
         Vacancy::factory()->create(['judul_posisi' => 'Perawat IGD', 'unit_id' => $otherUnit->id]);
 

@@ -86,7 +86,7 @@ class InterviewScheduleTest extends TestCase
     private function makeUnitHead(Unit $unit): User
     {
         $user = User::factory()->create(['role' => Role::UnitHead, 'is_active' => true]);
-        Employee::factory()->create(['user_id' => $user->id, 'unit' => $unit->nama]);
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unit->id]);
 
         return $user;
     }
@@ -94,7 +94,7 @@ class InterviewScheduleTest extends TestCase
     private function makeEmployee(Unit $unit): User
     {
         $user = User::factory()->create(['role' => Role::Employee, 'is_active' => true]);
-        Employee::factory()->create(['user_id' => $user->id, 'unit' => $unit->nama]);
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unit->id]);
 
         return $user;
     }
@@ -263,7 +263,7 @@ class InterviewScheduleTest extends TestCase
         $unit = Unit::factory()->create();
         $admin = User::factory()->hrAdmin()->create();
         $inactiveUser = User::factory()->create(['role' => Role::UnitHead, 'is_active' => false]);
-        Employee::factory()->create(['user_id' => $inactiveUser->id, 'unit' => $unit->nama]);
+        Employee::factory()->create(['user_id' => $inactiveUser->id, 'unit_id' => $unit->id]);
 
         $vacancy = $this->createVacancyWithStages(['lamaran', 'wawancara_user', 'onboarding'], $unit);
         $application = $this->makeApplicationAtStage($vacancy, 'wawancara_user');
