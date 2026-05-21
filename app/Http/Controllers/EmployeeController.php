@@ -19,6 +19,7 @@ class EmployeeController extends Controller
         Gate::authorize('viewAny', Employee::class);
 
         $employees = Employee::query()
+            ->with('unit')
             ->when(
                 $request->q,
                 fn ($q, $search) => $q->where(function ($q) use ($search) {
@@ -84,12 +85,16 @@ class EmployeeController extends Controller
     {
         Gate::authorize('view', $employee);
 
+        $employee->load('unit');
+
         return view('employees.show', compact('employee'));
     }
 
     public function edit(Employee $employee): View
     {
         Gate::authorize('update', $employee);
+
+        $employee->load('unit');
 
         return view('employees.edit', compact('employee'));
     }
