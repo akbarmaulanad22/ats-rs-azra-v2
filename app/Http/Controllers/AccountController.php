@@ -43,27 +43,11 @@ class AccountController extends Controller
         return view('accounts.index', compact('accounts', 'roles'));
     }
 
-    public function availableEmployees(): JsonResponse
-    {
-        Gate::authorize('create', User::class);
-
-        return response()->json(
-            Employee::whereNull('user_id')
-                ->orderBy('nama_karyawan')
-                ->get()
-                ->map(fn ($e) => [
-                    'id' => $e->id,
-                    'label' => $e->nama_karyawan.' ('.$e->nip.')',
-                    'employeeName' => $e->nama_karyawan,
-                ])
-        );
-    }
-
     public function searchAvailableEmployees(Request $request): JsonResponse
     {
         Gate::authorize('create', User::class);
 
-        $q = strtolower($request->string('q'));
+        $q = strtolower(str_replace(['%', '_'], ['\\%', '\\_'], $request->string('q')));
         $query = Employee::whereNull('user_id')
             ->when($q, fn ($query) => $query->where(function ($query) use ($q) {
                 $query->whereRaw('LOWER(nama_karyawan) LIKE ?', ["%{$q}%"])
@@ -71,14 +55,15 @@ class AccountController extends Controller
             }))
             ->orderBy('nama_karyawan');
 
-        $total = $query->count();
-        $results = $query->limit(10)->get()->map(fn ($e) => [
+        $results = $query->limit(11)->get();
+        $hasMore = $results->count() > 10;
+        $results = $results->take(10)->map(fn ($e) => [
             'id' => $e->id,
             'label' => $e->nama_karyawan.' ('.$e->nip.')',
             'employeeName' => $e->nama_karyawan,
         ]);
 
-        return response()->json(['results' => $results, 'has_more' => $total > 10]);
+        return response()->json(['results' => $results, 'has_more' => $hasMore]);
     }
 
     public function create(): View

@@ -55,6 +55,62 @@ class UnitCrudTest extends TestCase
         $response->assertDontSee('Radiologi');
     }
 
+    // ── Search (AJAX) ────────────────────────────────────────────────────────
+
+    public function test_hr_admin_can_search_units(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        Unit::factory()->create(['nama' => 'ICU Dewasa']);
+        Unit::factory()->create(['nama' => 'Radiologi']);
+
+        $response = $this->actingAs($admin)->get(route('unit.cari', ['q' => 'ICU']));
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['results', 'has_more']);
+        $names = collect($response->json('results'))->pluck('label');
+        $this->assertTrue($names->contains('ICU Dewasa'));
+        $this->assertFalse($names->contains('Radiologi'));
+    }
+
+    public function test_search_units_returns_all_when_no_query(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        Unit::factory()->count(3)->create();
+
+        $response = $this->actingAs($admin)->get(route('unit.cari'));
+
+        $response->assertStatus(200);
+        $this->assertCount(3, $response->json('results'));
+    }
+
+    public function test_search_units_has_more_flag(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        Unit::factory()->count(12)->create();
+
+        $response = $this->actingAs($admin)->get(route('unit.cari'));
+
+        $response->assertStatus(200);
+        $this->assertCount(10, $response->json('results'));
+        $this->assertTrue($response->json('has_more'));
+    }
+
+    public function test_non_hr_admin_cannot_search_units(): void
+    {
+        $user = User::factory()->create(['role' => Role::Employee]);
+
+        $response = $this->actingAs($user)->get(route('unit.cari'));
+
+        $response->assertStatus(403);
+    }
+
+    public function test_guest_cannot_search_units(): void
+    {
+        $response = $this->get(route('unit.cari'));
+
+        $response->assertRedirect(route('login'));
+    }
+
     // ── Create ─────────────────────────────────────────────────────────────────
 
     public function test_hr_admin_can_view_create_form(): void

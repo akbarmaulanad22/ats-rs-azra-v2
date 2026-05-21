@@ -33,14 +33,15 @@ class UnitController extends Controller
     {
         Gate::authorize('viewAny', Unit::class);
 
-        $q = strtolower($request->string('q'));
+        $q = strtolower(str_replace(['%', '_'], ['\\%', '\\_'], $request->string('q')));
         $query = Unit::when($q, fn ($query) => $query->whereRaw('LOWER(nama) LIKE ?', ["%{$q}%"]))
             ->orderBy('nama');
 
-        $total = $query->count();
-        $results = $query->limit(10)->get()->map(fn ($u) => ['id' => $u->id, 'label' => $u->nama]);
+        $results = $query->limit(11)->get();
+        $hasMore = $results->count() > 10;
+        $results = $results->take(10)->map(fn ($u) => ['id' => $u->id, 'label' => $u->nama]);
 
-        return response()->json(['results' => $results, 'has_more' => $total > 10]);
+        return response()->json(['results' => $results, 'has_more' => $hasMore]);
     }
 
     public function create(): View

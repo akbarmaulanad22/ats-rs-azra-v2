@@ -69,6 +69,64 @@ class WorkflowTemplateTest extends TestCase
         $response->assertDontSee('Staf Medis');
     }
 
+    // ── Search (AJAX) ────────────────────────────────────────────────────────
+
+    public function test_hr_admin_can_search_templates(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        WorkflowTemplate::factory()->create(['nama' => 'Koordinator']);
+        WorkflowTemplate::factory()->create(['nama' => 'Staf Medis']);
+
+        $response = $this->actingAs($admin)->get(route('template-alur.cari', ['q' => 'koordinator']));
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['results', 'has_more']);
+        $names = collect($response->json('results'))->pluck('label');
+        $this->assertTrue($names->contains('Koordinator'));
+        $this->assertFalse($names->contains('Staf Medis'));
+    }
+
+    public function test_search_templates_returns_all_when_no_query(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        WorkflowTemplate::factory()->count(3)->create();
+
+        $response = $this->actingAs($admin)->get(route('template-alur.cari'));
+
+        $response->assertStatus(200);
+        $this->assertCount(3, $response->json('results'));
+    }
+
+    public function test_search_templates_has_more_flag(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        WorkflowTemplate::factory()->count(12)->create();
+
+        $response = $this->actingAs($admin)->get(route('template-alur.cari'));
+
+        $response->assertStatus(200);
+        $this->assertCount(10, $response->json('results'));
+        $this->assertTrue($response->json('has_more'));
+    }
+
+    public function test_non_hr_admin_cannot_search_templates(): void
+    {
+        $user = User::factory()->create(['role' => Role::Employee]);
+
+        $response = $this->actingAs($user)->get(route('template-alur.cari'));
+
+        $response->assertStatus(403);
+    }
+
+    public function test_guest_cannot_search_templates(): void
+    {
+        $response = $this->get(route('template-alur.cari'));
+
+        $response->assertRedirect(route('login'));
+    }
+
+    // ── Index (continued) ─────────────────────────────────────────────────────
+
     public function test_non_hr_admin_cannot_view_template_list(): void
     {
         foreach ([Role::HrManager, Role::UnitHead, Role::Director, Role::Employee] as $role) {
