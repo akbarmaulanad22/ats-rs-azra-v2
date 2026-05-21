@@ -114,6 +114,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/lowongan/{lowongan}/wawancara/{application}/keputusan', [InterviewController::class, 'decide'])->scopeBindings()->name('lowongan.wawancara.keputusan');
     Route::post('/lowongan/{lowongan}/wawancara/{application}/jadwal', [InterviewScheduleController::class, 'store'])->scopeBindings()->name('lowongan.wawancara.jadwal');
+    Route::put('/lowongan/{lowongan}/wawancara/{application}/jadwal', [InterviewScheduleController::class, 'update'])->scopeBindings()->name('lowongan.wawancara.jadwal.update');
 
     Route::post('/lowongan/{lowongan}/surat-penawaran/{application}/kirim', [OfferingLetterController::class, 'send'])->scopeBindings()->name('lowongan.surat-penawaran.kirim');
 

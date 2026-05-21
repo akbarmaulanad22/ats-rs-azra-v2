@@ -14,7 +14,7 @@ class StageSeeder extends Seeder
             ['key' => 'skrining_cv_hr', 'nama' => 'Skrining CV HR', 'is_locked_first' => false, 'is_locked_last' => false],
             ['key' => 'skrining_cv_user', 'nama' => 'Skrining CV User', 'is_locked_first' => false, 'is_locked_last' => false],
             ['key' => 'tes_kompetensi', 'nama' => 'Tes Kompetensi', 'is_locked_first' => false, 'is_locked_last' => false],
-            ['key' => 'wawancara_kepala_unit', 'nama' => 'Wawancara Kepala Unit', 'is_locked_first' => false, 'is_locked_last' => false],
+            ['key' => 'wawancara_user', 'nama' => 'Wawancara User', 'is_locked_first' => false, 'is_locked_last' => false],
             ['key' => 'wawancara_manajer_hr', 'nama' => 'Wawancara Manajer HR', 'is_locked_first' => false, 'is_locked_last' => false],
             ['key' => 'wawancara_direktur', 'nama' => 'Wawancara Direktur', 'is_locked_first' => false, 'is_locked_last' => false],
             ['key' => 'tes_disc', 'nama' => 'Tes DiSC', 'is_locked_first' => false, 'is_locked_last' => false],

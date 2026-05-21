@@ -47,7 +47,7 @@ class ApplicationPolicy
         $application->loadMissing('vacancy.unit');
 
         return match ($user->role) {
-            Role::UnitHead => $user->employee && $user->employee->unit === $application->vacancy->unit->nama,
+            Role::UnitHead, Role::Employee => $user->employee && $user->employee->unit === $application->vacancy->unit->nama,
             Role::HrManager, Role::Director => true,
             default => false,
         };

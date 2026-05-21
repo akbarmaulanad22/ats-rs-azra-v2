@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\InterviewTemplateType;
 use App\Enums\Role;
 use App\Models\Application;
+use App\Models\User;
 use App\Models\Vacancy;
 use Barryvdh\DomPDF\Facade\Pdf;
 use iio\libmergepdf\Merger;
@@ -78,6 +79,7 @@ class VacancyPipelineController extends Controller
             'candidate.applications.vacancy.unit',
             'stages.interviewResult.ratings.interviewTemplate',
             'stages.interviewResult.readinessAnswers.interviewTemplate',
+            'stages.interviewer',
             'stages.mcuResult',
             'testSubmission.answers.question.options',
             'testSubmission.answers.selectedOption',
@@ -94,7 +96,7 @@ class VacancyPipelineController extends Controller
 
         $assignedTemplates = collect();
         $assignedReadinessTemplates = collect();
-        $interviewStageKeys = ['wawancara_kepala_unit', 'wawancara_manajer_hr', 'wawancara_direktur'];
+        $interviewStageKeys = ['wawancara_user', 'wawancara_manajer_hr', 'wawancara_direktur'];
 
         if ($currentStage && in_array($currentStage->key, $interviewStageKeys, true)) {
             $assignedTemplates = $lowongan->interviewTemplates()
@@ -113,8 +115,8 @@ class VacancyPipelineController extends Controller
         $priorInterviewStageKeys = [];
         if ($currentStage) {
             $priorInterviewStageKeys = match ($currentStage->key) {
-                'wawancara_manajer_hr' => ['wawancara_kepala_unit'],
-                'wawancara_direktur' => ['wawancara_kepala_unit', 'wawancara_manajer_hr'],
+                'wawancara_manajer_hr' => ['wawancara_user'],
+                'wawancara_direktur' => ['wawancara_user', 'wawancara_manajer_hr'],
                 default => [],
             };
         }
@@ -140,9 +142,9 @@ class VacancyPipelineController extends Controller
                     'Tim Unit '.$lowongan->unit->nama,
                 ],
                 $currentStage->key === 'tes_kompetensi' => [$user->isHrAdmin(), 'Admin HR'],
-                $currentStage->key === 'wawancara_kepala_unit' => [
-                    $user->hasRole(Role::UnitHead) && $user->employee?->unit === $lowongan->unit->nama,
-                    'Kepala Unit '.$lowongan->unit->nama,
+                $currentStage->key === 'wawancara_user' => [
+                    $user->isHrAdmin() || ($currentStage->interviewer_id !== null && $currentStage->interviewer_id === $user->id),
+                    $currentStage->interviewer_id ? ($currentStage->interviewer?->name ?? 'Pewawancara') : 'Admin HR',
                 ],
                 $currentStage->key === 'wawancara_manajer_hr' => [$user->hasRole(Role::HrManager), 'Manajer HR'],
                 $currentStage->key === 'wawancara_direktur' => [$user->hasRole(Role::Director), 'Direktur'],
@@ -151,6 +153,14 @@ class VacancyPipelineController extends Controller
                 $currentStage->key === 'onboarding' => [$user->isHrAdmin(), 'Admin HR'],
                 default => [true, null],
             };
+        }
+
+        $eligibleInterviewers = collect();
+        if ($currentStage?->key === 'wawancara_user') {
+            $eligibleInterviewers = User::where('is_active', true)
+                ->whereIn('role', [Role::UnitHead->value, Role::Employee->value])
+                ->whereHas('employee', fn ($q) => $q->where('unit', $lowongan->unit->nama))
+                ->get();
         }
 
         return view('vacancies.pipeline-show', compact(
@@ -164,6 +174,7 @@ class VacancyPipelineController extends Controller
             'testAllReviewed',
             'isUserPic',
             'picLabel',
+            'eligibleInterviewers',
         ));
     }
 

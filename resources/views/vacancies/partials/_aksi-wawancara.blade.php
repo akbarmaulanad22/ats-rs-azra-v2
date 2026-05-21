@@ -1,5 +1,5 @@
 {{-- Aksi Tahap: Wawancara --}}
-{{-- Variables: $application, $lowongan, $currentStage, $assignedTemplates, $assignedReadinessTemplates, $priorInterviews --}}
+{{-- Variables: $application, $lowongan, $currentStage, $assignedTemplates, $assignedReadinessTemplates, $priorInterviews, $eligibleInterviewers --}}
 
 @if ($errors->any())
     <div class="mb-4 px-4 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
@@ -16,7 +16,7 @@
                 @php
                     $priorResult = $priorStage->interviewResult;
                     $stageLabels = [
-                        'wawancara_kepala_unit' => 'Wawancara Kepala Unit',
+                        'wawancara_user' => 'Wawancara User',
                         'wawancara_manajer_hr' => 'Wawancara Manajer HR',
                         'wawancara_direktur' => 'Wawancara Direktur',
                     ];
@@ -82,6 +82,7 @@
 @php
     $existingResult = $currentStage?->interviewResult;
     $hasSchedule = (bool) $currentStage?->jadwal;
+    $isWawancaraUser = $currentStage?->key === 'wawancara_user';
 @endphp
 
 {{-- Phase 1: No schedule yet --}}
@@ -107,6 +108,23 @@
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+                @if ($isWawancaraUser)
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Pewawancara <span class="text-red-500">*</span></label>
+                        <select name="interviewer_id" required
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
+                            <option value="">Pilih pewawancara...</option>
+                            @foreach ($eligibleInterviewers as $interviewer)
+                                <option value="{{ $interviewer->id }}" @if (old('interviewer_id') == $interviewer->id) selected @endif>
+                                    {{ $interviewer->name }} ({{ $interviewer->role->label() }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('interviewer_id')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                @endif
             </div>
             <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
                 <p class="text-xs text-amber-700">Keputusan wawancara baru dapat diberikan setelah jadwal ditetapkan dan form penilaian diisi.</p>
@@ -131,8 +149,62 @@
                 <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Lokasi</dt>
                 <dd class="text-xs text-gray-800">{{ $currentStage->lokasi }}</dd>
             </div>
+            @if ($isWawancaraUser && $currentStage->interviewer)
+                <div>
+                    <dt class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Pewawancara</dt>
+                    <dd class="text-xs text-gray-800">{{ $currentStage->interviewer->name }}</dd>
+                </div>
+            @endif
         </dl>
     </div>
+
+    {{-- Reschedule / Reassign form (HR Admin only) --}}
+    @if (auth()->user()->isHrAdmin() && $isWawancaraUser)
+        <div class="bg-white rounded-xl border border-gray-100 p-5 mb-4" x-data="{ open: false }">
+            <button type="button" @click="open = !open"
+                class="flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Ubah Jadwal / Pewawancara
+            </button>
+            <div x-show="open" x-collapse class="mt-4">
+                <form action="{{ route('lowongan.wawancara.jadwal.update', [$lowongan, $application]) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="space-y-3 mb-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Tanggal & Waktu <span class="text-red-500">*</span></label>
+                            <input type="datetime-local" name="jadwal" required
+                                value="{{ $currentStage->jadwal->format('Y-m-d\TH:i') }}"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Lokasi <span class="text-red-500">*</span></label>
+                            <input type="text" name="lokasi" required value="{{ $currentStage->lokasi }}"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Pewawancara</label>
+                            <select name="interviewer_id"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
+                                <option value="">Tetap sama</option>
+                                @foreach ($eligibleInterviewers as $interviewer)
+                                    <option value="{{ $interviewer->id }}" @if ($currentStage->interviewer_id == $interviewer->id) selected @endif>
+                                        {{ $interviewer->name }} ({{ $interviewer->role->label() }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-full px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-lg hover:bg-gray-900 transition-colors ease-out duration-150 cursor-pointer">
+                        Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endif
 
     <div class="bg-white rounded-xl border border-gray-100 p-5">
         <h2 class="text-sm font-semibold text-gray-800 mb-4">Penilaian Wawancara</h2>

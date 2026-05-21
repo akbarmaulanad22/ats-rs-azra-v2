@@ -237,7 +237,7 @@ class DiscTestSubmissionTest extends TestCase
         $vacancy = $this->createVacancyWithDiscStage();
         $unit = $vacancy->unit;
 
-        $stageKeys = ['lamaran', 'tes_disc', 'wawancara_kepala_unit', 'onboarding'];
+        $stageKeys = ['lamaran', 'tes_disc', 'wawancara_user', 'onboarding'];
         $template = WorkflowTemplate::factory()->create();
         collect($stageKeys)->each(function (string $key, int $index) use ($template) {
             $stage = Stage::where('key', $key)->firstOrFail();
@@ -258,7 +258,7 @@ class DiscTestSubmissionTest extends TestCase
         $stages = $vacancyWithInterview->workflowTemplateSnapshot->stages()->orderBy('position')->get();
         foreach ($stages as $index => $stage) {
             $status = match ($stage->key) {
-                'wawancara_kepala_unit' => ApplicationStageStatus::Aktif,
+                'wawancara_user' => ApplicationStageStatus::Aktif,
                 'lamaran', 'tes_disc' => ApplicationStageStatus::Selesai,
                 default => ApplicationStageStatus::Pending,
             };
@@ -300,7 +300,7 @@ class DiscTestSubmissionTest extends TestCase
         $response->assertOk();
         $response->assertSee('Hasil Tes DiSC');
         $response->assertSee('Tipe Primer');
-        $response->assertSee('Dominan'); // tipe_primer = D → shortLabel = Dominan
+        $response->assertSee('Dominan'); // tipe_primer = D â†’ shortLabel = Dominan
     }
 
     public function test_empty_submission_is_rejected_by_validation(): void

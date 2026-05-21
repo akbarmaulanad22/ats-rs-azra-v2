@@ -24,6 +24,7 @@ class ApplicationStage extends Model
         'jadwal',
         'lokasi',
         'reviewed_by',
+        'interviewer_id',
     ];
 
     protected function casts(): array
@@ -53,5 +54,10 @@ class ApplicationStage extends Model
     public function reviewedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function interviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'interviewer_id');
     }
 }

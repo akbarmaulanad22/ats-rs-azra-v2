@@ -82,10 +82,10 @@ class StoreInterviewResultRequest extends FormRequest
     private function resolveStageKey(): string
     {
         return match ($this->user()->role) {
-            Role::UnitHead => 'wawancara_kepala_unit',
+            Role::UnitHead, Role::Employee => 'wawancara_user',
             Role::HrManager => 'wawancara_manajer_hr',
             Role::Director => 'wawancara_direktur',
-            default => 'wawancara_kepala_unit',
+            default => 'wawancara_user',
         };
     }
 

@@ -124,7 +124,7 @@ class ApplicationPipelineService
             return;
         }
 
-        $wawancaraStages = ['wawancara_kepala_unit', 'wawancara_manajer_hr', 'wawancara_direktur'];
+        $wawancaraStages = ['wawancara_user', 'wawancara_manajer_hr', 'wawancara_direktur'];
         $silentStages = ['mcu', 'onboarding', ...$wawancaraStages];
 
         if ($nextStage === null || in_array($nextStage->key, $silentStages, true)) {
