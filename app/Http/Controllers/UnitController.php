@@ -8,6 +8,7 @@ use App\Models\Unit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -51,9 +52,13 @@ class UnitController extends Controller
         return view('units.create');
     }
 
-    public function store(StoreUnitRequest $request): RedirectResponse
+    public function store(StoreUnitRequest $request): RedirectResponse|Response
     {
         Unit::create($request->validated());
+
+        if ($request->boolean('popup')) {
+            return response('<script>window.close()</script>');
+        }
 
         return redirect()
             ->route('unit.index')

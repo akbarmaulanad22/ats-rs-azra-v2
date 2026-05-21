@@ -23,6 +23,7 @@
                 name="unit_id"
                 label="Unit"
                 search-url="{{ route('unit.cari') }}"
+                create-url="{{ route('unit.create') }}"
                 :value="old('unit_id', $lowongan->unit_id ?? null)"
                 :selected-label="($lowongan ?? null)?->unit?->nama ?? ''"
                 :required="true"
