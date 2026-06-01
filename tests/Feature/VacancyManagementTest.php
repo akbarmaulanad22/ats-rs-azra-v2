@@ -178,13 +178,49 @@ class VacancyManagementTest extends TestCase
         $response->assertDontSee('Perawat IGD');
     }
 
-    public function test_employee_cannot_view_vacancy_list(): void
+    public function test_employee_without_employee_cannot_view_vacancy_list(): void
     {
         $user = User::factory()->create(['role' => Role::Employee]);
 
         $response = $this->actingAs($user)->get(route('lowongan.index'));
 
         $response->assertStatus(403);
+    }
+
+    public function test_employee_with_employee_can_view_vacancy_list_scoped_to_own_unit(): void
+    {
+        $this->seedStages();
+        $ownUnit = Unit::factory()->create(['nama' => 'ICU']);
+        $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
+
+        $user = User::factory()->create(['role' => Role::Employee]);
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $ownUnit->id]);
+
+        Vacancy::factory()->create(['judul_posisi' => 'Perawat ICU', 'unit_id' => $ownUnit->id]);
+        Vacancy::factory()->create(['judul_posisi' => 'Perawat IGD', 'unit_id' => $otherUnit->id]);
+
+        $response = $this->actingAs($user)->get(route('lowongan.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Perawat ICU');
+        $response->assertDontSee('Perawat IGD');
+    }
+
+    public function test_employee_cannot_escape_scope_via_unit_id_param(): void
+    {
+        $this->seedStages();
+        $ownUnit = Unit::factory()->create(['nama' => 'ICU']);
+        $otherUnit = Unit::factory()->create(['nama' => 'IGD']);
+
+        $user = User::factory()->create(['role' => Role::Employee]);
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $ownUnit->id]);
+
+        Vacancy::factory()->create(['judul_posisi' => 'Perawat IGD', 'unit_id' => $otherUnit->id]);
+
+        $response = $this->actingAs($user)->get(route('lowongan.index', ['unit_id' => $otherUnit->id]));
+
+        $response->assertStatus(200);
+        $response->assertDontSee('Perawat IGD');
     }
 
     public function test_guest_is_redirected_from_vacancy_list(): void

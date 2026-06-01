@@ -25,7 +25,7 @@ class VacancyController extends Controller
         $user = auth()->user();
         $query = Vacancy::with(['unit', 'workflowTemplateSnapshot']);
 
-        if ($user->hasRole(Role::UnitHead)) {
+        if ($user->hasRole(Role::UnitHead, Role::Employee)) {
             $employee = $user->employee;
             $unit = $employee?->unit;
 
