@@ -24,16 +24,17 @@ class VacancyController extends Controller
 
         $user = auth()->user();
         $query = Vacancy::with(['unit', 'workflowTemplateSnapshot']);
+        $isUnitScoped = $user->hasRole(Role::UnitHead, Role::Employee);
+        $scopedUnit = null;
 
-        if ($user->hasRole(Role::UnitHead, Role::Employee)) {
-            $employee = $user->employee;
-            $unit = $employee?->unit;
+        if ($isUnitScoped) {
+            $scopedUnit = $user->employee?->unit;
 
-            if (! $unit) {
+            if (! $scopedUnit) {
                 session()->flash('warning', 'Unit Anda tidak ditemukan. Hubungi Admin HR untuk memperbaiki data.');
             }
 
-            $query->where('unit_id', $unit?->id ?? 0);
+            $query->where('unit_id', $scopedUnit?->id ?? 0);
         }
 
         $vacancies = $query
@@ -53,7 +54,9 @@ class VacancyController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        $units = Unit::orderBy('nama')->get();
+        $units = $isUnitScoped
+            ? Unit::whereKey($scopedUnit?->id ?? 0)->orderBy('nama')->get()
+            : Unit::orderBy('nama')->get();
 
         return view('vacancies.index', compact('vacancies', 'units'));
     }
