@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\QuestionType;
-use App\Http\Requests\CvScreeningDecisionRequest;
+use App\Http\Requests\CompetencyTestDecisionRequest;
 use App\Models\TestAnswer;
 use App\Models\TestSubmission;
 use App\Models\Vacancy;
@@ -44,7 +44,7 @@ class TestReviewController extends Controller
         return back()->with('success', 'Nilai esai berhasil disimpan.');
     }
 
-    public function decide(CvScreeningDecisionRequest $request, Vacancy $lowongan, TestSubmission $submission): RedirectResponse
+    public function decide(CompetencyTestDecisionRequest $request, Vacancy $lowongan, TestSubmission $submission): RedirectResponse
     {
         $vacancyTest = $lowongan->vacancyTest()->firstOrFail();
         Gate::authorize('decide', $vacancyTest);
