@@ -130,6 +130,7 @@
                     method="POST"
                     action="{{ route('lowongan.tes.ulasan.keputusan', [$lowongan, $submission]) }}"
                     x-data="{ keputusan: '{{ old('keputusan') }}' }"
+                    @submit="keputusan === 'gagal' && !confirm('Yakin ingin menolak kandidat ini?') && $event.preventDefault()"
                 >
                     @csrf
 

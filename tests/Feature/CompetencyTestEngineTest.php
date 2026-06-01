@@ -585,4 +585,44 @@ class CompetencyTestEngineTest extends TestCase
         $submission->refresh();
         $this->assertEquals(28, $submission->total_skor);
     }
+
+    public function test_reserved_candidate_can_still_be_advanced(): void
+    {
+        $this->seedStages();
+        $admin = $this->hrAdmin();
+        $unit = Unit::factory()->create();
+        [
+            'vacancy' => $vacancy,
+            'testSnapshot' => $testSnapshot,
+            'snapshotEssayQuestion' => $snapshotEssayQuestion,
+        ] = $this->createVacancyWithTest($unit);
+
+        $application = $this->makeApplicationAtTestStage($vacancy);
+        $application->stages()->where('key', 'tes_kompetensi')->update([
+            'status' => ApplicationStageStatus::Reserved,
+        ]);
+
+        $submission = TestSubmission::factory()->submitted()->create([
+            'application_id' => $application->id,
+            'vacancy_test_snapshot_id' => $testSnapshot->id,
+        ]);
+        $submission->answers()->create([
+            'vacancy_test_snapshot_question_id' => $snapshotEssayQuestion->id,
+            'jawaban_teks' => 'Jawaban esai',
+            'skor' => 18,
+            'is_reviewed' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('lowongan.tes.ulasan.keputusan', [$vacancy, $submission]), [
+            'keputusan' => 'lulus',
+        ]);
+
+        $response->assertRedirect(route('lowongan.pipeline', $vacancy));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('application_stages', [
+            'application_id' => $application->id,
+            'key' => 'tes_kompetensi',
+            'status' => ApplicationStageStatus::Selesai->value,
+        ]);
+    }
 }
