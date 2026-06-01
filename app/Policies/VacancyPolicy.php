@@ -14,7 +14,7 @@ class VacancyPolicy
             return true;
         }
 
-        if ($user->hasRole(Role::UnitHead)) {
+        if ($user->hasRole(Role::UnitHead, Role::Employee)) {
             return $user->employee !== null;
         }
 
