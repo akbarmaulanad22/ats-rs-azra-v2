@@ -52,7 +52,12 @@ class StoreApplicationRequest extends FormRequest
             $this->rules(),
             function (string $key) use ($prefixes): bool {
                 foreach ($prefixes as $prefix) {
-                    if (str_starts_with($key, $prefix)) {
+                    // Exact scalar key (`email`), array subkey (`siblings.*.nama`),
+                    // or an explicit group prefix ending in `_` (`ayah_`, `kontak_darurat_`).
+                    // Anchoring avoids `email` falsely matching a future `emailx`.
+                    if ($key === $prefix
+                        || str_starts_with($key, $prefix.'.')
+                        || (str_ends_with($prefix, '_') && str_starts_with($key, $prefix))) {
                         return true;
                     }
                 }
@@ -91,7 +96,6 @@ class StoreApplicationRequest extends FormRequest
             'kontak_darurat_nama' => ['nullable', 'string', 'max:255'],
             'kontak_darurat_no_telp' => ['nullable', 'string', 'max:20'],
             'kontak_darurat_hubungan' => ['nullable', 'string', 'max:100'],
-            'cv' => ['required', 'file', 'mimes:pdf,doc,docx', 'max:3072'],
 
             // Step 2 — Latar Belakang Keluarga
             'ayah_nama' => ['nullable', 'string', 'max:255'],
@@ -184,6 +188,7 @@ class StoreApplicationRequest extends FormRequest
             'references.*.keterangan' => ['nullable', 'string', 'max:1000'],
 
             // Step 8 — Lain-Lain
+            'cv' => ['required', 'file', 'mimes:pdf,doc,docx', 'max:3072'],
             'pernah_sakit_serius' => ['required', Rule::in(['ya', 'tidak'])],
             'diagnosis_sakit' => ['nullable', 'required_if:pernah_sakit_serius,ya', 'string', 'max:2000'],
             'kesiapan_kerja' => ['required', 'string', 'max:2000'],
