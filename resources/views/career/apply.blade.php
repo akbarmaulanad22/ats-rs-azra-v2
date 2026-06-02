@@ -1094,8 +1094,8 @@
                         Langkah <span x-text="step"></span> dari 8
                     </div>
 
-                    <button type="button" class="btn-next" x-show="step < 8" @click="next()">
-                        Selanjutnya
+                    <button type="button" class="btn-next" x-show="step < 8" @click="next()" :disabled="_validating" :style="_validating ? 'opacity:.6;cursor:wait;' : ''">
+                        <span x-text="_validating ? 'Memeriksa...' : 'Selanjutnya'"></span>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
                     </button>
                     <button type="button" class="btn-submit" x-show="step === 8" @click="submitForm()">
@@ -1143,6 +1143,7 @@
 <script>
 window.__adjRegistry = {};
 window.__atsFormKey = 'ats_apply_' + @js($vacancy->id);
+window.__atsValidateUrl = @js(route('karier.lamar.validate', $vacancy));
 window.__atsHasErrors = {{ $errors->any() ? 'true' : 'false' }};
 window.__atsValidationErrors = @js($errors->toArray());
 
@@ -1160,16 +1161,7 @@ function applyWizard() {
         step: @php
             $errorStep = 1;
             if ($errors->any()) {
-                $stepFields = [
-                    1 => ['nama_lengkap','tempat_lahir','tanggal_lahir','jenis_kelamin','agama','status_perkawinan','golongan_darah','alamat_ktp','alamat_domisili','no_telepon','email','no_ktp','npwp','nama_ibu_kandung','kontak_darurat_'],
-                    2 => ['ayah_','ibu_','saudara_','siblings','spouses','children'],
-                    3 => ['formal_educations','achievements','informal_educations','language_skills'],
-                    4 => ['organization_experiences'],
-                    5 => ['is_fresh_graduate','work_experiences'],
-                    6 => ['alasan_melamar','gaji_diharapkan','fasilitas_diharapkan'],
-                    7 => ['references'],
-                    8 => ['pernah_sakit_serius','diagnosis_sakit','kesiapan_kerja','cv','str_sip','vaksinasi_covid','social_media_accounts','sumber_informasi','pernyataan'],
-                ];
+                $stepFields = \App\Http\Requests\StoreApplicationRequest::stepFields();
                 foreach ($stepFields as $step => $prefixes) {
                     foreach ($errors->keys() as $key) {
                         foreach ($prefixes as $prefix) {
@@ -1185,6 +1177,8 @@ function applyWizard() {
         isFreshGraduate: {{ old('is_fresh_graduate', '0') === '1' ? 'true' : 'false' }},
         hasSavedData: false,
         _submitting: false,
+        _validating: false,
+        _ajaxErrorEls: [],
 
         init() {
             this._validFields = new Set(
@@ -1290,13 +1284,92 @@ function applyWizard() {
             let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
         },
 
-        next() {
+        async next() {
+            if (this._validating || this.step >= 8) { return; }
             this._save();
-            if (this.step < 8) { this.step++; this.scrollTop(); }
+            this._validating = true;
+            try {
+                const ok = await this.validateStep(this.step);
+                if (ok) {
+                    this.clearStepErrors();
+                    this.step++;
+                    this.scrollTop();
+                }
+            } finally {
+                this._validating = false;
+            }
+        },
+
+        async validateStep(step) {
+            const form = document.getElementById('apply-form');
+            const fd = new FormData(form);
+            fd.append('step', step);
+            let res;
+            try {
+                res = await fetch(window.__atsValidateUrl, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    body: fd,
+                });
+            } catch {
+                alert('Gangguan koneksi. Coba lagi.');
+                return false;
+            }
+            if (res.ok) { return true; }
+            if (res.status === 422) {
+                let data = {};
+                try { data = await res.json(); } catch {}
+                this.applyStepErrors(data.errors || {});
+                return false;
+            }
+            if (res.status === 429) {
+                alert('Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.');
+                return false;
+            }
+            alert('Terjadi kesalahan. Coba lagi.');
+            return false;
+        },
+
+        _dotToName(key) {
+            const parts = key.split('.');
+            return parts.map((p, i) => (i === 0 ? p : `[${p}]`)).join('');
+        },
+
+        clearStepErrors() {
+            this._ajaxErrorEls.forEach(({ field, note }) => {
+                if (field) { field.classList.remove('error'); }
+                if (note && note.parentNode) { note.parentNode.removeChild(note); }
+            });
+            this._ajaxErrorEls = [];
+        },
+
+        applyStepErrors(errors) {
+            this.clearStepErrors();
+            const form = document.getElementById('apply-form');
+            let firstField = null;
+            Object.entries(errors).forEach(([key, msgs]) => {
+                const name = this._dotToName(key);
+                const field = form.querySelector(`[name="${CSS.escape(name)}"]`);
+                if (!field) { return; }
+                field.classList.add('error');
+                const note = document.createElement('p');
+                note.className = 'field-error';
+                note.textContent = Array.isArray(msgs) ? msgs[0] : msgs;
+                field.insertAdjacentElement('afterend', note);
+                this._ajaxErrorEls.push({ field, note });
+                if (!firstField) { firstField = field; }
+            });
+            if (firstField) {
+                firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (typeof firstField.focus === 'function') { firstField.focus({ preventScroll: true }); }
+            } else {
+                this.scrollTop();
+            }
         },
 
         prev() {
             this._save();
+            this.clearStepErrors();
             if (this.step > 1) { this.step--; this.scrollTop(); }
         },
 

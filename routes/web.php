@@ -30,6 +30,7 @@ use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\VacancyInterviewTemplateController;
 use App\Http\Controllers\VacancyPipelineController;
 use App\Http\Controllers\VacancyTestController;
+use App\Http\Controllers\ValidateApplicationStepController;
 use App\Http\Controllers\WorkflowTemplateController;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +52,7 @@ Route::middleware('throttle:public-browse')->group(function () {
     Route::get('/karier', [CareerController::class, 'index'])->name('karier.index');
     Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('karier.show');
     Route::get('/karier/{vacancy}/lamar', [ApplicationController::class, 'create'])->name('karier.lamar');
+    Route::post('/karier/{vacancy}/lamar/validate', ValidateApplicationStepController::class)->name('karier.lamar.validate');
 });
 Route::post('/karier/{vacancy}/lamar', [ApplicationController::class, 'store'])->name('karier.lamar.store')->middleware('throttle:public-submit');
 Route::get('/karier/lamaran/{token}', [ApplicationController::class, 'confirmation'])->name('karier.lamaran.konfirmasi')->middleware('throttle:token-access');

@@ -19,6 +19,51 @@ class StoreApplicationRequest extends FormRequest
     }
 
     /**
+     * Canonical map of wizard step number to the field-name prefixes that
+     * belong to that step. Single source of truth shared by the per-step
+     * validation endpoint and the blade error-step jump logic.
+     *
+     * @return array<int, array<int, string>>
+     */
+    public static function stepFields(): array
+    {
+        return [
+            1 => ['nama_lengkap', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'agama', 'status_perkawinan', 'golongan_darah', 'alamat_ktp', 'alamat_domisili', 'no_telepon', 'email', 'no_ktp', 'npwp', 'nama_ibu_kandung', 'kontak_darurat_'],
+            2 => ['ayah_', 'ibu_', 'saudara_', 'siblings', 'spouses', 'children'],
+            3 => ['formal_educations', 'achievements', 'informal_educations', 'language_skills'],
+            4 => ['organization_experiences'],
+            5 => ['is_fresh_graduate', 'work_experiences'],
+            6 => ['alasan_melamar', 'gaji_diharapkan', 'fasilitas_diharapkan'],
+            7 => ['references'],
+            8 => ['pernah_sakit_serius', 'diagnosis_sakit', 'kesiapan_kerja', 'cv', 'str_sip', 'vaksinasi_covid', 'social_media_accounts', 'sumber_informasi', 'pernyataan'],
+        ];
+    }
+
+    /**
+     * Subset of rules() whose keys belong to a single wizard step.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rulesForStep(int $step): array
+    {
+        $prefixes = self::stepFields()[$step] ?? [];
+
+        return array_filter(
+            $this->rules(),
+            function (string $key) use ($prefixes): bool {
+                foreach ($prefixes as $prefix) {
+                    if (str_starts_with($key, $prefix)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            },
+            ARRAY_FILTER_USE_KEY,
+        );
+    }
+
+    /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array

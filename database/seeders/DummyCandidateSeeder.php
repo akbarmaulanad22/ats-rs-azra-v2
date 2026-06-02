@@ -46,7 +46,7 @@ class DummyCandidateSeeder extends Seeder
             [
                 'nip' => '000000',
                 'nama_karyawan' => $kepalaUnit->name,
-                'unit' => $unit->nama,
+                'unit_id' => $unit->id,
                 'posisi_pekerjaan' => 'Kepala Unit',
                 'profesi' => '-',
                 'jabatan' => 'Kepala Unit',
