@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_RekrutmenAzra"
+                  targetNamespace="http://azra.example/bpmn/rekrutmen">
+
+  <bpmn:collaboration id="Collab_Rekrutmen">
+    <bpmn:participant id="Participant_Kandidat" name="Kandidat" processRef="Process_Kandidat" />
+    <bpmn:participant id="Participant_Azra" name="Rekrutmen Azra" processRef="Process_Azra" />
+
+    <bpmn:messageFlow id="mf1" name="Kirim lamaran" sourceRef="K_lamaran" targetRef="A_lamaran" />
+    <bpmn:messageFlow id="mf2" name="Link tes kompetensi" sourceRef="kirimKomp" targetRef="K_linkKomp" />
+    <bpmn:messageFlow id="mf3" name="Jawaban tes" sourceRef="K_komp" targetRef="jwbKomp" />
+    <bpmn:messageFlow id="mf4" name="Link tes DiSC" sourceRef="kirimDisc" targetRef="K_linkDisc" />
+    <bpmn:messageFlow id="mf5" name="Jawaban DiSC" sourceRef="K_disc" targetRef="jwbDisc" />
+    <bpmn:messageFlow id="mf6" name="Link tes MBTI" sourceRef="kirimMbti" targetRef="K_linkMbti" />
+    <bpmn:messageFlow id="mf7" name="Jawaban MBTI" sourceRef="K_mbti" targetRef="jwbMbti" />
+    <bpmn:messageFlow id="mf8" name="Surat penawaran" sourceRef="offer" targetRef="K_offer" />
+    <bpmn:messageFlow id="mf9" name="Konfirmasi terima" sourceRef="K_accept" targetRef="A_resp" />
+    <bpmn:messageFlow id="mf10" name="Penolakan tawaran" sourceRef="K_reject" targetRef="A_resp" />
+  </bpmn:collaboration>
+
+  <!-- ============ POOL KANDIDAT ============ -->
+  <bpmn:process id="Process_Kandidat" isExecutable="false">
+    <bpmn:startEvent id="K_start" name="Mulai melamar">
+      <bpmn:outgoing>kf1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="K_lamaran" name="Isi &amp; kirim lamaran">
+      <bpmn:incoming>kf1</bpmn:incoming>
+      <bpmn:outgoing>kf2</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:intermediateCatchEvent id="K_linkKomp" name="Terima link tes kompetensi">
+      <bpmn:incoming>kf2</bpmn:incoming>
+      <bpmn:outgoing>kf3</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_k1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="K_komp" name="Kerjakan tes kompetensi">
+      <bpmn:incoming>kf3</bpmn:incoming>
+      <bpmn:outgoing>kf4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="K_linkDisc" name="Terima link tes DiSC">
+      <bpmn:incoming>kf4</bpmn:incoming>
+      <bpmn:outgoing>kf5</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_k2" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="K_disc" name="Kerjakan tes DiSC">
+      <bpmn:incoming>kf5</bpmn:incoming>
+      <bpmn:outgoing>kf6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="K_linkMbti" name="Terima link tes MBTI">
+      <bpmn:incoming>kf6</bpmn:incoming>
+      <bpmn:outgoing>kf7</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_k3" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="K_mbti" name="Kerjakan tes MBTI">
+      <bpmn:incoming>kf7</bpmn:incoming>
+      <bpmn:outgoing>kf8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="K_offer" name="Terima surat penawaran">
+      <bpmn:incoming>kf8</bpmn:incoming>
+      <bpmn:outgoing>kf9</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_k4" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="K_gw" name="Terima tawaran?">
+      <bpmn:incoming>kf9</bpmn:incoming>
+      <bpmn:outgoing>kf10</bpmn:outgoing>
+      <bpmn:outgoing>kf11</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="K_accept" name="Konfirmasi terima tawaran">
+      <bpmn:incoming>kf10</bpmn:incoming>
+      <bpmn:outgoing>kf12</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="K_reject" name="Tolak tawaran">
+      <bpmn:incoming>kf11</bpmn:incoming>
+      <bpmn:outgoing>kf13</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="K_hired" name="Diterima bekerja">
+      <bpmn:incoming>kf12</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="K_resign" name="Mengundurkan diri">
+      <bpmn:incoming>kf13</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="kf1" sourceRef="K_start" targetRef="K_lamaran" />
+    <bpmn:sequenceFlow id="kf2" sourceRef="K_lamaran" targetRef="K_linkKomp" />
+    <bpmn:sequenceFlow id="kf3" sourceRef="K_linkKomp" targetRef="K_komp" />
+    <bpmn:sequenceFlow id="kf4" sourceRef="K_komp" targetRef="K_linkDisc" />
+    <bpmn:sequenceFlow id="kf5" sourceRef="K_linkDisc" targetRef="K_disc" />
+    <bpmn:sequenceFlow id="kf6" sourceRef="K_disc" targetRef="K_linkMbti" />
+    <bpmn:sequenceFlow id="kf7" sourceRef="K_linkMbti" targetRef="K_mbti" />
+    <bpmn:sequenceFlow id="kf8" sourceRef="K_mbti" targetRef="K_offer" />
+    <bpmn:sequenceFlow id="kf9" sourceRef="K_offer" targetRef="K_gw" />
+    <bpmn:sequenceFlow id="kf10" name="Terima" sourceRef="K_gw" targetRef="K_accept" />
+    <bpmn:sequenceFlow id="kf11" name="Tolak" sourceRef="K_gw" targetRef="K_reject" />
+    <bpmn:sequenceFlow id="kf12" sourceRef="K_accept" targetRef="K_hired" />
+    <bpmn:sequenceFlow id="kf13" sourceRef="K_reject" targetRef="K_resign" />
+  </bpmn:process>
+
+  <!-- ============ POOL REKRUTMEN AZRA ============ -->
+  <bpmn:process id="Process_Azra" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Azra">
+      <bpmn:lane id="Lane_Sistem" name="Sistem">
+        <bpmn:flowNodeRef>A_lamaran</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>kirimKomp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>jwbKomp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>kirimDisc</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>jwbDisc</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>kirimMbti</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>jwbMbti</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>A_resp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>A_ditolak</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_AdminHR" name="Admin HR">
+        <bpmn:flowNodeRef>skrHr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reviewKomp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>offer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gOffer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>mcu</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g7</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>onboarding</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>A_hired</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>A_resign</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Unit" name="Unit (Kepala Unit / Karyawan)">
+        <bpmn:flowNodeRef>skrUser</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>wwUser</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g4</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_ManajerHR" name="Manajer HR">
+        <bpmn:flowNodeRef>wwHr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g5</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Direktur" name="Direktur">
+        <bpmn:flowNodeRef>wwDir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g6</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="A_lamaran" name="Lamaran diterima">
+      <bpmn:outgoing>af1</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_a0" />
+    </bpmn:startEvent>
+    <bpmn:task id="skrHr" name="Skrining CV HR">
+      <bpmn:incoming>af1</bpmn:incoming>
+      <bpmn:incoming>af5</bpmn:incoming>
+      <bpmn:outgoing>af2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="g1" name="Keputusan skrining HR">
+      <bpmn:incoming>af2</bpmn:incoming>
+      <bpmn:outgoing>af3</bpmn:outgoing>
+      <bpmn:outgoing>af4</bpmn:outgoing>
+      <bpmn:outgoing>af5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="skrUser" name="Skrining CV User">
+      <bpmn:incoming>af3</bpmn:incoming>
+      <bpmn:incoming>af9</bpmn:incoming>
+      <bpmn:outgoing>af6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="g2" name="Keputusan skrining User">
+      <bpmn:incoming>af6</bpmn:incoming>
+      <bpmn:outgoing>af7</bpmn:outgoing>
+      <bpmn:outgoing>af8</bpmn:outgoing>
+      <bpmn:outgoing>af9</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="kirimKomp" name="Kirim link tes kompetensi">
+      <bpmn:incoming>af7</bpmn:incoming>
+      <bpmn:outgoing>af10</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="jwbKomp" name="Jawaban tes diterima">
+      <bpmn:incoming>af10</bpmn:incoming>
+      <bpmn:outgoing>af11</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_a1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="reviewKomp" name="Review tes kompetensi">
+      <bpmn:incoming>af11</bpmn:incoming>
+      <bpmn:incoming>af15</bpmn:incoming>
+      <bpmn:outgoing>af12</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="g3" name="Keputusan tes kompetensi">
+      <bpmn:incoming>af12</bpmn:incoming>
+      <bpmn:outgoing>af13</bpmn:outgoing>
+      <bpmn:outgoing>af14</bpmn:outgoing>
+      <bpmn:outgoing>af15</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="wwUser" name="Wawancara User">
+      <bpmn:incoming>af13</bpmn:incoming>
+      <bpmn:incoming>af19</bpmn:incoming>
+      <bpmn:outgoing>af16</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="g4" name="Keputusan wawancara User">
+      <bpmn:incoming>af16</bpmn:incoming>
+      <bpmn:outgoing>af17</bpmn:outgoing>
+      <bpmn:outgoing>af18</bpmn:outgoing>
+      <bpmn:outgoing>af19</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="wwHr" name="Wawancara Manajer HR">
+      <bpmn:incoming>af17</bpmn:incoming>
+      <bpmn:incoming>af23</bpmn:incoming>
+      <bpmn:outgoing>af20</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="g5" name="Keputusan wawancara Manajer HR">
+      <bpmn:incoming>af20</bpmn:incoming>
+      <bpmn:outgoing>af21</bpmn:outgoing>
+      <bpmn:outgoing>af22</bpmn:outgoing>
+      <bpmn:outgoing>af23</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="wwDir" name="Wawancara Direktur">
+      <bpmn:incoming>af21</bpmn:incoming>
+      <bpmn:incoming>af27</bpmn:incoming>
+      <bpmn:outgoing>af24</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="g6" name="Keputusan wawancara Direktur">
+      <bpmn:incoming>af24</bpmn:incoming>
+      <bpmn:outgoing>af25</bpmn:outgoing>
+      <bpmn:outgoing>af26</bpmn:outgoing>
+      <bpmn:outgoing>af27</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="kirimDisc" name="Kirim link tes DiSC">
+      <bpmn:incoming>af25</bpmn:incoming>
+      <bpmn:outgoing>af28</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="jwbDisc" name="Jawaban DiSC diterima">
+      <bpmn:incoming>af28</bpmn:incoming>
+      <bpmn:outgoing>af29</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_a2" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="kirimMbti" name="Kirim link tes MBTI">
+      <bpmn:incoming>af29</bpmn:incoming>
+      <bpmn:outgoing>af30</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="jwbMbti" name="Jawaban MBTI diterima">
+      <bpmn:incoming>af30</bpmn:incoming>
+      <bpmn:outgoing>af31</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_a3" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="offer" name="Terbitkan surat penawaran">
+      <bpmn:incoming>af31</bpmn:incoming>
+      <bpmn:outgoing>af32</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="A_resp" name="Respon tawaran diterima">
+      <bpmn:incoming>af32</bpmn:incoming>
+      <bpmn:outgoing>af33</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_a4" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="gOffer" name="Tawaran diterima?">
+      <bpmn:incoming>af33</bpmn:incoming>
+      <bpmn:outgoing>af34</bpmn:outgoing>
+      <bpmn:outgoing>af35</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="mcu" name="Proses MCU">
+      <bpmn:incoming>af34</bpmn:incoming>
+      <bpmn:incoming>af39</bpmn:incoming>
+      <bpmn:outgoing>af36</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="g7" name="Keputusan MCU">
+      <bpmn:incoming>af36</bpmn:incoming>
+      <bpmn:outgoing>af37</bpmn:outgoing>
+      <bpmn:outgoing>af38</bpmn:outgoing>
+      <bpmn:outgoing>af39</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="onboarding" name="Onboarding">
+      <bpmn:incoming>af37</bpmn:incoming>
+      <bpmn:outgoing>af40</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="A_hired" name="Kandidat diterima (Hired)">
+      <bpmn:incoming>af40</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="A_ditolak" name="Ditolak">
+      <bpmn:incoming>af4</bpmn:incoming>
+      <bpmn:incoming>af8</bpmn:incoming>
+      <bpmn:incoming>af14</bpmn:incoming>
+      <bpmn:incoming>af18</bpmn:incoming>
+      <bpmn:incoming>af22</bpmn:incoming>
+      <bpmn:incoming>af26</bpmn:incoming>
+      <bpmn:incoming>af38</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="A_resign" name="Kandidat mengundurkan diri">
+      <bpmn:incoming>af35</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="af1" sourceRef="A_lamaran" targetRef="skrHr" />
+    <bpmn:sequenceFlow id="af2" sourceRef="skrHr" targetRef="g1" />
+    <bpmn:sequenceFlow id="af3" name="lulus" sourceRef="g1" targetRef="skrUser" />
+    <bpmn:sequenceFlow id="af4" name="gagal" sourceRef="g1" targetRef="A_ditolak" />
+    <bpmn:sequenceFlow id="af5" name="reserved" sourceRef="g1" targetRef="skrHr" />
+    <bpmn:sequenceFlow id="af6" sourceRef="skrUser" targetRef="g2" />
+    <bpmn:sequenceFlow id="af7" name="lulus" sourceRef="g2" targetRef="kirimKomp" />
+    <bpmn:sequenceFlow id="af8" name="gagal" sourceRef="g2" targetRef="A_ditolak" />
+    <bpmn:sequenceFlow id="af9" name="reserved" sourceRef="g2" targetRef="skrUser" />
+    <bpmn:sequenceFlow id="af10" sourceRef="kirimKomp" targetRef="jwbKomp" />
+    <bpmn:sequenceFlow id="af11" sourceRef="jwbKomp" targetRef="reviewKomp" />
+    <bpmn:sequenceFlow id="af12" sourceRef="reviewKomp" targetRef="g3" />
+    <bpmn:sequenceFlow id="af13" name="lulus" sourceRef="g3" targetRef="wwUser" />
+    <bpmn:sequenceFlow id="af14" name="gagal" sourceRef="g3" targetRef="A_ditolak" />
+    <bpmn:sequenceFlow id="af15" name="reserved" sourceRef="g3" targetRef="reviewKomp" />
+    <bpmn:sequenceFlow id="af16" sourceRef="wwUser" targetRef="g4" />
+    <bpmn:sequenceFlow id="af17" name="lulus" sourceRef="g4" targetRef="wwHr" />
+    <bpmn:sequenceFlow id="af18" name="gagal" sourceRef="g4" targetRef="A_ditolak" />
+    <bpmn:sequenceFlow id="af19" name="reserved" sourceRef="g4" targetRef="wwUser" />
+    <bpmn:sequenceFlow id="af20" sourceRef="wwHr" targetRef="g5" />
+    <bpmn:sequenceFlow id="af21" name="lulus" sourceRef="g5" targetRef="wwDir" />
+    <bpmn:sequenceFlow id="af22" name="gagal" sourceRef="g5" targetRef="A_ditolak" />
+    <bpmn:sequenceFlow id="af23" name="reserved" sourceRef="g5" targetRef="wwHr" />
+    <bpmn:sequenceFlow id="af24" sourceRef="wwDir" targetRef="g6" />
+    <bpmn:sequenceFlow id="af25" name="lulus" sourceRef="g6" targetRef="kirimDisc" />
+    <bpmn:sequenceFlow id="af26" name="gagal" sourceRef="g6" targetRef="A_ditolak" />
+    <bpmn:sequenceFlow id="af27" name="reserved" sourceRef="g6" targetRef="wwDir" />
+    <bpmn:sequenceFlow id="af28" sourceRef="kirimDisc" targetRef="jwbDisc" />
+    <bpmn:sequenceFlow id="af29" sourceRef="jwbDisc" targetRef="kirimMbti" />
+    <bpmn:sequenceFlow id="af30" sourceRef="kirimMbti" targetRef="jwbMbti" />
+    <bpmn:sequenceFlow id="af31" sourceRef="jwbMbti" targetRef="offer" />
+    <bpmn:sequenceFlow id="af32" sourceRef="offer" targetRef="A_resp" />
+    <bpmn:sequenceFlow id="af33" sourceRef="A_resp" targetRef="gOffer" />
+    <bpmn:sequenceFlow id="af34" name="diterima" sourceRef="gOffer" targetRef="mcu" />
+    <bpmn:sequenceFlow id="af35" name="ditolak" sourceRef="gOffer" targetRef="A_resign" />
+    <bpmn:sequenceFlow id="af36" sourceRef="mcu" targetRef="g7" />
+    <bpmn:sequenceFlow id="af37" name="lulus" sourceRef="g7" targetRef="onboarding" />
+    <bpmn:sequenceFlow id="af38" name="tidak lulus" sourceRef="g7" targetRef="A_ditolak" />
+    <bpmn:sequenceFlow id="af39" name="ditangguhkan" sourceRef="g7" targetRef="mcu" />
+    <bpmn:sequenceFlow id="af40" sourceRef="onboarding" targetRef="A_hired" />
+  </bpmn:process>
+
+  <!-- ============ DIAGRAM INTERCHANGE ============ -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collab_Rekrutmen">
+
+      <bpmndi:BPMNShape id="di_Participant_Kandidat" bpmnElement="Participant_Kandidat" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="3200" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_Participant_Azra" bpmnElement="Participant_Azra" isHorizontal="true">
+        <dc:Bounds x="160" y="300" width="3200" height="580" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_Lane_Sistem" bpmnElement="Lane_Sistem" isHorizontal="true">
+        <dc:Bounds x="210" y="300" width="3150" height="116" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_Lane_AdminHR" bpmnElement="Lane_AdminHR" isHorizontal="true">
+        <dc:Bounds x="210" y="416" width="3150" height="116" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_Lane_Unit" bpmnElement="Lane_Unit" isHorizontal="true">
+        <dc:Bounds x="210" y="532" width="3150" height="116" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_Lane_ManajerHR" bpmnElement="Lane_ManajerHR" isHorizontal="true">
+        <dc:Bounds x="210" y="648" width="3150" height="116" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_Lane_Direktur" bpmnElement="Lane_Direktur" isHorizontal="true">
+        <dc:Bounds x="210" y="764" width="3150" height="116" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="di_K_start" bpmnElement="K_start"><dc:Bounds x="240" y="150" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_lamaran" bpmnElement="K_lamaran"><dc:Bounds x="320" y="130" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_linkKomp" bpmnElement="K_linkKomp"><dc:Bounds x="820" y="150" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_komp" bpmnElement="K_komp"><dc:Bounds x="900" y="130" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_linkDisc" bpmnElement="K_linkDisc"><dc:Bounds x="2010" y="150" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_disc" bpmnElement="K_disc"><dc:Bounds x="2090" y="130" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_linkMbti" bpmnElement="K_linkMbti"><dc:Bounds x="2220" y="150" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_mbti" bpmnElement="K_mbti"><dc:Bounds x="2300" y="130" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_offer" bpmnElement="K_offer"><dc:Bounds x="2430" y="150" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_gw" bpmnElement="K_gw" isMarkerVisible="true"><dc:Bounds x="2505" y="143" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_accept" bpmnElement="K_accept"><dc:Bounds x="2600" y="92" width="100" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_reject" bpmnElement="K_reject"><dc:Bounds x="2600" y="185" width="100" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_hired" bpmnElement="K_hired"><dc:Bounds x="2760" y="99" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_K_resign" bpmnElement="K_resign"><dc:Bounds x="2760" y="192" width="36" height="36" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="di_A_lamaran" bpmnElement="A_lamaran"><dc:Bounds x="240" y="340" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_skrHr" bpmnElement="skrHr"><dc:Bounds x="320" y="445" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_g1" bpmnElement="g1" isMarkerVisible="true"><dc:Bounds x="470" y="455" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_skrUser" bpmnElement="skrUser"><dc:Bounds x="560" y="560" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_g2" bpmnElement="g2" isMarkerVisible="true"><dc:Bounds x="710" y="570" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_kirimKomp" bpmnElement="kirimKomp"><dc:Bounds x="790" y="335" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_jwbKomp" bpmnElement="jwbKomp"><dc:Bounds x="950" y="352" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_reviewKomp" bpmnElement="reviewKomp"><dc:Bounds x="1030" y="445" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_g3" bpmnElement="g3" isMarkerVisible="true"><dc:Bounds x="1180" y="455" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_wwUser" bpmnElement="wwUser"><dc:Bounds x="1270" y="560" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_g4" bpmnElement="g4" isMarkerVisible="true"><dc:Bounds x="1420" y="570" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_wwHr" bpmnElement="wwHr"><dc:Bounds x="1510" y="675" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_g5" bpmnElement="g5" isMarkerVisible="true"><dc:Bounds x="1660" y="685" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_wwDir" bpmnElement="wwDir"><dc:Bounds x="1750" y="790" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_g6" bpmnElement="g6" isMarkerVisible="true"><dc:Bounds x="1900" y="800" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_kirimDisc" bpmnElement="kirimDisc"><dc:Bounds x="1990" y="335" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_jwbDisc" bpmnElement="jwbDisc"><dc:Bounds x="2120" y="352" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_kirimMbti" bpmnElement="kirimMbti"><dc:Bounds x="2200" y="335" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_jwbMbti" bpmnElement="jwbMbti"><dc:Bounds x="2330" y="352" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_offer" bpmnElement="offer"><dc:Bounds x="2410" y="445" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_A_resp" bpmnElement="A_resp"><dc:Bounds x="2560" y="352" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_gOffer" bpmnElement="gOffer" isMarkerVisible="true"><dc:Bounds x="2640" y="455" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_mcu" bpmnElement="mcu"><dc:Bounds x="2730" y="445" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_g7" bpmnElement="g7" isMarkerVisible="true"><dc:Bounds x="2880" y="455" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_onboarding" bpmnElement="onboarding"><dc:Bounds x="2970" y="445" width="100" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_A_hired" bpmnElement="A_hired"><dc:Bounds x="3120" y="462" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_A_ditolak" bpmnElement="A_ditolak"><dc:Bounds x="3120" y="352" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_A_resign" bpmnElement="A_resign"><dc:Bounds x="2647" y="500" width="36" height="36" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="di_kf1" bpmnElement="kf1"><di:waypoint x="276" y="168" /><di:waypoint x="320" y="165" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf2" bpmnElement="kf2"><di:waypoint x="430" y="165" /><di:waypoint x="820" y="168" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf3" bpmnElement="kf3"><di:waypoint x="856" y="168" /><di:waypoint x="900" y="165" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf4" bpmnElement="kf4"><di:waypoint x="1000" y="165" /><di:waypoint x="2010" y="168" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf5" bpmnElement="kf5"><di:waypoint x="2046" y="168" /><di:waypoint x="2090" y="165" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf6" bpmnElement="kf6"><di:waypoint x="2190" y="165" /><di:waypoint x="2220" y="168" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf7" bpmnElement="kf7"><di:waypoint x="2256" y="168" /><di:waypoint x="2300" y="165" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf8" bpmnElement="kf8"><di:waypoint x="2400" y="165" /><di:waypoint x="2430" y="168" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf9" bpmnElement="kf9"><di:waypoint x="2466" y="168" /><di:waypoint x="2505" y="168" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf10" bpmnElement="kf10"><di:waypoint x="2530" y="143" /><di:waypoint x="2600" y="117" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf11" bpmnElement="kf11"><di:waypoint x="2530" y="193" /><di:waypoint x="2600" y="210" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf12" bpmnElement="kf12"><di:waypoint x="2700" y="117" /><di:waypoint x="2760" y="117" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kf13" bpmnElement="kf13"><di:waypoint x="2700" y="210" /><di:waypoint x="2760" y="210" /></bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="di_af1" bpmnElement="af1"><di:waypoint x="258" y="376" /><di:waypoint x="370" y="445" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af2" bpmnElement="af2"><di:waypoint x="420" y="480" /><di:waypoint x="470" y="480" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af3" bpmnElement="af3"><di:waypoint x="495" y="505" /><di:waypoint x="610" y="560" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af4" bpmnElement="af4"><di:waypoint x="495" y="455" /><di:waypoint x="3120" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af5" bpmnElement="af5"><di:waypoint x="470" y="480" /><di:waypoint x="370" y="445" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af6" bpmnElement="af6"><di:waypoint x="660" y="595" /><di:waypoint x="710" y="595" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af7" bpmnElement="af7"><di:waypoint x="735" y="570" /><di:waypoint x="840" y="405" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af8" bpmnElement="af8"><di:waypoint x="735" y="570" /><di:waypoint x="3120" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af9" bpmnElement="af9"><di:waypoint x="710" y="595" /><di:waypoint x="610" y="560" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af10" bpmnElement="af10"><di:waypoint x="890" y="370" /><di:waypoint x="950" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af11" bpmnElement="af11"><di:waypoint x="986" y="370" /><di:waypoint x="1080" y="445" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af12" bpmnElement="af12"><di:waypoint x="1130" y="480" /><di:waypoint x="1180" y="480" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af13" bpmnElement="af13"><di:waypoint x="1205" y="505" /><di:waypoint x="1320" y="560" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af14" bpmnElement="af14"><di:waypoint x="1205" y="455" /><di:waypoint x="3120" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af15" bpmnElement="af15"><di:waypoint x="1180" y="480" /><di:waypoint x="1080" y="445" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af16" bpmnElement="af16"><di:waypoint x="1370" y="595" /><di:waypoint x="1420" y="595" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af17" bpmnElement="af17"><di:waypoint x="1445" y="620" /><di:waypoint x="1560" y="675" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af18" bpmnElement="af18"><di:waypoint x="1445" y="570" /><di:waypoint x="3120" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af19" bpmnElement="af19"><di:waypoint x="1420" y="595" /><di:waypoint x="1320" y="560" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af20" bpmnElement="af20"><di:waypoint x="1610" y="710" /><di:waypoint x="1660" y="710" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af21" bpmnElement="af21"><di:waypoint x="1685" y="735" /><di:waypoint x="1800" y="790" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af22" bpmnElement="af22"><di:waypoint x="1685" y="685" /><di:waypoint x="3120" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af23" bpmnElement="af23"><di:waypoint x="1660" y="710" /><di:waypoint x="1560" y="675" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af24" bpmnElement="af24"><di:waypoint x="1850" y="825" /><di:waypoint x="1900" y="825" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af25" bpmnElement="af25"><di:waypoint x="1925" y="800" /><di:waypoint x="2040" y="405" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af26" bpmnElement="af26"><di:waypoint x="1925" y="800" /><di:waypoint x="3120" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af27" bpmnElement="af27"><di:waypoint x="1900" y="825" /><di:waypoint x="1800" y="790" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af28" bpmnElement="af28"><di:waypoint x="2090" y="370" /><di:waypoint x="2120" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af29" bpmnElement="af29"><di:waypoint x="2156" y="370" /><di:waypoint x="2200" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af30" bpmnElement="af30"><di:waypoint x="2300" y="370" /><di:waypoint x="2330" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af31" bpmnElement="af31"><di:waypoint x="2366" y="370" /><di:waypoint x="2460" y="445" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af32" bpmnElement="af32"><di:waypoint x="2510" y="465" /><di:waypoint x="2578" y="388" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af33" bpmnElement="af33"><di:waypoint x="2578" y="388" /><di:waypoint x="2665" y="455" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af34" bpmnElement="af34"><di:waypoint x="2690" y="480" /><di:waypoint x="2780" y="480" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af35" bpmnElement="af35"><di:waypoint x="2665" y="505" /><di:waypoint x="2665" y="500" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af36" bpmnElement="af36"><di:waypoint x="2830" y="480" /><di:waypoint x="2880" y="480" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af37" bpmnElement="af37"><di:waypoint x="2930" y="480" /><di:waypoint x="2970" y="480" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af38" bpmnElement="af38"><di:waypoint x="2905" y="455" /><di:waypoint x="3120" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af39" bpmnElement="af39"><di:waypoint x="2905" y="505" /><di:waypoint x="2780" y="515" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_af40" bpmnElement="af40"><di:waypoint x="3070" y="480" /><di:waypoint x="3120" y="480" /></bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="di_mf1" bpmnElement="mf1"><di:waypoint x="375" y="200" /><di:waypoint x="258" y="340" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_mf2" bpmnElement="mf2"><di:waypoint x="840" y="335" /><di:waypoint x="838" y="186" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_mf3" bpmnElement="mf3"><di:waypoint x="950" y="200" /><di:waypoint x="968" y="352" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_mf4" bpmnElement="mf4"><di:waypoint x="2040" y="335" /><di:waypoint x="2028" y="186" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_mf5" bpmnElement="mf5"><di:waypoint x="2140" y="200" /><di:waypoint x="2138" y="352" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_mf6" bpmnElement="mf6"><di:waypoint x="2250" y="335" /><di:waypoint x="2238" y="186" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_mf7" bpmnElement="mf7"><di:waypoint x="2350" y="200" /><di:waypoint x="2348" y="352" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_mf8" bpmnElement="mf8"><di:waypoint x="2460" y="445" /><di:waypoint x="2448" y="186" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_mf9" bpmnElement="mf9"><di:waypoint x="2650" y="117" /><di:waypoint x="2578" y="352" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_mf10" bpmnElement="mf10"><di:waypoint x="2650" y="210" /><di:waypoint x="2578" y="388" /></bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_WizardLamaran"
+                  targetNamespace="http://azra.example/bpmn/rekrutmen">
+
+  <!-- Zoom 1: ekspansi sub-process "Isi & kirim lamaran" (pool Kandidat) -->
+  <bpmn:process id="Process_Wizard" isExecutable="false">
+    <bpmn:startEvent id="w_start" name="Mulai isi lamaran">
+      <bpmn:outgoing>wf0</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:task id="t1" name="Langkah 1: Identitas Diri">
+      <bpmn:incoming>wf0</bpmn:incoming>
+      <bpmn:incoming>wf1_back</bpmn:incoming>
+      <bpmn:outgoing>wf1</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gv1" name="Data valid? (AJAX)">
+      <bpmn:incoming>wf1</bpmn:incoming>
+      <bpmn:outgoing>wf1_ok</bpmn:outgoing>
+      <bpmn:outgoing>wf1_back</bpmn:outgoing>
+      <bpmn:outgoing>wf1_dup</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="t2" name="Langkah 2: Latar Belakang Keluarga">
+      <bpmn:incoming>wf1_ok</bpmn:incoming>
+      <bpmn:incoming>wf2_back</bpmn:incoming>
+      <bpmn:outgoing>wf2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gv2" name="Data valid? (AJAX)">
+      <bpmn:incoming>wf2</bpmn:incoming>
+      <bpmn:outgoing>wf2_ok</bpmn:outgoing>
+      <bpmn:outgoing>wf2_back</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="t3" name="Langkah 3: Pendidikan">
+      <bpmn:incoming>wf2_ok</bpmn:incoming>
+      <bpmn:incoming>wf3_back</bpmn:incoming>
+      <bpmn:outgoing>wf3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gv3" name="Data valid? (AJAX)">
+      <bpmn:incoming>wf3</bpmn:incoming>
+      <bpmn:outgoing>wf3_ok</bpmn:outgoing>
+      <bpmn:outgoing>wf3_back</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="t4" name="Langkah 4: Organisasi">
+      <bpmn:incoming>wf3_ok</bpmn:incoming>
+      <bpmn:incoming>wf4_back</bpmn:incoming>
+      <bpmn:outgoing>wf4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gv4" name="Data valid? (AJAX)">
+      <bpmn:incoming>wf4</bpmn:incoming>
+      <bpmn:outgoing>wf4_ok</bpmn:outgoing>
+      <bpmn:outgoing>wf4_back</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="t5" name="Langkah 5: Pengalaman Kerja">
+      <bpmn:incoming>wf4_ok</bpmn:incoming>
+      <bpmn:incoming>wf5_back</bpmn:incoming>
+      <bpmn:outgoing>wf5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gv5" name="Data valid? (AJAX)">
+      <bpmn:incoming>wf5</bpmn:incoming>
+      <bpmn:outgoing>wf5_ok</bpmn:outgoing>
+      <bpmn:outgoing>wf5_back</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="t6" name="Langkah 6: Minat">
+      <bpmn:incoming>wf5_ok</bpmn:incoming>
+      <bpmn:incoming>wf6_back</bpmn:incoming>
+      <bpmn:outgoing>wf6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gv6" name="Data valid? (AJAX)">
+      <bpmn:incoming>wf6</bpmn:incoming>
+      <bpmn:outgoing>wf6_ok</bpmn:outgoing>
+      <bpmn:outgoing>wf6_back</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="t7" name="Langkah 7: Referensi">
+      <bpmn:incoming>wf6_ok</bpmn:incoming>
+      <bpmn:incoming>wf7_back</bpmn:incoming>
+      <bpmn:outgoing>wf7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gv7" name="Data valid? (AJAX)">
+      <bpmn:incoming>wf7</bpmn:incoming>
+      <bpmn:outgoing>wf7_ok</bpmn:outgoing>
+      <bpmn:outgoing>wf7_back</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="t8" name="Langkah 8: Lain-Lain (CV, STR/SIP, Pernyataan)">
+      <bpmn:incoming>wf7_ok</bpmn:incoming>
+      <bpmn:incoming>wf8_back</bpmn:incoming>
+      <bpmn:outgoing>wf8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gv8" name="Data valid? (AJAX)">
+      <bpmn:incoming>wf8</bpmn:incoming>
+      <bpmn:outgoing>wf8_ok</bpmn:outgoing>
+      <bpmn:outgoing>wf8_back</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="w_submit" name="Kirim lamaran">
+      <bpmn:incoming>wf8_ok</bpmn:incoming>
+      <bpmn:outgoing>wf_done</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="w_end_ok" name="Lamaran terkirim">
+      <bpmn:incoming>wf_done</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="w_end_dup" name="Sudah pernah melamar lowongan ini">
+      <bpmn:incoming>wf1_dup</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="wf0" sourceRef="w_start" targetRef="t1" />
+    <bpmn:sequenceFlow id="wf1" sourceRef="t1" targetRef="gv1" />
+    <bpmn:sequenceFlow id="wf1_ok" name="valid" sourceRef="gv1" targetRef="t2" />
+    <bpmn:sequenceFlow id="wf1_back" name="tidak valid" sourceRef="gv1" targetRef="t1" />
+    <bpmn:sequenceFlow id="wf1_dup" name="email sudah melamar" sourceRef="gv1" targetRef="w_end_dup" />
+    <bpmn:sequenceFlow id="wf2" sourceRef="t2" targetRef="gv2" />
+    <bpmn:sequenceFlow id="wf2_ok" name="valid" sourceRef="gv2" targetRef="t3" />
+    <bpmn:sequenceFlow id="wf2_back" name="tidak valid" sourceRef="gv2" targetRef="t2" />
+    <bpmn:sequenceFlow id="wf3" sourceRef="t3" targetRef="gv3" />
+    <bpmn:sequenceFlow id="wf3_ok" name="valid" sourceRef="gv3" targetRef="t4" />
+    <bpmn:sequenceFlow id="wf3_back" name="tidak valid" sourceRef="gv3" targetRef="t3" />
+    <bpmn:sequenceFlow id="wf4" sourceRef="t4" targetRef="gv4" />
+    <bpmn:sequenceFlow id="wf4_ok" name="valid" sourceRef="gv4" targetRef="t5" />
+    <bpmn:sequenceFlow id="wf4_back" name="tidak valid" sourceRef="gv4" targetRef="t4" />
+    <bpmn:sequenceFlow id="wf5" sourceRef="t5" targetRef="gv5" />
+    <bpmn:sequenceFlow id="wf5_ok" name="valid" sourceRef="gv5" targetRef="t6" />
+    <bpmn:sequenceFlow id="wf5_back" name="tidak valid" sourceRef="gv5" targetRef="t5" />
+    <bpmn:sequenceFlow id="wf6" sourceRef="t6" targetRef="gv6" />
+    <bpmn:sequenceFlow id="wf6_ok" name="valid" sourceRef="gv6" targetRef="t7" />
+    <bpmn:sequenceFlow id="wf6_back" name="tidak valid" sourceRef="gv6" targetRef="t6" />
+    <bpmn:sequenceFlow id="wf7" sourceRef="t7" targetRef="gv7" />
+    <bpmn:sequenceFlow id="wf7_ok" name="valid" sourceRef="gv7" targetRef="t8" />
+    <bpmn:sequenceFlow id="wf7_back" name="tidak valid" sourceRef="gv7" targetRef="t7" />
+    <bpmn:sequenceFlow id="wf8" sourceRef="t8" targetRef="gv8" />
+    <bpmn:sequenceFlow id="wf8_ok" name="valid" sourceRef="gv8" targetRef="w_submit" />
+    <bpmn:sequenceFlow id="wf8_back" name="tidak valid" sourceRef="gv8" targetRef="t8" />
+    <bpmn:sequenceFlow id="wf_done" sourceRef="w_submit" targetRef="w_end_ok" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_W">
+    <bpmndi:BPMNPlane id="BPMNPlane_W" bpmnElement="Process_Wizard">
+      <bpmndi:BPMNShape id="di_w_start" bpmnElement="w_start"><dc:Bounds x="160" y="202" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_t1" bpmnElement="t1"><dc:Bounds x="240" y="185" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_gv1" bpmnElement="gv1" isMarkerVisible="true"><dc:Bounds x="395" y="195" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_t2" bpmnElement="t2"><dc:Bounds x="490" y="185" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_gv2" bpmnElement="gv2" isMarkerVisible="true"><dc:Bounds x="645" y="195" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_t3" bpmnElement="t3"><dc:Bounds x="740" y="185" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_gv3" bpmnElement="gv3" isMarkerVisible="true"><dc:Bounds x="895" y="195" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_t4" bpmnElement="t4"><dc:Bounds x="990" y="185" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_gv4" bpmnElement="gv4" isMarkerVisible="true"><dc:Bounds x="1145" y="195" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_t5" bpmnElement="t5"><dc:Bounds x="1240" y="185" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_gv5" bpmnElement="gv5" isMarkerVisible="true"><dc:Bounds x="1395" y="195" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_t6" bpmnElement="t6"><dc:Bounds x="1490" y="185" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_gv6" bpmnElement="gv6" isMarkerVisible="true"><dc:Bounds x="1645" y="195" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_t7" bpmnElement="t7"><dc:Bounds x="1740" y="185" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_gv7" bpmnElement="gv7" isMarkerVisible="true"><dc:Bounds x="1895" y="195" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_t8" bpmnElement="t8"><dc:Bounds x="1990" y="185" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_gv8" bpmnElement="gv8" isMarkerVisible="true"><dc:Bounds x="2165" y="195" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_w_submit" bpmnElement="w_submit"><dc:Bounds x="2260" y="185" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_w_end_ok" bpmnElement="w_end_ok"><dc:Bounds x="2420" y="202" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_w_end_dup" bpmnElement="w_end_dup"><dc:Bounds x="402" y="80" width="36" height="36" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="di_wf0" bpmnElement="wf0"><di:waypoint x="196" y="220" /><di:waypoint x="240" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf1" bpmnElement="wf1"><di:waypoint x="350" y="220" /><di:waypoint x="395" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf1_ok" bpmnElement="wf1_ok"><di:waypoint x="445" y="220" /><di:waypoint x="490" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf1_back" bpmnElement="wf1_back"><di:waypoint x="420" y="245" /><di:waypoint x="420" y="290" /><di:waypoint x="295" y="290" /><di:waypoint x="295" y="255" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf1_dup" bpmnElement="wf1_dup"><di:waypoint x="420" y="195" /><di:waypoint x="420" y="116" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf2" bpmnElement="wf2"><di:waypoint x="600" y="220" /><di:waypoint x="645" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf2_ok" bpmnElement="wf2_ok"><di:waypoint x="695" y="220" /><di:waypoint x="740" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf2_back" bpmnElement="wf2_back"><di:waypoint x="670" y="245" /><di:waypoint x="670" y="290" /><di:waypoint x="545" y="290" /><di:waypoint x="545" y="255" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf3" bpmnElement="wf3"><di:waypoint x="850" y="220" /><di:waypoint x="895" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf3_ok" bpmnElement="wf3_ok"><di:waypoint x="945" y="220" /><di:waypoint x="990" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf3_back" bpmnElement="wf3_back"><di:waypoint x="920" y="245" /><di:waypoint x="920" y="290" /><di:waypoint x="795" y="290" /><di:waypoint x="795" y="255" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf4" bpmnElement="wf4"><di:waypoint x="1100" y="220" /><di:waypoint x="1145" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf4_ok" bpmnElement="wf4_ok"><di:waypoint x="1195" y="220" /><di:waypoint x="1240" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf4_back" bpmnElement="wf4_back"><di:waypoint x="1170" y="245" /><di:waypoint x="1170" y="290" /><di:waypoint x="1045" y="290" /><di:waypoint x="1045" y="255" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf5" bpmnElement="wf5"><di:waypoint x="1350" y="220" /><di:waypoint x="1395" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf5_ok" bpmnElement="wf5_ok"><di:waypoint x="1445" y="220" /><di:waypoint x="1490" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf5_back" bpmnElement="wf5_back"><di:waypoint x="1420" y="245" /><di:waypoint x="1420" y="290" /><di:waypoint x="1295" y="290" /><di:waypoint x="1295" y="255" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf6" bpmnElement="wf6"><di:waypoint x="1600" y="220" /><di:waypoint x="1645" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf6_ok" bpmnElement="wf6_ok"><di:waypoint x="1695" y="220" /><di:waypoint x="1740" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf6_back" bpmnElement="wf6_back"><di:waypoint x="1670" y="245" /><di:waypoint x="1670" y="290" /><di:waypoint x="1545" y="290" /><di:waypoint x="1545" y="255" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf7" bpmnElement="wf7"><di:waypoint x="1850" y="220" /><di:waypoint x="1895" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf7_ok" bpmnElement="wf7_ok"><di:waypoint x="1945" y="220" /><di:waypoint x="1990" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf7_back" bpmnElement="wf7_back"><di:waypoint x="1920" y="245" /><di:waypoint x="1920" y="290" /><di:waypoint x="1795" y="290" /><di:waypoint x="1795" y="255" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf8" bpmnElement="wf8"><di:waypoint x="2120" y="220" /><di:waypoint x="2165" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf8_ok" bpmnElement="wf8_ok"><di:waypoint x="2215" y="220" /><di:waypoint x="2260" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf8_back" bpmnElement="wf8_back"><di:waypoint x="2190" y="245" /><di:waypoint x="2190" y="290" /><di:waypoint x="2055" y="290" /><di:waypoint x="2055" y="255" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_wf_done" bpmnElement="wf_done"><di:waypoint x="2370" y="220" /><di:waypoint x="2420" y="220" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

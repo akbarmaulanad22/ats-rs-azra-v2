@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_VacancyLifecycle"
+                  targetNamespace="http://azra.example/bpmn/rekrutmen">
+
+  <!-- Proses: Penyusunan & Publikasi Lowongan (Draft -> Published -> Closed) -->
+  <bpmn:process id="Process_Vacancy" isExecutable="false">
+    <bpmn:laneSet id="ls_V">
+      <bpmn:lane id="lv_AdminHR" name="Admin HR">
+        <bpmn:flowNodeRef>v_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_create</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_gTest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_confTest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_confWw</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_publish</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="lv_Sistem" name="Sistem">
+        <bpmn:flowNodeRef>v_snapshot</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_gGuard</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_open</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_deadline</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_closed</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="v_start" name="Kebutuhan rekrutmen">
+      <bpmn:outgoing>vf1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="v_create" name="Buat lowongan &amp; pilih workflow template">
+      <bpmn:incoming>vf1</bpmn:incoming>
+      <bpmn:outgoing>vf2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="v_snapshot" name="Buat snapshot workflow template (otomatis)">
+      <bpmn:incoming>vf2</bpmn:incoming>
+      <bpmn:outgoing>vf3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="v_gTest" name="Ada tahap tes kompetensi?">
+      <bpmn:incoming>vf3</bpmn:incoming>
+      <bpmn:outgoing>vf4</bpmn:outgoing>
+      <bpmn:outgoing>vf5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="v_confTest" name="Konfigurasi tes kompetensi (snapshot soal)">
+      <bpmn:incoming>vf4</bpmn:incoming>
+      <bpmn:incoming>vf9</bpmn:incoming>
+      <bpmn:outgoing>vf6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="v_confWw" name="Assign template wawancara (opsional)">
+      <bpmn:incoming>vf5</bpmn:incoming>
+      <bpmn:incoming>vf6</bpmn:incoming>
+      <bpmn:outgoing>vf7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="v_publish" name="Publikasikan lowongan">
+      <bpmn:incoming>vf7</bpmn:incoming>
+      <bpmn:outgoing>vf8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="v_gGuard" name="Tes terkonfigurasi?">
+      <bpmn:incoming>vf8</bpmn:incoming>
+      <bpmn:outgoing>vf9</bpmn:outgoing>
+      <bpmn:outgoing>vf10</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="v_open" name="Lowongan tayang &#8212; terima lamaran (Published)">
+      <bpmn:incoming>vf10</bpmn:incoming>
+      <bpmn:outgoing>vf11</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="v_deadline" name="Tenggat lamaran tercapai / ditutup HR">
+      <bpmn:incoming>vf11</bpmn:incoming>
+      <bpmn:outgoing>vf12</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="ted_v1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="v_closed" name="Lowongan ditutup (Closed)">
+      <bpmn:incoming>vf12</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="vf1" sourceRef="v_start" targetRef="v_create" />
+    <bpmn:sequenceFlow id="vf2" sourceRef="v_create" targetRef="v_snapshot" />
+    <bpmn:sequenceFlow id="vf3" sourceRef="v_snapshot" targetRef="v_gTest" />
+    <bpmn:sequenceFlow id="vf4" name="ada" sourceRef="v_gTest" targetRef="v_confTest" />
+    <bpmn:sequenceFlow id="vf5" name="tidak ada" sourceRef="v_gTest" targetRef="v_confWw" />
+    <bpmn:sequenceFlow id="vf6" sourceRef="v_confTest" targetRef="v_confWw" />
+    <bpmn:sequenceFlow id="vf7" sourceRef="v_confWw" targetRef="v_publish" />
+    <bpmn:sequenceFlow id="vf8" sourceRef="v_publish" targetRef="v_gGuard" />
+    <bpmn:sequenceFlow id="vf9" name="belum &#8212; simpan draft" sourceRef="v_gGuard" targetRef="v_confTest" />
+    <bpmn:sequenceFlow id="vf10" name="siap / tidak perlu" sourceRef="v_gGuard" targetRef="v_open" />
+    <bpmn:sequenceFlow id="vf11" sourceRef="v_open" targetRef="v_deadline" />
+    <bpmn:sequenceFlow id="vf12" sourceRef="v_deadline" targetRef="v_closed" />
+
+    <bpmn:textAnnotation id="v_note">
+      <bpmn:text>Selama tayang, setiap lamaran masuk memicu Proses Rekrutmen (lihat diagram Level-0).</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="v_assoc" sourceRef="v_open" targetRef="v_note" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_V">
+    <bpmndi:BPMNPlane id="BPMNPlane_V" bpmnElement="Process_Vacancy">
+      <bpmndi:BPMNShape id="di_lv_AdminHR" bpmnElement="lv_AdminHR" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1710" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_lv_Sistem" bpmnElement="lv_Sistem" isHorizontal="true">
+        <dc:Bounds x="190" y="240" width="1710" height="160" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="di_v_start" bpmnElement="v_start"><dc:Bounds x="240" y="142" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_create" bpmnElement="v_create"><dc:Bounds x="320" y="125" width="120" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_snapshot" bpmnElement="v_snapshot"><dc:Bounds x="490" y="285" width="120" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_gTest" bpmnElement="v_gTest" isMarkerVisible="true"><dc:Bounds x="665" y="135" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_confTest" bpmnElement="v_confTest"><dc:Bounds x="760" y="125" width="120" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_confWw" bpmnElement="v_confWw"><dc:Bounds x="930" y="125" width="120" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_publish" bpmnElement="v_publish"><dc:Bounds x="1100" y="125" width="120" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_gGuard" bpmnElement="v_gGuard" isMarkerVisible="true"><dc:Bounds x="1270" y="295" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_open" bpmnElement="v_open"><dc:Bounds x="1370" y="285" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_deadline" bpmnElement="v_deadline"><dc:Bounds x="1560" y="302" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_closed" bpmnElement="v_closed"><dc:Bounds x="1670" y="302" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_v_note" bpmnElement="v_note"><dc:Bounds x="1360" y="410" width="240" height="55" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="di_vf1" bpmnElement="vf1"><di:waypoint x="276" y="160" /><di:waypoint x="320" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf2" bpmnElement="vf2"><di:waypoint x="380" y="195" /><di:waypoint x="550" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf3" bpmnElement="vf3"><di:waypoint x="610" y="320" /><di:waypoint x="690" y="185" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf4" bpmnElement="vf4"><di:waypoint x="715" y="160" /><di:waypoint x="760" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf5" bpmnElement="vf5"><di:waypoint x="690" y="135" /><di:waypoint x="990" y="125" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf6" bpmnElement="vf6"><di:waypoint x="880" y="160" /><di:waypoint x="930" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf7" bpmnElement="vf7"><di:waypoint x="1050" y="160" /><di:waypoint x="1100" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf8" bpmnElement="vf8"><di:waypoint x="1220" y="160" /><di:waypoint x="1295" y="295" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf9" bpmnElement="vf9"><di:waypoint x="1295" y="295" /><di:waypoint x="820" y="195" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf10" bpmnElement="vf10"><di:waypoint x="1320" y="320" /><di:waypoint x="1370" y="320" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf11" bpmnElement="vf11"><di:waypoint x="1500" y="320" /><di:waypoint x="1560" y="320" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_vf12" bpmnElement="vf12"><di:waypoint x="1596" y="320" /><di:waypoint x="1670" y="320" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_v_assoc" bpmnElement="v_assoc"><di:waypoint x="1435" y="355" /><di:waypoint x="1450" y="410" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

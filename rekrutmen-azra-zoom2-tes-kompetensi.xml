@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_TesKompetensi"
+                  targetNamespace="http://azra.example/bpmn/rekrutmen">
+
+  <!-- Zoom 2: tahap Tes Kompetensi (kolaborasi Kandidat x Azra) -->
+  <bpmn:collaboration id="Collab_TesKompetensi">
+    <bpmn:participant id="P_Kandidat" name="Kandidat" processRef="Proc_K" />
+    <bpmn:participant id="P_Azra" name="Rekrutmen Azra" processRef="Proc_A" />
+    <bpmn:messageFlow id="tmf1" name="Email link tes" sourceRef="a_sendLink" targetRef="k_link" />
+    <bpmn:messageFlow id="tmf2" name="Submit jawaban" sourceRef="k_submit" targetRef="a_jwb" />
+  </bpmn:collaboration>
+
+  <bpmn:process id="Proc_K" isExecutable="false">
+    <bpmn:startEvent id="k_start" name="Mulai">
+      <bpmn:outgoing>kt1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:intermediateCatchEvent id="k_link" name="Terima link tes">
+      <bpmn:incoming>kt1</bpmn:incoming>
+      <bpmn:outgoing>kt2</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_kt1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="k_kerja" name="Buka &amp; kerjakan tes">
+      <bpmn:incoming>kt2</bpmn:incoming>
+      <bpmn:outgoing>kt3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="k_submit" name="Submit jawaban">
+      <bpmn:incoming>kt3</bpmn:incoming>
+      <bpmn:outgoing>kt4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="k_end" name="Selesai mengerjakan">
+      <bpmn:incoming>kt4</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="kt1" sourceRef="k_start" targetRef="k_link" />
+    <bpmn:sequenceFlow id="kt2" sourceRef="k_link" targetRef="k_kerja" />
+    <bpmn:sequenceFlow id="kt3" sourceRef="k_kerja" targetRef="k_submit" />
+    <bpmn:sequenceFlow id="kt4" sourceRef="k_submit" targetRef="k_end" />
+  </bpmn:process>
+
+  <bpmn:process id="Proc_A" isExecutable="false">
+    <bpmn:laneSet id="ls_A">
+      <bpmn:lane id="la_Sistem" name="Sistem">
+        <bpmn:flowNodeRef>a_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_gen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_sendLink</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_jwb</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="la_AdminHR" name="Admin HR">
+        <bpmn:flowNodeRef>a_review</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_gw</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_tangguh</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_lulus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_ditolak</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="a_start" name="Masuk tahap tes kompetensi">
+      <bpmn:outgoing>at1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="a_gen" name="Generate token &amp; snapshot soal">
+      <bpmn:incoming>at1</bpmn:incoming>
+      <bpmn:outgoing>at2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="a_sendLink" name="Kirim email link tes">
+      <bpmn:incoming>at2</bpmn:incoming>
+      <bpmn:outgoing>at3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="a_jwb" name="Jawaban tes diterima">
+      <bpmn:incoming>at3</bpmn:incoming>
+      <bpmn:outgoing>at4</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="med_at1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="a_review" name="Review hasil tes">
+      <bpmn:incoming>at4</bpmn:incoming>
+      <bpmn:incoming>at_loop</bpmn:incoming>
+      <bpmn:outgoing>at5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="a_gw" name="Keputusan tes kompetensi">
+      <bpmn:incoming>at5</bpmn:incoming>
+      <bpmn:outgoing>at_lulus</bpmn:outgoing>
+      <bpmn:outgoing>at_gagal</bpmn:outgoing>
+      <bpmn:outgoing>at_reserved</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateThrowEvent id="a_tangguh" name="Ditangguhkan">
+      <bpmn:incoming>at_reserved</bpmn:incoming>
+      <bpmn:outgoing>at_loop</bpmn:outgoing>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="a_lulus" name="Lanjut ke wawancara">
+      <bpmn:incoming>at_lulus</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="a_ditolak" name="Ditolak">
+      <bpmn:incoming>at_gagal</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="at1" sourceRef="a_start" targetRef="a_gen" />
+    <bpmn:sequenceFlow id="at2" sourceRef="a_gen" targetRef="a_sendLink" />
+    <bpmn:sequenceFlow id="at3" sourceRef="a_sendLink" targetRef="a_jwb" />
+    <bpmn:sequenceFlow id="at4" sourceRef="a_jwb" targetRef="a_review" />
+    <bpmn:sequenceFlow id="at5" sourceRef="a_review" targetRef="a_gw" />
+    <bpmn:sequenceFlow id="at_lulus" name="lulus" sourceRef="a_gw" targetRef="a_lulus" />
+    <bpmn:sequenceFlow id="at_gagal" name="gagal" sourceRef="a_gw" targetRef="a_ditolak" />
+    <bpmn:sequenceFlow id="at_reserved" name="reserved" sourceRef="a_gw" targetRef="a_tangguh" />
+    <bpmn:sequenceFlow id="at_loop" name="tinjau ulang" sourceRef="a_tangguh" targetRef="a_review" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_T">
+    <bpmndi:BPMNPlane id="BPMNPlane_T" bpmnElement="Collab_TesKompetensi">
+      <bpmndi:BPMNShape id="di_P_Kandidat" bpmnElement="P_Kandidat" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1100" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_P_Azra" bpmnElement="P_Azra" isHorizontal="true">
+        <dc:Bounds x="160" y="280" width="1100" height="320" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_la_Sistem" bpmnElement="la_Sistem" isHorizontal="true">
+        <dc:Bounds x="210" y="280" width="1050" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_la_AdminHR" bpmnElement="la_AdminHR" isHorizontal="true">
+        <dc:Bounds x="210" y="440" width="1050" height="160" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="di_k_start" bpmnElement="k_start"><dc:Bounds x="240" y="142" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_k_link" bpmnElement="k_link"><dc:Bounds x="340" y="142" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_k_kerja" bpmnElement="k_kerja"><dc:Bounds x="440" y="125" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_k_submit" bpmnElement="k_submit"><dc:Bounds x="610" y="125" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_k_end" bpmnElement="k_end"><dc:Bounds x="780" y="142" width="36" height="36" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="di_a_start" bpmnElement="a_start"><dc:Bounds x="240" y="342" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_a_gen" bpmnElement="a_gen"><dc:Bounds x="320" y="325" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_a_sendLink" bpmnElement="a_sendLink"><dc:Bounds x="480" y="325" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_a_jwb" bpmnElement="a_jwb"><dc:Bounds x="650" y="342" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_a_review" bpmnElement="a_review"><dc:Bounds x="740" y="485" width="110" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_a_gw" bpmnElement="a_gw" isMarkerVisible="true"><dc:Bounds x="900" y="495" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_a_tangguh" bpmnElement="a_tangguh"><dc:Bounds x="907" y="565" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_a_lulus" bpmnElement="a_lulus"><dc:Bounds x="1020" y="502" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="di_a_ditolak" bpmnElement="a_ditolak"><dc:Bounds x="1020" y="392" width="36" height="36" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="di_kt1" bpmnElement="kt1"><di:waypoint x="276" y="160" /><di:waypoint x="340" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kt2" bpmnElement="kt2"><di:waypoint x="376" y="160" /><di:waypoint x="440" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kt3" bpmnElement="kt3"><di:waypoint x="550" y="160" /><di:waypoint x="610" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_kt4" bpmnElement="kt4"><di:waypoint x="720" y="160" /><di:waypoint x="780" y="160" /></bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="di_at1" bpmnElement="at1"><di:waypoint x="276" y="360" /><di:waypoint x="320" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_at2" bpmnElement="at2"><di:waypoint x="430" y="360" /><di:waypoint x="480" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_at3" bpmnElement="at3"><di:waypoint x="590" y="360" /><di:waypoint x="650" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_at4" bpmnElement="at4"><di:waypoint x="668" y="378" /><di:waypoint x="795" y="485" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_at5" bpmnElement="at5"><di:waypoint x="850" y="520" /><di:waypoint x="900" y="520" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_at_lulus" bpmnElement="at_lulus"><di:waypoint x="950" y="520" /><di:waypoint x="1020" y="520" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_at_gagal" bpmnElement="at_gagal"><di:waypoint x="925" y="495" /><di:waypoint x="1020" y="410" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_at_reserved" bpmnElement="at_reserved"><di:waypoint x="925" y="545" /><di:waypoint x="925" y="565" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_at_loop" bpmnElement="at_loop"><di:waypoint x="907" y="583" /><di:waypoint x="795" y="555" /></bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="di_tmf1" bpmnElement="tmf1"><di:waypoint x="535" y="325" /><di:waypoint x="358" y="178" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="di_tmf2" bpmnElement="tmf2"><di:waypoint x="665" y="195" /><di:waypoint x="668" y="342" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
