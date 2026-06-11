@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<!--
+  Use Case model - Sistem ATS Azra Hospital
+  Format: XMI 2.1 (UML 2.1) untuk impor ke Sparx Enterprise Architect.
+  Impor: Project Browser > klik kanan paket tujuan > Import/Export > Import Package from XMI.
+  Catatan: XMI hanya membawa elemen model (aktor, use case, relasi). Diagram TIDAK ikut
+  terbentuk otomatis; setelah impor buat diagram Use Case baru lalu seret elemen dari Browser.
+-->
+<xmi:XMI xmi:version="2.1"
+         xmlns:uml="http://schema.omg.org/spec/UML/2.1"
+         xmlns:xmi="http://schema.omg.org/spec/XMI/2.1">
+  <xmi:Documentation exporter="Claude Code" exporterVersion="1.0"/>
+  <uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_rekrutmen" name="Rekrutmen Azra - Use Case" visibility="public">
+
+      <!-- ===================== AKTOR ===================== -->
+      <packagedElement xmi:type="uml:Actor" xmi:id="act_internal" name="Pengguna Internal" isAbstract="true"/>
+      <packagedElement xmi:type="uml:Actor" xmi:id="act_hradmin" name="HR Admin">
+        <generalization xmi:type="uml:Generalization" xmi:id="gen_hradmin" general="act_internal"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Actor" xmi:id="act_unithead" name="Unit Head">
+        <generalization xmi:type="uml:Generalization" xmi:id="gen_unithead" general="act_internal"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Actor" xmi:id="act_hrmanager" name="HR Manager">
+        <generalization xmi:type="uml:Generalization" xmi:id="gen_hrmanager" general="act_internal"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Actor" xmi:id="act_director" name="Direktur">
+        <generalization xmi:type="uml:Generalization" xmi:id="gen_director" general="act_internal"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Actor" xmi:id="act_employee" name="Karyawan">
+        <generalization xmi:type="uml:Generalization" xmi:id="gen_employee" general="act_internal"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Actor" xmi:id="act_candidate" name="Kandidat"/>
+
+      <!-- ===================== USE CASE ===================== -->
+      <!-- Bersama pengguna internal -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_login"  name="UC-01 Login"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_pass"   name="UC-02 Ubah Password"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_notif"  name="UC-03 Lihat Notifikasi"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_profil" name="UC-04 Lihat Profil Sendiri"/>
+
+      <!-- CRUD / manajemen (HR Admin) -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_lowongan" name="UC-12 Kelola Lowongan">
+        <!-- extend dimiliki oleh use case extension (Terapkan Template Alur), lihat di bawah -->
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_karyawan" name="UC-07 Kelola Karyawan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_akun"     name="UC-06 Kelola Akun"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_unit"     name="UC-05 Kelola Unit"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_tplalur"  name="UC-08 Kelola Template Alur"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_tplwwc"   name="UC-09 Kelola Template Wawancara"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_banksoal" name="UC-10 Kelola Bank Soal"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_tplemail" name="UC-11 Kelola Template Email"/>
+
+      <!-- Pipeline -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_pipeline" name="UC-14 Lihat Pipeline">
+        <include xmi:type="uml:Include" xmi:id="inc_pipeline_detail" addition="uc_detail"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_detail" name="UC-15 Lihat Detail Kandidat"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_skrininghr" name="UC-16 Skrining CV HR">
+        <include xmi:type="uml:Include" xmi:id="inc_skrininghr_email" addition="uc_email"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_skrininguser" name="UC-17 Skrining CV User">
+        <include xmi:type="uml:Include" xmi:id="inc_skrininguser_email" addition="uc_email"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelolates" name="UC-18 Kelola Tes Kompetensi"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_tinjautes" name="UC-19 Tinjau Jawaban Tes">
+        <include xmi:type="uml:Include" xmi:id="inc_tinjautes_email" addition="uc_email"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_hasildisc" name="UC-20 Lihat Hasil DiSC/MBTI"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_wwcuser" name="UC-21 Wawancara User">
+        <include xmi:type="uml:Include" xmi:id="inc_wwcuser_email" addition="uc_email"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_wwcmanajer" name="UC-22 Wawancara Manajer HR">
+        <include xmi:type="uml:Include" xmi:id="inc_wwcmanajer_email" addition="uc_email"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_wwcdirektur" name="UC-23 Wawancara Direktur">
+        <include xmi:type="uml:Include" xmi:id="inc_wwcdirektur_email" addition="uc_email"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_jadwalmcu" name="UC-24 Jadwalkan MCU"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_keputusanmcu" name="UC-25 Keputusan MCU">
+        <include xmi:type="uml:Include" xmi:id="inc_keputusanmcu_email" addition="uc_email"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_penawaran" name="UC-26 Kirim Surat Penawaran">
+        <include xmi:type="uml:Include" xmi:id="inc_penawaran_email" addition="uc_email"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_onboarding" name="UC-27 Proses Onboarding">
+        <include xmi:type="uml:Include" xmi:id="inc_onboarding_email" addition="uc_email"/>
+      </packagedElement>
+
+      <!-- Shared / opsional -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_email" name="UC-28 Kirim Notifikasi Email"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_reserved" name="UC-29 Tandai Reserved">
+        <extend xmi:type="uml:Extend" xmi:id="ext_reserved_skrininghr"   extendedCase="uc_skrininghr"/>
+        <extend xmi:type="uml:Extend" xmi:id="ext_reserved_skrininguser" extendedCase="uc_skrininguser"/>
+        <extend xmi:type="uml:Extend" xmi:id="ext_reserved_wwcuser"      extendedCase="uc_wwcuser"/>
+        <extend xmi:type="uml:Extend" xmi:id="ext_reserved_wwcmanajer"   extendedCase="uc_wwcmanajer"/>
+        <extend xmi:type="uml:Extend" xmi:id="ext_reserved_wwcdirektur"  extendedCase="uc_wwcdirektur"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_terapkantpl" name="UC-13 Terapkan Template Alur">
+        <extend xmi:type="uml:Extend" xmi:id="ext_terapkantpl_lowongan" extendedCase="uc_lowongan"/>
+      </packagedElement>
+
+      <!-- Kandidat (tautan tertoken, tanpa akun) -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_lihatlowongan"  name="UC-30 Lihat Lowongan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_lamar"          name="UC-31 Lamar Lowongan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_datapribadi"    name="UC-32 Isi Data Pribadi"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kerjakantes"    name="UC-33 Kerjakan Tes Kompetensi"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_tesdisc"        name="UC-34 Kerjakan Tes DiSC"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_tesmbti"        name="UC-35 Kerjakan Tes MBTI"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_responpenawaran" name="UC-36 Terima/Tolak Penawaran"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_statuslamaran"  name="UC-37 Lihat Status Lamaran"/>
+
+      <!-- ===================== ASOSIASI AKTOR - USE CASE ===================== -->
+      <!-- Pengguna Internal -->
+      <packagedElement xmi:type="uml:Association" xmi:id="as_internal_login">
+        <memberEnd xmi:idref="ae_internal_login_a"/><memberEnd xmi:idref="ae_internal_login_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_internal_login_a" association="as_internal_login" type="act_internal"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_internal_login_b" association="as_internal_login" type="uc_login"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_internal_pass">
+        <memberEnd xmi:idref="ae_internal_pass_a"/><memberEnd xmi:idref="ae_internal_pass_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_internal_pass_a" association="as_internal_pass" type="act_internal"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_internal_pass_b" association="as_internal_pass" type="uc_pass"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_internal_notif">
+        <memberEnd xmi:idref="ae_internal_notif_a"/><memberEnd xmi:idref="ae_internal_notif_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_internal_notif_a" association="as_internal_notif" type="act_internal"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_internal_notif_b" association="as_internal_notif" type="uc_notif"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_internal_profil">
+        <memberEnd xmi:idref="ae_internal_profil_a"/><memberEnd xmi:idref="ae_internal_profil_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_internal_profil_a" association="as_internal_profil" type="act_internal"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_internal_profil_b" association="as_internal_profil" type="uc_profil"/>
+      </packagedElement>
+
+      <!-- HR Admin -->
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_lowongan">
+        <memberEnd xmi:idref="ae_hradmin_lowongan_a"/><memberEnd xmi:idref="ae_hradmin_lowongan_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_lowongan_a" association="as_hradmin_lowongan" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_lowongan_b" association="as_hradmin_lowongan" type="uc_lowongan"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_karyawan">
+        <memberEnd xmi:idref="ae_hradmin_karyawan_a"/><memberEnd xmi:idref="ae_hradmin_karyawan_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_karyawan_a" association="as_hradmin_karyawan" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_karyawan_b" association="as_hradmin_karyawan" type="uc_karyawan"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_akun">
+        <memberEnd xmi:idref="ae_hradmin_akun_a"/><memberEnd xmi:idref="ae_hradmin_akun_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_akun_a" association="as_hradmin_akun" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_akun_b" association="as_hradmin_akun" type="uc_akun"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_unit">
+        <memberEnd xmi:idref="ae_hradmin_unit_a"/><memberEnd xmi:idref="ae_hradmin_unit_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_unit_a" association="as_hradmin_unit" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_unit_b" association="as_hradmin_unit" type="uc_unit"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_tplalur">
+        <memberEnd xmi:idref="ae_hradmin_tplalur_a"/><memberEnd xmi:idref="ae_hradmin_tplalur_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_tplalur_a" association="as_hradmin_tplalur" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_tplalur_b" association="as_hradmin_tplalur" type="uc_tplalur"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_tplwwc">
+        <memberEnd xmi:idref="ae_hradmin_tplwwc_a"/><memberEnd xmi:idref="ae_hradmin_tplwwc_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_tplwwc_a" association="as_hradmin_tplwwc" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_tplwwc_b" association="as_hradmin_tplwwc" type="uc_tplwwc"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_banksoal">
+        <memberEnd xmi:idref="ae_hradmin_banksoal_a"/><memberEnd xmi:idref="ae_hradmin_banksoal_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_banksoal_a" association="as_hradmin_banksoal" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_banksoal_b" association="as_hradmin_banksoal" type="uc_banksoal"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_tplemail">
+        <memberEnd xmi:idref="ae_hradmin_tplemail_a"/><memberEnd xmi:idref="ae_hradmin_tplemail_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_tplemail_a" association="as_hradmin_tplemail" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_tplemail_b" association="as_hradmin_tplemail" type="uc_tplemail"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_pipeline">
+        <memberEnd xmi:idref="ae_hradmin_pipeline_a"/><memberEnd xmi:idref="ae_hradmin_pipeline_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_pipeline_a" association="as_hradmin_pipeline" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_pipeline_b" association="as_hradmin_pipeline" type="uc_pipeline"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_skrininghr">
+        <memberEnd xmi:idref="ae_hradmin_skrininghr_a"/><memberEnd xmi:idref="ae_hradmin_skrininghr_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_skrininghr_a" association="as_hradmin_skrininghr" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_skrininghr_b" association="as_hradmin_skrininghr" type="uc_skrininghr"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_kelolates">
+        <memberEnd xmi:idref="ae_hradmin_kelolates_a"/><memberEnd xmi:idref="ae_hradmin_kelolates_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_kelolates_a" association="as_hradmin_kelolates" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_kelolates_b" association="as_hradmin_kelolates" type="uc_kelolates"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_tinjautes">
+        <memberEnd xmi:idref="ae_hradmin_tinjautes_a"/><memberEnd xmi:idref="ae_hradmin_tinjautes_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_tinjautes_a" association="as_hradmin_tinjautes" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_tinjautes_b" association="as_hradmin_tinjautes" type="uc_tinjautes"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_hasildisc">
+        <memberEnd xmi:idref="ae_hradmin_hasildisc_a"/><memberEnd xmi:idref="ae_hradmin_hasildisc_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_hasildisc_a" association="as_hradmin_hasildisc" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_hasildisc_b" association="as_hradmin_hasildisc" type="uc_hasildisc"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_jadwalmcu">
+        <memberEnd xmi:idref="ae_hradmin_jadwalmcu_a"/><memberEnd xmi:idref="ae_hradmin_jadwalmcu_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_jadwalmcu_a" association="as_hradmin_jadwalmcu" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_jadwalmcu_b" association="as_hradmin_jadwalmcu" type="uc_jadwalmcu"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_keputusanmcu">
+        <memberEnd xmi:idref="ae_hradmin_keputusanmcu_a"/><memberEnd xmi:idref="ae_hradmin_keputusanmcu_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_keputusanmcu_a" association="as_hradmin_keputusanmcu" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_keputusanmcu_b" association="as_hradmin_keputusanmcu" type="uc_keputusanmcu"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_penawaran">
+        <memberEnd xmi:idref="ae_hradmin_penawaran_a"/><memberEnd xmi:idref="ae_hradmin_penawaran_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_penawaran_a" association="as_hradmin_penawaran" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_penawaran_b" association="as_hradmin_penawaran" type="uc_penawaran"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hradmin_onboarding">
+        <memberEnd xmi:idref="ae_hradmin_onboarding_a"/><memberEnd xmi:idref="ae_hradmin_onboarding_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_onboarding_a" association="as_hradmin_onboarding" type="act_hradmin"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hradmin_onboarding_b" association="as_hradmin_onboarding" type="uc_onboarding"/>
+      </packagedElement>
+
+      <!-- Unit Head -->
+      <packagedElement xmi:type="uml:Association" xmi:id="as_unithead_skrininguser">
+        <memberEnd xmi:idref="ae_unithead_skrininguser_a"/><memberEnd xmi:idref="ae_unithead_skrininguser_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_unithead_skrininguser_a" association="as_unithead_skrininguser" type="act_unithead"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_unithead_skrininguser_b" association="as_unithead_skrininguser" type="uc_skrininguser"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_unithead_wwcuser">
+        <memberEnd xmi:idref="ae_unithead_wwcuser_a"/><memberEnd xmi:idref="ae_unithead_wwcuser_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_unithead_wwcuser_a" association="as_unithead_wwcuser" type="act_unithead"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_unithead_wwcuser_b" association="as_unithead_wwcuser" type="uc_wwcuser"/>
+      </packagedElement>
+
+      <!-- Karyawan (unit-side, sama dengan Unit Head) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="as_employee_skrininguser">
+        <memberEnd xmi:idref="ae_employee_skrininguser_a"/><memberEnd xmi:idref="ae_employee_skrininguser_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_employee_skrininguser_a" association="as_employee_skrininguser" type="act_employee"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_employee_skrininguser_b" association="as_employee_skrininguser" type="uc_skrininguser"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_employee_wwcuser">
+        <memberEnd xmi:idref="ae_employee_wwcuser_a"/><memberEnd xmi:idref="ae_employee_wwcuser_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_employee_wwcuser_a" association="as_employee_wwcuser" type="act_employee"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_employee_wwcuser_b" association="as_employee_wwcuser" type="uc_wwcuser"/>
+      </packagedElement>
+
+      <!-- HR Manager / Direktur -->
+      <packagedElement xmi:type="uml:Association" xmi:id="as_hrmanager_wwcmanajer">
+        <memberEnd xmi:idref="ae_hrmanager_wwcmanajer_a"/><memberEnd xmi:idref="ae_hrmanager_wwcmanajer_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hrmanager_wwcmanajer_a" association="as_hrmanager_wwcmanajer" type="act_hrmanager"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_hrmanager_wwcmanajer_b" association="as_hrmanager_wwcmanajer" type="uc_wwcmanajer"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_director_wwcdirektur">
+        <memberEnd xmi:idref="ae_director_wwcdirektur_a"/><memberEnd xmi:idref="ae_director_wwcdirektur_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_director_wwcdirektur_a" association="as_director_wwcdirektur" type="act_director"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_director_wwcdirektur_b" association="as_director_wwcdirektur" type="uc_wwcdirektur"/>
+      </packagedElement>
+
+      <!-- Kandidat -->
+      <packagedElement xmi:type="uml:Association" xmi:id="as_candidate_lihatlowongan">
+        <memberEnd xmi:idref="ae_candidate_lihatlowongan_a"/><memberEnd xmi:idref="ae_candidate_lihatlowongan_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_lihatlowongan_a" association="as_candidate_lihatlowongan" type="act_candidate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_lihatlowongan_b" association="as_candidate_lihatlowongan" type="uc_lihatlowongan"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_candidate_lamar">
+        <memberEnd xmi:idref="ae_candidate_lamar_a"/><memberEnd xmi:idref="ae_candidate_lamar_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_lamar_a" association="as_candidate_lamar" type="act_candidate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_lamar_b" association="as_candidate_lamar" type="uc_lamar"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_candidate_datapribadi">
+        <memberEnd xmi:idref="ae_candidate_datapribadi_a"/><memberEnd xmi:idref="ae_candidate_datapribadi_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_datapribadi_a" association="as_candidate_datapribadi" type="act_candidate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_datapribadi_b" association="as_candidate_datapribadi" type="uc_datapribadi"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_candidate_kerjakantes">
+        <memberEnd xmi:idref="ae_candidate_kerjakantes_a"/><memberEnd xmi:idref="ae_candidate_kerjakantes_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_kerjakantes_a" association="as_candidate_kerjakantes" type="act_candidate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_kerjakantes_b" association="as_candidate_kerjakantes" type="uc_kerjakantes"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_candidate_tesdisc">
+        <memberEnd xmi:idref="ae_candidate_tesdisc_a"/><memberEnd xmi:idref="ae_candidate_tesdisc_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_tesdisc_a" association="as_candidate_tesdisc" type="act_candidate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_tesdisc_b" association="as_candidate_tesdisc" type="uc_tesdisc"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_candidate_tesmbti">
+        <memberEnd xmi:idref="ae_candidate_tesmbti_a"/><memberEnd xmi:idref="ae_candidate_tesmbti_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_tesmbti_a" association="as_candidate_tesmbti" type="act_candidate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_tesmbti_b" association="as_candidate_tesmbti" type="uc_tesmbti"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_candidate_responpenawaran">
+        <memberEnd xmi:idref="ae_candidate_responpenawaran_a"/><memberEnd xmi:idref="ae_candidate_responpenawaran_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_responpenawaran_a" association="as_candidate_responpenawaran" type="act_candidate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_responpenawaran_b" association="as_candidate_responpenawaran" type="uc_responpenawaran"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_candidate_statuslamaran">
+        <memberEnd xmi:idref="ae_candidate_statuslamaran_a"/><memberEnd xmi:idref="ae_candidate_statuslamaran_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_statuslamaran_a" association="as_candidate_statuslamaran" type="act_candidate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="ae_candidate_statuslamaran_b" association="as_candidate_statuslamaran" type="uc_statuslamaran"/>
+      </packagedElement>
+
+    </packagedElement>
+  </uml:Model>
+
+  <!-- ============ EA AUTO-DRAW (proprietary, diabaikan tool lain) ============ -->
+  <xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+    <diagrams>
+      <diagram xmi:id="dia_usecase_rekrutmen">
+        <model package="pkg_rekrutmen" owner="pkg_rekrutmen" localID="1"/>
+        <properties name="Use Case - Rekrutmen Azra Hospital" type="Use Case"/>
+        <project author="Claude Code" version="1.0"/>
+        <elements>
+          <!-- Aktor (kolom kiri + Kandidat kanan) -->
+          <element geometry="Left=40;Top=40;Right=140;Bottom=110;"     subject="act_internal"  seqno="1"/>
+          <element geometry="Left=40;Top=180;Right=140;Bottom=250;"    subject="act_hradmin"   seqno="2"/>
+          <element geometry="Left=40;Top=320;Right=140;Bottom=390;"    subject="act_unithead"  seqno="3"/>
+          <element geometry="Left=40;Top=460;Right=140;Bottom=530;"    subject="act_hrmanager" seqno="4"/>
+          <element geometry="Left=40;Top=600;Right=140;Bottom=670;"    subject="act_director"  seqno="5"/>
+          <element geometry="Left=40;Top=740;Right=140;Bottom=810;"    subject="act_employee"  seqno="6"/>
+          <element geometry="Left=1450;Top=355;Right=1550;Bottom=425;" subject="act_candidate" seqno="7"/>
+
+          <!-- Use case bersama pengguna internal (kolom 1) -->
+          <element geometry="Left=240;Top=40;Right=390;Bottom=95;"   subject="uc_login"  seqno="8"/>
+          <element geometry="Left=240;Top=120;Right=390;Bottom=175;" subject="uc_pass"   seqno="9"/>
+          <element geometry="Left=240;Top=200;Right=390;Bottom=255;" subject="uc_notif"  seqno="10"/>
+          <element geometry="Left=240;Top=280;Right=390;Bottom=335;" subject="uc_profil" seqno="11"/>
+
+          <!-- CRUD / manajemen (kolom 2) -->
+          <element geometry="Left=440;Top=40;Right=590;Bottom=95;"   subject="uc_lowongan" seqno="12"/>
+          <element geometry="Left=440;Top=120;Right=590;Bottom=175;" subject="uc_karyawan" seqno="13"/>
+          <element geometry="Left=440;Top=200;Right=590;Bottom=255;" subject="uc_akun"     seqno="14"/>
+          <element geometry="Left=440;Top=280;Right=590;Bottom=335;" subject="uc_unit"     seqno="15"/>
+          <element geometry="Left=440;Top=360;Right=590;Bottom=415;" subject="uc_tplalur"  seqno="16"/>
+          <element geometry="Left=440;Top=440;Right=590;Bottom=495;" subject="uc_tplwwc"   seqno="17"/>
+          <element geometry="Left=440;Top=520;Right=590;Bottom=575;" subject="uc_banksoal" seqno="18"/>
+          <element geometry="Left=440;Top=600;Right=590;Bottom=655;" subject="uc_tplemail" seqno="19"/>
+
+          <!-- Pipeline (kolom 3) -->
+          <element geometry="Left=650;Top=40;Right=800;Bottom=95;"   subject="uc_pipeline"     seqno="20"/>
+          <element geometry="Left=650;Top=120;Right=800;Bottom=175;" subject="uc_detail"       seqno="21"/>
+          <element geometry="Left=650;Top=200;Right=800;Bottom=255;" subject="uc_skrininghr"   seqno="22"/>
+          <element geometry="Left=650;Top=280;Right=800;Bottom=335;" subject="uc_kelolates"    seqno="23"/>
+          <element geometry="Left=650;Top=360;Right=800;Bottom=415;" subject="uc_tinjautes"    seqno="24"/>
+          <element geometry="Left=650;Top=440;Right=800;Bottom=495;" subject="uc_hasildisc"    seqno="25"/>
+          <element geometry="Left=650;Top=520;Right=800;Bottom=575;" subject="uc_jadwalmcu"    seqno="26"/>
+          <element geometry="Left=650;Top=600;Right=800;Bottom=655;" subject="uc_keputusanmcu" seqno="27"/>
+          <element geometry="Left=650;Top=680;Right=800;Bottom=735;" subject="uc_penawaran"    seqno="28"/>
+          <element geometry="Left=650;Top=760;Right=800;Bottom=815;" subject="uc_onboarding"   seqno="29"/>
+
+          <!-- Unit-side & wawancara (kolom 4) -->
+          <element geometry="Left=860;Top=300;Right=1010;Bottom=355;" subject="uc_skrininguser" seqno="30"/>
+          <element geometry="Left=860;Top=400;Right=1010;Bottom=455;" subject="uc_wwcuser"      seqno="31"/>
+          <element geometry="Left=860;Top=500;Right=1010;Bottom=555;" subject="uc_wwcmanajer"   seqno="32"/>
+          <element geometry="Left=860;Top=600;Right=1010;Bottom=655;" subject="uc_wwcdirektur"  seqno="33"/>
+
+          <!-- Shared / opsional (kolom 5) -->
+          <element geometry="Left=1070;Top=40;Right=1220;Bottom=95;"   subject="uc_terapkantpl" seqno="34"/>
+          <element geometry="Left=1070;Top=480;Right=1220;Bottom=535;" subject="uc_email"       seqno="35"/>
+          <element geometry="Left=1070;Top=360;Right=1220;Bottom=415;" subject="uc_reserved"    seqno="36"/>
+
+          <!-- Kandidat (kolom 6) -->
+          <element geometry="Left=1250;Top=110;Right=1400;Bottom=165;" subject="uc_lihatlowongan"   seqno="37"/>
+          <element geometry="Left=1250;Top=180;Right=1400;Bottom=235;" subject="uc_lamar"           seqno="38"/>
+          <element geometry="Left=1250;Top=250;Right=1400;Bottom=305;" subject="uc_datapribadi"     seqno="39"/>
+          <element geometry="Left=1250;Top=320;Right=1400;Bottom=375;" subject="uc_kerjakantes"     seqno="40"/>
+          <element geometry="Left=1250;Top=390;Right=1400;Bottom=445;" subject="uc_tesdisc"         seqno="41"/>
+          <element geometry="Left=1250;Top=460;Right=1400;Bottom=515;" subject="uc_tesmbti"         seqno="42"/>
+          <element geometry="Left=1250;Top=530;Right=1400;Bottom=585;" subject="uc_responpenawaran" seqno="43"/>
+          <element geometry="Left=1250;Top=600;Right=1400;Bottom=655;" subject="uc_statuslamaran"   seqno="44"/>
+        </elements>
+      </diagram>
+    </diagrams>
+  </xmi:Extension>
+</xmi:XMI>

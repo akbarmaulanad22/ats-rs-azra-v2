@@ -1,0 +1,146 @@
+@startuml rekrutmen-azra-usecase
+' Use Case Diagram - Sistem ATS Azra Hospital
+' Cakupan: seluruh sistem (ATS + Direktori Karyawan + Manajemen Akun)
+' Notasi: actor generalization, <<include>>, <<extend>>
+' ID UC mengikuti dokumen narasi rekrutmen-azra-usecase-narrative.md
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam shadowing false
+
+' ===================== AKTOR =====================
+actor "Pengguna Internal" as Internal
+actor "HR Admin"            as HrAdmin
+actor "Unit Head"           as UnitHead
+actor "HR Manager"          as HrManager
+actor "Direktur"            as Director
+actor "Karyawan"            as Employee
+actor "Kandidat"            as Candidate
+
+' Generalisasi: semua pemilik akun adalah Pengguna Internal
+HrAdmin   --|> Internal
+UnitHead  --|> Internal
+HrManager --|> Internal
+Director  --|> Internal
+Employee  --|> Internal
+
+rectangle "Sistem ATS Azra Hospital" {
+
+  ' --- Use case bersama pengguna internal ---
+  usecase "UC-01 Login"             as UC_Login
+  usecase "UC-02 Ubah Password"     as UC_Pass
+  usecase "UC-03 Lihat Notifikasi"  as UC_Notif
+
+  ' --- Manajemen / CRUD (HR Admin) ---
+  usecase "UC-12 Kelola Lowongan"          as UC_Lowongan
+  usecase "UC-07 Kelola Karyawan"          as UC_Karyawan
+  usecase "UC-06 Kelola Akun"              as UC_Akun
+  usecase "UC-05 Kelola Unit"              as UC_Unit
+  usecase "UC-08 Kelola Template Alur"     as UC_TplAlur
+  usecase "UC-09 Kelola Template Wawancara" as UC_TplWwc
+  usecase "UC-10 Kelola Bank Soal"         as UC_BankSoal
+  usecase "UC-11 Kelola Template Email"    as UC_TplEmail
+
+  ' --- Pipeline rekrutmen ---
+  usecase "UC-14 Lihat Pipeline"           as UC_Pipeline
+  usecase "UC-15 Lihat Detail Kandidat"    as UC_Detail
+  usecase "UC-16 Skrining CV HR"           as UC_SkriningHr
+  usecase "UC-17 Skrining CV User"         as UC_SkriningUser
+  usecase "UC-18 Kelola Tes Kompetensi"    as UC_KelolaTes
+  usecase "UC-19 Tinjau Jawaban Tes"       as UC_TinjauTes
+  usecase "UC-20 Lihat Hasil DiSC/MBTI"    as UC_HasilDisc
+  usecase "UC-21 Wawancara User"           as UC_WwcUser
+  usecase "UC-22 Wawancara Manajer HR"     as UC_WwcManajer
+  usecase "UC-23 Wawancara Direktur"       as UC_WwcDirektur
+  usecase "UC-24 Jadwalkan MCU"            as UC_JadwalMcu
+  usecase "UC-25 Keputusan MCU"            as UC_KeputusanMcu
+  usecase "UC-26 Kirim Surat Penawaran"    as UC_Penawaran
+  usecase "UC-27 Proses Onboarding"        as UC_Onboarding
+
+  ' --- Use case shared / opsional (target include & extend) ---
+  usecase "UC-28 Kirim Notifikasi Email"   as UC_Email
+  usecase "UC-29 Tandai Reserved"          as UC_Reserved
+  usecase "UC-13 Terapkan Template Alur"   as UC_TerapkanTpl
+
+  ' --- Karyawan ---
+  usecase "UC-04 Lihat Profil Sendiri"     as UC_Profil
+
+  ' --- Kandidat (tautan tertoken, tanpa akun) ---
+  usecase "UC-30 Lihat Lowongan"           as UC_LihatLowongan
+  usecase "UC-31 Lamar Lowongan"           as UC_Lamar
+  usecase "UC-32 Isi Data Pribadi"         as UC_DataPribadi
+  usecase "UC-33 Kerjakan Tes Kompetensi"  as UC_KerjakanTes
+  usecase "UC-34 Kerjakan Tes DiSC"        as UC_TesDisc
+  usecase "UC-35 Kerjakan Tes MBTI"        as UC_TesMbti
+  usecase "UC-36 Terima/Tolak Penawaran"   as UC_ResponPenawaran
+  usecase "UC-37 Lihat Status Lamaran"     as UC_StatusLamaran
+}
+
+' ===================== ASOSIASI =====================
+' Pengguna Internal (diwariskan ke semua peran berakun)
+Internal -- UC_Login
+Internal -- UC_Pass
+Internal -- UC_Notif
+Internal -- UC_Profil
+
+' HR Admin
+HrAdmin -- UC_Lowongan
+HrAdmin -- UC_Karyawan
+HrAdmin -- UC_Akun
+HrAdmin -- UC_Unit
+HrAdmin -- UC_TplAlur
+HrAdmin -- UC_TplWwc
+HrAdmin -- UC_BankSoal
+HrAdmin -- UC_TplEmail
+HrAdmin -- UC_Pipeline
+HrAdmin -- UC_SkriningHr
+HrAdmin -- UC_KelolaTes
+HrAdmin -- UC_TinjauTes
+HrAdmin -- UC_HasilDisc
+HrAdmin -- UC_JadwalMcu
+HrAdmin -- UC_KeputusanMcu
+HrAdmin -- UC_Penawaran
+HrAdmin -- UC_Onboarding
+
+' Unit Head & Karyawan (skrining + wawancara unit, terbatas unit sendiri)
+UnitHead -- UC_SkriningUser
+UnitHead -- UC_WwcUser
+Employee -- UC_SkriningUser
+Employee -- UC_WwcUser
+
+' HR Manager & Direktur
+HrManager -- UC_WwcManajer
+Director  -- UC_WwcDirektur
+
+' Kandidat
+Candidate -- UC_LihatLowongan
+Candidate -- UC_Lamar
+Candidate -- UC_DataPribadi
+Candidate -- UC_KerjakanTes
+Candidate -- UC_TesDisc
+Candidate -- UC_TesMbti
+Candidate -- UC_ResponPenawaran
+Candidate -- UC_StatusLamaran
+
+' ===================== <<include>> =====================
+UC_Pipeline      ..> UC_Detail        : <<include>>
+UC_SkriningHr    ..> UC_Email         : <<include>>
+UC_SkriningUser  ..> UC_Email         : <<include>>
+UC_TinjauTes     ..> UC_Email         : <<include>>
+UC_WwcUser       ..> UC_Email         : <<include>>
+UC_WwcManajer    ..> UC_Email         : <<include>>
+UC_WwcDirektur   ..> UC_Email         : <<include>>
+UC_KeputusanMcu  ..> UC_Email         : <<include>>
+UC_Penawaran     ..> UC_Email         : <<include>>
+UC_Onboarding    ..> UC_Email         : <<include>>
+
+' ===================== <<extend>> =====================
+UC_Reserved      ..> UC_SkriningHr    : <<extend>>
+UC_Reserved      ..> UC_SkriningUser  : <<extend>>
+UC_Reserved      ..> UC_WwcUser       : <<extend>>
+UC_Reserved      ..> UC_WwcManajer    : <<extend>>
+UC_Reserved      ..> UC_WwcDirektur   : <<extend>>
+UC_TerapkanTpl   ..> UC_Lowongan      : <<extend>>
+
+@enduml
