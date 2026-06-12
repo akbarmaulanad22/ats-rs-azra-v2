@@ -1,0 +1,934 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<!--
+  Diagram Kelas - Sistem ATS Azra Hospital (ats-v2).
+  Format XMI 2.1 (UML 2.1) untuk impor ke Sparx Enterprise Architect 15.2.
+  Impor: Project Browser > klik kanan paket tujuan > Import/Export > Import Package from XMI.
+  Atribut = field bisnis (FK & timestamp disembunyikan; relasi diwakili garis).
+  Komposisi = diamond terisi (sub-record yang hidup-mati bergantung induk).
+  Garis tanpa angka multiplicity sesuai permintaan. Operasi = method domain nyata.
+  Untuk diagram Overview: pilih semua > klik kanan > Suppress Attributes/Operations.
+-->
+<xmi:XMI xmi:version="2.1"
+         xmlns:uml="http://schema.omg.org/spec/UML/2.1"
+         xmlns:xmi="http://schema.omg.org/spec/XMI/2.1">
+  <xmi:Documentation exporter="Claude Code" exporterVersion="1.0"/>
+  <uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_ats" name="ATS v2" visibility="public">
+      <packagedElement xmi:type="uml:Package" xmi:id="pkg_primitives" name="Primitives" visibility="public">
+        <packagedElement xmi:type="uml:PrimitiveType" xmi:id="prim_String" name="String"/>
+        <packagedElement xmi:type="uml:PrimitiveType" xmi:id="prim_int" name="int"/>
+        <packagedElement xmi:type="uml:PrimitiveType" xmi:id="prim_long" name="long"/>
+        <packagedElement xmi:type="uml:PrimitiveType" xmi:id="prim_boolean" name="boolean"/>
+        <packagedElement xmi:type="uml:PrimitiveType" xmi:id="prim_Date" name="Date"/>
+        <packagedElement xmi:type="uml:PrimitiveType" xmi:id="prim_DateTime" name="DateTime"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="pkg_enums" name="Enums" visibility="public">
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_Role" name="Role" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_Role_0" name="HrAdmin"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_Role_1" name="HrManager"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_Role_2" name="UnitHead"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_Role_3" name="Director"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_Role_4" name="Employee"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_EmploymentType" name="EmploymentType" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_EmploymentType_0" name="FullTime"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_EmploymentType_1" name="PartTime"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_EmploymentType_2" name="Contract"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_EmploymentType_3" name="Internship"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_VacancyStatus" name="VacancyStatus" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_VacancyStatus_0" name="Draft"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_VacancyStatus_1" name="Published"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_VacancyStatus_2" name="Closed"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_JenisKelamin" name="JenisKelamin" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisKelamin_0" name="LakiLaki"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisKelamin_1" name="Perempuan"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_StatusPerkawinan" name="StatusPerkawinan" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_StatusPerkawinan_0" name="BelumMenikah"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_StatusPerkawinan_1" name="Menikah"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_StatusPerkawinan_2" name="Duda"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_StatusPerkawinan_3" name="Janda"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_GolonganDarah" name="GolonganDarah" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_GolonganDarah_0" name="A"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_GolonganDarah_1" name="B"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_GolonganDarah_2" name="AB"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_GolonganDarah_3" name="O"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_JenisPendidikan" name="JenisPendidikan" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisPendidikan_0" name="SD"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisPendidikan_1" name="SMP"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisPendidikan_2" name="SMAAtauSMK"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisPendidikan_3" name="D1"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisPendidikan_4" name="D2"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisPendidikan_5" name="D3"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisPendidikan_6" name="D4AtauS1"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisPendidikan_7" name="S2"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_JenisPendidikan_8" name="S3"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_TingkatKemampuanBahasa" name="TingkatKemampuanBahasa" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_TingkatKemampuanBahasa_0" name="Baik"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_TingkatKemampuanBahasa_1" name="Sedang"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_TingkatKemampuanBahasa_2" name="Kurang"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_ApplicationStageStatus" name="ApplicationStageStatus" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_ApplicationStageStatus_0" name="Pending"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_ApplicationStageStatus_1" name="Aktif"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_ApplicationStageStatus_2" name="Reserved"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_ApplicationStageStatus_3" name="Selesai"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_ApplicationStageStatus_4" name="Gagal"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_QuestionType" name="QuestionType" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_QuestionType_0" name="Mc"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_QuestionType_1" name="Essay"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_DiscDimension" name="DiscDimension" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_DiscDimension_0" name="D"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_DiscDimension_1" name="I"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_DiscDimension_2" name="S"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_DiscDimension_3" name="C"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_MbtiPole" name="MbtiPole" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_MbtiPole_0" name="E"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_MbtiPole_1" name="I"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_MbtiPole_2" name="S"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_MbtiPole_3" name="N"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_MbtiPole_4" name="T"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_MbtiPole_5" name="F"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_MbtiPole_6" name="J"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_MbtiPole_7" name="P"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_InterviewTemplateType" name="InterviewTemplateType" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_InterviewTemplateType_0" name="KriteriaPenilaian"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_InterviewTemplateType_1" name="Kesiapan"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_OfferingLetterStatus" name="OfferingLetterStatus" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_OfferingLetterStatus_0" name="Pending"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_OfferingLetterStatus_1" name="Accepted"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_OfferingLetterStatus_2" name="Rejected"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="enum_McuStatus" name="McuStatus" visibility="public">
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_McuStatus_0" name="Lulus"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_McuStatus_1" name="Ditangguhkan"/>
+          <ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="enum_McuStatus_2" name="TidakLulus"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="pkg_AuthOrg" name="Auth &amp; Org" visibility="public">
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_User" name="User" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_User_a0" name="name" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_User_a1" name="username" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_User_a2" name="role" visibility="public" type="enum_Role"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_User_a3" name="must_change_password" visibility="public" type="prim_boolean"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_User_a4" name="is_active" visibility="public" type="prim_boolean"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_User_o0" name="hasRole" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_User_o0_r" direction="return" name="return" type="prim_boolean"/>
+          </ownedOperation>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_User_o1" name="isHrAdmin" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_User_o1_r" direction="return" name="return" type="prim_boolean"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_Employee" name="Employee" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Employee_a0" name="nip" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Employee_a1" name="nama_karyawan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Employee_a2" name="posisi_pekerjaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Employee_a3" name="profesi" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Employee_a4" name="jabatan" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_Unit" name="Unit" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Unit_a0" name="nama" visibility="public" type="prim_String"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="pkg_Workflow" name="Workflow" visibility="public">
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_Stage" name="Stage" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Stage_a0" name="key" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Stage_a1" name="nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Stage_a2" name="is_locked_first" visibility="public" type="prim_boolean"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Stage_a3" name="is_locked_last" visibility="public" type="prim_boolean"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_WorkflowTemplate" name="WorkflowTemplate" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_WorkflowTemplate_a0" name="nama" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_WorkflowTemplateSnapshot" name="WorkflowTemplateSnapshot" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_WorkflowTemplateSnapshot_a0" name="nama" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_WorkflowTemplateSnapshotStage" name="WorkflowTemplateSnapshotStage" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_WorkflowTemplateSnapshotStage_a0" name="position" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_WorkflowTemplateSnapshotStage_a1" name="key" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_WorkflowTemplateSnapshotStage_a2" name="nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_WorkflowTemplateSnapshotStage_a3" name="is_locked_first" visibility="public" type="prim_boolean"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_WorkflowTemplateSnapshotStage_a4" name="is_locked_last" visibility="public" type="prim_boolean"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="pkg_Candidate" name="Candidate Profile" visibility="public">
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_Candidate" name="Candidate" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a0" name="nama_lengkap" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a1" name="email" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a2" name="no_telepon" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a3" name="tempat_lahir" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a4" name="tanggal_lahir" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a5" name="jenis_kelamin" visibility="public" type="enum_JenisKelamin"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a6" name="agama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a7" name="status_perkawinan" visibility="public" type="enum_StatusPerkawinan"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a8" name="golongan_darah" visibility="public" type="enum_GolonganDarah"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a9" name="alamat_ktp" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a10" name="alamat_domisili" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a11" name="no_ktp" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a12" name="npwp" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a13" name="nama_ibu_kandung" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a14" name="kontak_darurat_nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a15" name="kontak_darurat_no_telp" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a16" name="kontak_darurat_hubungan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a17" name="ayah_nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a18" name="ayah_usia" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a19" name="ayah_pendidikan_terakhir" visibility="public" type="enum_JenisPendidikan"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a20" name="ayah_pekerjaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a21" name="ibu_nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a22" name="ibu_usia" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a23" name="ibu_pendidikan_terakhir" visibility="public" type="enum_JenisPendidikan"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a24" name="ibu_pekerjaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a25" name="saudara_anak_ke" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a26" name="saudara_dari_bersaudara" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a27" name="is_fresh_graduate" visibility="public" type="prim_boolean"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a28" name="pernah_sakit_serius" visibility="public" type="prim_boolean"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a29" name="diagnosis_sakit" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Candidate_a30" name="vaksinasi_covid" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_CandidateSibling" name="CandidateSibling" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSibling_a0" name="nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSibling_a1" name="usia" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSibling_a2" name="jenis_kelamin" visibility="public" type="enum_JenisKelamin"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSibling_a3" name="pendidikan_terakhir" visibility="public" type="enum_JenisPendidikan"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSibling_a4" name="pekerjaan_jabatan" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_CandidateSpouse" name="CandidateSpouse" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSpouse_a0" name="nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSpouse_a1" name="usia" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSpouse_a2" name="jenis_kelamin" visibility="public" type="enum_JenisKelamin"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSpouse_a3" name="pendidikan_terakhir" visibility="public" type="enum_JenisPendidikan"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateSpouse_a4" name="pekerjaan_jabatan" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_CandidateChild" name="CandidateChild" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateChild_a0" name="nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateChild_a1" name="usia" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateChild_a2" name="jenis_kelamin" visibility="public" type="enum_JenisKelamin"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateChild_a3" name="pendidikan_terakhir" visibility="public" type="enum_JenisPendidikan"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateChild_a4" name="pekerjaan_jabatan" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_CandidateFormalEducation" name="CandidateFormalEducation" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateFormalEducation_a0" name="jenis_pendidikan" visibility="public" type="enum_JenisPendidikan"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateFormalEducation_a1" name="nama_sekolah" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateFormalEducation_a2" name="kota" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateFormalEducation_a3" name="tahun_lulus" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateFormalEducation_a4" name="ip_nilai" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateFormalEducation_a5" name="jurusan" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_CandidateInformalEducation" name="CandidateInformalEducation" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateInformalEducation_a0" name="nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateInformalEducation_a1" name="topik" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateInformalEducation_a2" name="periode_mulai" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateInformalEducation_a3" name="periode_selesai" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateInformalEducation_a4" name="penyelenggara" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_CandidateAchievement" name="CandidateAchievement" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateAchievement_a0" name="nama_prestasi" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateAchievement_a1" name="tahun" visibility="public" type="prim_int"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_CandidateLanguageSkill" name="CandidateLanguageSkill" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateLanguageSkill_a0" name="nama_bahasa" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateLanguageSkill_a1" name="berbicara" visibility="public" type="enum_TingkatKemampuanBahasa"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateLanguageSkill_a2" name="menulis" visibility="public" type="enum_TingkatKemampuanBahasa"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateLanguageSkill_a3" name="membaca" visibility="public" type="enum_TingkatKemampuanBahasa"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_CandidateOrganizationExperience" name="CandidateOrganizationExperience" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateOrganizationExperience_a0" name="nama_organisasi" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateOrganizationExperience_a1" name="jabatan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateOrganizationExperience_a2" name="periode_mulai" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateOrganizationExperience_a3" name="periode_selesai" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateOrganizationExperience_a4" name="keterangan" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_CandidateWorkExperience" name="CandidateWorkExperience" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateWorkExperience_a0" name="nama_perusahaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateWorkExperience_a1" name="jabatan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateWorkExperience_a2" name="alamat_perusahaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateWorkExperience_a3" name="periode_mulai" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateWorkExperience_a4" name="periode_selesai" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateWorkExperience_a5" name="rincian_tugas" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateWorkExperience_a6" name="gaji_terakhir" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_CandidateWorkExperience_a7" name="alasan_meninggalkan" visibility="public" type="prim_String"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="pkg_Recruitment" name="Recruitment Core" visibility="public">
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_Vacancy" name="Vacancy" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Vacancy_a0" name="judul_posisi" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Vacancy_a1" name="jenis_pekerjaan" visibility="public" type="enum_EmploymentType"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Vacancy_a2" name="deskripsi_pekerjaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Vacancy_a3" name="kualifikasi" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Vacancy_a4" name="jumlah_posisi" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Vacancy_a5" name="tenggat_lamaran" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Vacancy_a6" name="status" visibility="public" type="enum_VacancyStatus"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_Vacancy_o0" name="scopePublished" visibility="public">
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_Application" name="Application" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Application_a0" name="token" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Application_a1" name="cv_path" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Application_a2" name="alasan_melamar" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Application_a3" name="gaji_diharapkan" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Application_a4" name="fasilitas_diharapkan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Application_a5" name="kesiapan_kerja" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Application_a6" name="str_sip_path" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Application_a7" name="sumber_informasi" visibility="public" type="prim_String"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_Application_o0" name="currentStage" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_Application_o0_r" direction="return" name="return" type="cls_ApplicationStage"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_ApplicationStage" name="ApplicationStage" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationStage_a0" name="position" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationStage_a1" name="key" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationStage_a2" name="nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationStage_a3" name="status" visibility="public" type="enum_ApplicationStageStatus"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationStage_a4" name="catatan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationStage_a5" name="jadwal" visibility="public" type="prim_DateTime"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationStage_a6" name="lokasi" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_ApplicationReference" name="ApplicationReference" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationReference_a0" name="nama_karyawan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationReference_a1" name="hubungan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationReference_a2" name="keterangan" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_ApplicationSocialMediaAccount" name="ApplicationSocialMediaAccount" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationSocialMediaAccount_a0" name="platform" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_ApplicationSocialMediaAccount_a1" name="link" visibility="public" type="prim_String"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="pkg_Assessment" name="Assessment" visibility="public">
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_QuestionBankTemplate" name="QuestionBankTemplate" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_QuestionBankTemplate_a0" name="nama" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_Question" name="Question" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Question_a0" name="tipe" visibility="public" type="enum_QuestionType"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Question_a1" name="pertanyaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Question_a2" name="nilai_poin" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_Question_a3" name="urutan" visibility="public" type="prim_int"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_Question_o0" name="correctOption" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_Question_o0_r" direction="return" name="return" type="cls_QuestionOption"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_QuestionOption" name="QuestionOption" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_QuestionOption_a0" name="teks_opsi" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_QuestionOption_a1" name="is_correct" visibility="public" type="prim_boolean"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_VacancyTest" name="VacancyTest" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTest_a0" name="batas_waktu_menit" visibility="public" type="prim_int"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_VacancyTest_o0" name="totalNilaiMaksimal" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_VacancyTest_o0_r" direction="return" name="return" type="prim_int"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_VacancyTestQuestion" name="VacancyTestQuestion" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestQuestion_a0" name="urutan" visibility="public" type="prim_int"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_VacancyTestSnapshot" name="VacancyTestSnapshot" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshot_a0" name="batas_waktu_menit" visibility="public" type="prim_int"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_VacancyTestSnapshot_o0" name="totalNilaiMaksimal" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_VacancyTestSnapshot_o0_r" direction="return" name="return" type="prim_int"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_VacancyTestSnapshotQuestion" name="VacancyTestSnapshotQuestion" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotQuestion_a0" name="urutan" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotQuestion_a1" name="tipe" visibility="public" type="enum_QuestionType"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotQuestion_a2" name="pertanyaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotQuestion_a3" name="nilai_poin" visibility="public" type="prim_int"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_VacancyTestSnapshotOption" name="VacancyTestSnapshotOption" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotOption_a0" name="teks_opsi" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyTestSnapshotOption_a1" name="is_correct" visibility="public" type="prim_boolean"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_TestSubmission" name="TestSubmission" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestSubmission_a0" name="token" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestSubmission_a1" name="started_at" visibility="public" type="prim_DateTime"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestSubmission_a2" name="submitted_at" visibility="public" type="prim_DateTime"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestSubmission_a3" name="total_skor" visibility="public" type="prim_int"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_TestSubmission_o0" name="isSubmitted" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_TestSubmission_o0_r" direction="return" name="return" type="prim_boolean"/>
+          </ownedOperation>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_TestSubmission_o1" name="isExpired" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_TestSubmission_o1_r" direction="return" name="return" type="prim_boolean"/>
+          </ownedOperation>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_TestSubmission_o2" name="remainingSeconds" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_TestSubmission_o2_r" direction="return" name="return" type="prim_int"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_TestAnswer" name="TestAnswer" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestAnswer_a0" name="jawaban_teks" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestAnswer_a1" name="skor" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_TestAnswer_a2" name="is_reviewed" visibility="public" type="prim_boolean"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_DiscQuestion" name="DiscQuestion" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscQuestion_a0" name="urutan" visibility="public" type="prim_int"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_DiscQuestionWord" name="DiscQuestionWord" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscQuestionWord_a0" name="teks" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscQuestionWord_a1" name="dimensi" visibility="public" type="enum_DiscDimension"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_DiscSubmission" name="DiscSubmission" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscSubmission_a0" name="token" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscSubmission_a1" name="started_at" visibility="public" type="prim_DateTime"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscSubmission_a2" name="submitted_at" visibility="public" type="prim_DateTime"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_DiscSubmission_o0" name="isSubmitted" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_DiscSubmission_o0_r" direction="return" name="return" type="prim_boolean"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_DiscAnswer" name="DiscAnswer" visibility="public">
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_DiscResult" name="DiscResult" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscResult_a0" name="skor_d" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscResult_a1" name="skor_i" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscResult_a2" name="skor_s" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscResult_a3" name="skor_c" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscResult_a4" name="tipe_primer" visibility="public" type="enum_DiscDimension"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_DiscResult_a5" name="tipe_sekunder" visibility="public" type="enum_DiscDimension"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_DiscResult_o0" name="profilRingkasan" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_DiscResult_o0_r" direction="return" name="return" type="prim_String"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_MbtiQuestion" name="MbtiQuestion" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiQuestion_a0" name="urutan" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiQuestion_a1" name="dikotomi" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiQuestion_a2" name="pernyataan_a" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiQuestion_a3" name="kutub_a" visibility="public" type="enum_MbtiPole"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiQuestion_a4" name="pernyataan_b" visibility="public" type="prim_String"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_MbtiQuestion_o0" name="kutubB" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_MbtiQuestion_o0_r" direction="return" name="return" type="enum_MbtiPole"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_MbtiSubmission" name="MbtiSubmission" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiSubmission_a0" name="token" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiSubmission_a1" name="started_at" visibility="public" type="prim_DateTime"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiSubmission_a2" name="submitted_at" visibility="public" type="prim_DateTime"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_MbtiSubmission_o0" name="isSubmitted" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_MbtiSubmission_o0_r" direction="return" name="return" type="prim_boolean"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_MbtiAnswer" name="MbtiAnswer" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiAnswer_a0" name="pilihan" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_MbtiResult" name="MbtiResult" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a0" name="skor_e" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a1" name="skor_i" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a2" name="skor_s" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a3" name="skor_n" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a4" name="skor_t" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a5" name="skor_f" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a6" name="skor_j" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a7" name="skor_p" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a8" name="tipe" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a9" name="kekuatan_ei" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a10" name="kekuatan_sn" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a11" name="kekuatan_tf" visibility="public" type="prim_int"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_MbtiResult_a12" name="kekuatan_jp" visibility="public" type="prim_int"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="pkg_Interview" name="Interview &amp; Outcomes" visibility="public">
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_InterviewTemplate" name="InterviewTemplate" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewTemplate_a0" name="nama" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewTemplate_a1" name="tipe" visibility="public" type="enum_InterviewTemplateType"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_InterviewTemplateItem" name="InterviewTemplateItem" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewTemplateItem_a0" name="teks" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewTemplateItem_a1" name="urutan" visibility="public" type="prim_int"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_VacancyInterviewTemplate" name="VacancyInterviewTemplate" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_VacancyInterviewTemplate_a0" name="stage_key" visibility="public" type="prim_String"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_InterviewResult" name="InterviewResult" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewResult_a0" name="keputusan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewResult_a1" name="catatan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewResult_a2" name="submitted_at" visibility="public" type="prim_DateTime"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_InterviewResultRating" name="InterviewResultRating" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewResultRating_a0" name="nama_kriteria" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewResultRating_a1" name="nilai" visibility="public" type="prim_int"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_InterviewReadinessAnswer" name="InterviewReadinessAnswer" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewReadinessAnswer_a0" name="pertanyaan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_InterviewReadinessAnswer_a1" name="jawaban" visibility="public" type="prim_boolean"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_OfferingLetter" name="OfferingLetter" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a0" name="jabatan_ditawarkan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a1" name="gaji" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a2" name="tanggal_mulai" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a3" name="catatan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a4" name="sent_at" visibility="public" type="prim_DateTime"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a5" name="status" visibility="public" type="enum_OfferingLetterStatus"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a6" name="responded_at" visibility="public" type="prim_DateTime"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OfferingLetter_a7" name="rejection_reason" visibility="public" type="prim_String"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_OfferingLetter_o0" name="isPending" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_OfferingLetter_o0_r" direction="return" name="return" type="prim_boolean"/>
+          </ownedOperation>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="cls_OfferingLetter_o1" name="isResponded" visibility="public">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="cls_OfferingLetter_o1_r" direction="return" name="return" type="prim_boolean"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_McuResult" name="McuResult" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_McuResult_a0" name="keputusan" visibility="public" type="enum_McuStatus"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_McuResult_a1" name="dokumen_path" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_McuResult_a2" name="catatan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_McuResult_a3" name="submitted_at" visibility="public" type="prim_DateTime"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_OnboardingResult" name="OnboardingResult" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OnboardingResult_a0" name="tanggal_bergabung" visibility="public" type="prim_Date"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OnboardingResult_a1" name="catatan" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_OnboardingResult_a2" name="sent_at" visibility="public" type="prim_DateTime"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="pkg_Shared" name="Shared" visibility="public">
+        <packagedElement xmi:type="uml:Class" xmi:id="cls_EmailTemplate" name="EmailTemplate" visibility="public">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_EmailTemplate_a0" name="key" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_EmailTemplate_a1" name="deskripsi" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_EmailTemplate_a2" name="subjek" visibility="public" type="prim_String"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="cls_EmailTemplate_a3" name="isi" visibility="public" type="prim_String"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_0">
+        <memberEnd xmi:idref="as_0_a"/><memberEnd xmi:idref="as_0_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_0_a" association="as_0" type="cls_Candidate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_0_b" association="as_0" type="cls_CandidateSibling"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_1">
+        <memberEnd xmi:idref="as_1_a"/><memberEnd xmi:idref="as_1_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_1_a" association="as_1" type="cls_Candidate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_1_b" association="as_1" type="cls_CandidateSpouse"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_2">
+        <memberEnd xmi:idref="as_2_a"/><memberEnd xmi:idref="as_2_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_2_a" association="as_2" type="cls_Candidate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_2_b" association="as_2" type="cls_CandidateChild"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_3">
+        <memberEnd xmi:idref="as_3_a"/><memberEnd xmi:idref="as_3_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_3_a" association="as_3" type="cls_Candidate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_3_b" association="as_3" type="cls_CandidateFormalEducation"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_4">
+        <memberEnd xmi:idref="as_4_a"/><memberEnd xmi:idref="as_4_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_4_a" association="as_4" type="cls_Candidate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_4_b" association="as_4" type="cls_CandidateInformalEducation"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_5">
+        <memberEnd xmi:idref="as_5_a"/><memberEnd xmi:idref="as_5_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_5_a" association="as_5" type="cls_Candidate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_5_b" association="as_5" type="cls_CandidateAchievement"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_6">
+        <memberEnd xmi:idref="as_6_a"/><memberEnd xmi:idref="as_6_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_6_a" association="as_6" type="cls_Candidate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_6_b" association="as_6" type="cls_CandidateLanguageSkill"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_7">
+        <memberEnd xmi:idref="as_7_a"/><memberEnd xmi:idref="as_7_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_7_a" association="as_7" type="cls_Candidate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_7_b" association="as_7" type="cls_CandidateOrganizationExperience"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_8">
+        <memberEnd xmi:idref="as_8_a"/><memberEnd xmi:idref="as_8_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_8_a" association="as_8" type="cls_Candidate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_8_b" association="as_8" type="cls_CandidateWorkExperience"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_9">
+        <memberEnd xmi:idref="as_9_a"/><memberEnd xmi:idref="as_9_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_9_a" association="as_9" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_9_b" association="as_9" type="cls_ApplicationStage"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_10">
+        <memberEnd xmi:idref="as_10_a"/><memberEnd xmi:idref="as_10_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_10_a" association="as_10" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_10_b" association="as_10" type="cls_ApplicationReference"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_11">
+        <memberEnd xmi:idref="as_11_a"/><memberEnd xmi:idref="as_11_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_11_a" association="as_11" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_11_b" association="as_11" type="cls_ApplicationSocialMediaAccount"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_12">
+        <memberEnd xmi:idref="as_12_a"/><memberEnd xmi:idref="as_12_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_12_a" association="as_12" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_12_b" association="as_12" type="cls_TestSubmission"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_13">
+        <memberEnd xmi:idref="as_13_a"/><memberEnd xmi:idref="as_13_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_13_a" association="as_13" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_13_b" association="as_13" type="cls_DiscSubmission"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_14">
+        <memberEnd xmi:idref="as_14_a"/><memberEnd xmi:idref="as_14_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_14_a" association="as_14" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_14_b" association="as_14" type="cls_MbtiSubmission"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_15">
+        <memberEnd xmi:idref="as_15_a"/><memberEnd xmi:idref="as_15_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_15_a" association="as_15" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_15_b" association="as_15" type="cls_InterviewResult"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_16">
+        <memberEnd xmi:idref="as_16_a"/><memberEnd xmi:idref="as_16_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_16_a" association="as_16" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_16_b" association="as_16" type="cls_OfferingLetter"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_17">
+        <memberEnd xmi:idref="as_17_a"/><memberEnd xmi:idref="as_17_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_17_a" association="as_17" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_17_b" association="as_17" type="cls_McuResult"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_18">
+        <memberEnd xmi:idref="as_18_a"/><memberEnd xmi:idref="as_18_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_18_a" association="as_18" type="cls_Application" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_18_b" association="as_18" type="cls_OnboardingResult"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_19">
+        <memberEnd xmi:idref="as_19_a"/><memberEnd xmi:idref="as_19_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_19_a" association="as_19" type="cls_InterviewResult" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_19_b" association="as_19" type="cls_InterviewResultRating"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_20">
+        <memberEnd xmi:idref="as_20_a"/><memberEnd xmi:idref="as_20_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_20_a" association="as_20" type="cls_InterviewResult" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_20_b" association="as_20" type="cls_InterviewReadinessAnswer"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_21">
+        <memberEnd xmi:idref="as_21_a"/><memberEnd xmi:idref="as_21_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_21_a" association="as_21" type="cls_DiscSubmission" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_21_b" association="as_21" type="cls_DiscAnswer"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_22">
+        <memberEnd xmi:idref="as_22_a"/><memberEnd xmi:idref="as_22_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_22_a" association="as_22" type="cls_DiscSubmission" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_22_b" association="as_22" type="cls_DiscResult"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_23">
+        <memberEnd xmi:idref="as_23_a"/><memberEnd xmi:idref="as_23_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_23_a" association="as_23" type="cls_MbtiSubmission" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_23_b" association="as_23" type="cls_MbtiAnswer"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_24">
+        <memberEnd xmi:idref="as_24_a"/><memberEnd xmi:idref="as_24_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_24_a" association="as_24" type="cls_MbtiSubmission" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_24_b" association="as_24" type="cls_MbtiResult"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_25">
+        <memberEnd xmi:idref="as_25_a"/><memberEnd xmi:idref="as_25_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_25_a" association="as_25" type="cls_TestSubmission" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_25_b" association="as_25" type="cls_TestAnswer"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_26">
+        <memberEnd xmi:idref="as_26_a"/><memberEnd xmi:idref="as_26_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_26_a" association="as_26" type="cls_DiscQuestion" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_26_b" association="as_26" type="cls_DiscQuestionWord"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_27">
+        <memberEnd xmi:idref="as_27_a"/><memberEnd xmi:idref="as_27_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_27_a" association="as_27" type="cls_Question" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_27_b" association="as_27" type="cls_QuestionOption"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_28">
+        <memberEnd xmi:idref="as_28_a"/><memberEnd xmi:idref="as_28_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_28_a" association="as_28" type="cls_QuestionBankTemplate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_28_b" association="as_28" type="cls_Question"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_29">
+        <memberEnd xmi:idref="as_29_a"/><memberEnd xmi:idref="as_29_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_29_a" association="as_29" type="cls_VacancyTest" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_29_b" association="as_29" type="cls_VacancyTestQuestion"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_30">
+        <memberEnd xmi:idref="as_30_a"/><memberEnd xmi:idref="as_30_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_30_a" association="as_30" type="cls_VacancyTest" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_30_b" association="as_30" type="cls_VacancyTestSnapshot"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_31">
+        <memberEnd xmi:idref="as_31_a"/><memberEnd xmi:idref="as_31_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_31_a" association="as_31" type="cls_VacancyTestSnapshot" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_31_b" association="as_31" type="cls_VacancyTestSnapshotQuestion"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_32">
+        <memberEnd xmi:idref="as_32_a"/><memberEnd xmi:idref="as_32_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_32_a" association="as_32" type="cls_VacancyTestSnapshotQuestion" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_32_b" association="as_32" type="cls_VacancyTestSnapshotOption"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_33">
+        <memberEnd xmi:idref="as_33_a"/><memberEnd xmi:idref="as_33_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_33_a" association="as_33" type="cls_WorkflowTemplateSnapshot" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_33_b" association="as_33" type="cls_WorkflowTemplateSnapshotStage"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_34">
+        <memberEnd xmi:idref="as_34_a"/><memberEnd xmi:idref="as_34_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_34_a" association="as_34" type="cls_InterviewTemplate" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_34_b" association="as_34" type="cls_InterviewTemplateItem"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_35">
+        <memberEnd xmi:idref="as_35_a"/><memberEnd xmi:idref="as_35_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_35_a" association="as_35" type="cls_Vacancy" aggregation="composite"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_35_b" association="as_35" type="cls_VacancyTest"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_36">
+        <memberEnd xmi:idref="as_36_a"/><memberEnd xmi:idref="as_36_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_36_a" association="as_36" type="cls_Application"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_36_b" association="as_36" type="cls_Candidate"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_37">
+        <memberEnd xmi:idref="as_37_a"/><memberEnd xmi:idref="as_37_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_37_a" association="as_37" type="cls_Application"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_37_b" association="as_37" type="cls_Vacancy"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_38">
+        <memberEnd xmi:idref="as_38_a"/><memberEnd xmi:idref="as_38_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_38_a" association="as_38" type="cls_Vacancy"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_38_b" association="as_38" type="cls_Unit"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_39" name="snapshot-of">
+        <memberEnd xmi:idref="as_39_a"/><memberEnd xmi:idref="as_39_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_39_a" association="as_39" type="cls_Vacancy"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_39_b" association="as_39" type="cls_WorkflowTemplateSnapshot"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_40" name="snapshot-of">
+        <memberEnd xmi:idref="as_40_a"/><memberEnd xmi:idref="as_40_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_40_a" association="as_40" type="cls_WorkflowTemplateSnapshot"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_40_b" association="as_40" type="cls_WorkflowTemplate"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_41">
+        <memberEnd xmi:idref="as_41_a"/><memberEnd xmi:idref="as_41_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_41_a" association="as_41" type="cls_Employee"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_41_b" association="as_41" type="cls_User"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_42">
+        <memberEnd xmi:idref="as_42_a"/><memberEnd xmi:idref="as_42_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_42_a" association="as_42" type="cls_Employee"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_42_b" association="as_42" type="cls_Unit"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_43" name="reviewedBy">
+        <memberEnd xmi:idref="as_43_a"/><memberEnd xmi:idref="as_43_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_43_a" association="as_43" type="cls_ApplicationStage"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_43_b" association="as_43" type="cls_User"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_44" name="interviewer">
+        <memberEnd xmi:idref="as_44_a"/><memberEnd xmi:idref="as_44_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_44_a" association="as_44" type="cls_ApplicationStage"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_44_b" association="as_44" type="cls_User"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_45" name="interviewer">
+        <memberEnd xmi:idref="as_45_a"/><memberEnd xmi:idref="as_45_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_45_a" association="as_45" type="cls_InterviewResult"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_45_b" association="as_45" type="cls_User"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_46">
+        <memberEnd xmi:idref="as_46_a"/><memberEnd xmi:idref="as_46_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_46_a" association="as_46" type="cls_InterviewResult"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_46_b" association="as_46" type="cls_ApplicationStage"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_47" name="reviewer">
+        <memberEnd xmi:idref="as_47_a"/><memberEnd xmi:idref="as_47_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_47_a" association="as_47" type="cls_McuResult"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_47_b" association="as_47" type="cls_User"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_48">
+        <memberEnd xmi:idref="as_48_a"/><memberEnd xmi:idref="as_48_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_48_a" association="as_48" type="cls_McuResult"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_48_b" association="as_48" type="cls_ApplicationStage"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_49">
+        <memberEnd xmi:idref="as_49_a"/><memberEnd xmi:idref="as_49_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_49_a" association="as_49" type="cls_Stage"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_49_b" association="as_49" type="cls_WorkflowTemplate"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_50">
+        <memberEnd xmi:idref="as_50_a"/><memberEnd xmi:idref="as_50_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_50_a" association="as_50" type="cls_VacancyTestQuestion"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_50_b" association="as_50" type="cls_Question"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_51">
+        <memberEnd xmi:idref="as_51_a"/><memberEnd xmi:idref="as_51_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_51_a" association="as_51" type="cls_TestSubmission"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_51_b" association="as_51" type="cls_VacancyTestSnapshot"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_52">
+        <memberEnd xmi:idref="as_52_a"/><memberEnd xmi:idref="as_52_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_52_a" association="as_52" type="cls_TestAnswer"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_52_b" association="as_52" type="cls_VacancyTestSnapshotQuestion"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_53">
+        <memberEnd xmi:idref="as_53_a"/><memberEnd xmi:idref="as_53_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_53_a" association="as_53" type="cls_TestAnswer"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_53_b" association="as_53" type="cls_VacancyTestSnapshotOption"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_54">
+        <memberEnd xmi:idref="as_54_a"/><memberEnd xmi:idref="as_54_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_54_a" association="as_54" type="cls_DiscAnswer"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_54_b" association="as_54" type="cls_DiscQuestion"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_55" name="most">
+        <memberEnd xmi:idref="as_55_a"/><memberEnd xmi:idref="as_55_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_55_a" association="as_55" type="cls_DiscAnswer"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_55_b" association="as_55" type="cls_DiscQuestionWord"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_56" name="least">
+        <memberEnd xmi:idref="as_56_a"/><memberEnd xmi:idref="as_56_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_56_a" association="as_56" type="cls_DiscAnswer"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_56_b" association="as_56" type="cls_DiscQuestionWord"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_57">
+        <memberEnd xmi:idref="as_57_a"/><memberEnd xmi:idref="as_57_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_57_a" association="as_57" type="cls_MbtiAnswer"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_57_b" association="as_57" type="cls_MbtiQuestion"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_58">
+        <memberEnd xmi:idref="as_58_a"/><memberEnd xmi:idref="as_58_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_58_a" association="as_58" type="cls_VacancyInterviewTemplate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_58_b" association="as_58" type="cls_Vacancy"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_59">
+        <memberEnd xmi:idref="as_59_a"/><memberEnd xmi:idref="as_59_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_59_a" association="as_59" type="cls_VacancyInterviewTemplate"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_59_b" association="as_59" type="cls_InterviewTemplate"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_60">
+        <memberEnd xmi:idref="as_60_a"/><memberEnd xmi:idref="as_60_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_60_a" association="as_60" type="cls_InterviewResultRating"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_60_b" association="as_60" type="cls_InterviewTemplate"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="as_61">
+        <memberEnd xmi:idref="as_61_a"/><memberEnd xmi:idref="as_61_b"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_61_a" association="as_61" type="cls_InterviewReadinessAnswer"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="as_61_b" association="as_61" type="cls_InterviewTemplate"/>
+      </packagedElement>
+    </packagedElement>
+  </uml:Model>
+  <xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+    <diagrams>
+      <diagram xmi:id="dia_overview">
+        <model package="pkg_ats" owner="pkg_ats" localID="1"/>
+        <properties name="ATS v2 - Class Overview" type="Logical"/>
+        <project author="Claude Code" version="1.0"/>
+        <elements>
+          <element geometry="Left=40;Top=40;Right=240;Bottom=190;" subject="cls_User" seqno="1"/>
+          <element geometry="Left=320;Top=40;Right=520;Bottom=190;" subject="cls_Employee" seqno="2"/>
+          <element geometry="Left=600;Top=40;Right=800;Bottom=190;" subject="cls_Unit" seqno="3"/>
+          <element geometry="Left=880;Top=40;Right=1080;Bottom=190;" subject="cls_WorkflowTemplateSnapshot" seqno="4"/>
+          <element geometry="Left=40;Top=260;Right=240;Bottom=410;" subject="cls_Vacancy" seqno="5"/>
+          <element geometry="Left=320;Top=260;Right=520;Bottom=410;" subject="cls_Candidate" seqno="6"/>
+          <element geometry="Left=600;Top=260;Right=800;Bottom=410;" subject="cls_Application" seqno="7"/>
+          <element geometry="Left=880;Top=260;Right=1080;Bottom=410;" subject="cls_QuestionBankTemplate" seqno="8"/>
+          <element geometry="Left=40;Top=480;Right=240;Bottom=630;" subject="cls_VacancyTest" seqno="9"/>
+          <element geometry="Left=320;Top=480;Right=520;Bottom=630;" subject="cls_TestSubmission" seqno="10"/>
+          <element geometry="Left=600;Top=480;Right=800;Bottom=630;" subject="cls_DiscSubmission" seqno="11"/>
+          <element geometry="Left=880;Top=480;Right=1080;Bottom=630;" subject="cls_MbtiSubmission" seqno="12"/>
+          <element geometry="Left=40;Top=700;Right=240;Bottom=850;" subject="cls_InterviewTemplate" seqno="13"/>
+          <element geometry="Left=320;Top=700;Right=520;Bottom=850;" subject="cls_InterviewResult" seqno="14"/>
+          <element geometry="Left=600;Top=700;Right=800;Bottom=850;" subject="cls_OfferingLetter" seqno="15"/>
+          <element geometry="Left=880;Top=700;Right=1080;Bottom=850;" subject="cls_McuResult" seqno="16"/>
+          <element geometry="Left=40;Top=920;Right=240;Bottom=1070;" subject="cls_OnboardingResult" seqno="17"/>
+        </elements>
+      </diagram>
+      <diagram xmi:id="dia_AuthOrg">
+        <model package="pkg_AuthOrg" owner="pkg_AuthOrg" localID="1"/>
+        <properties name="ATS v2 - Auth &amp; Org" type="Logical"/>
+        <project author="Claude Code" version="1.0"/>
+        <elements>
+          <element geometry="Left=40;Top=40;Right=240;Bottom=190;" subject="cls_User" seqno="1"/>
+          <element geometry="Left=320;Top=40;Right=520;Bottom=190;" subject="cls_Employee" seqno="2"/>
+          <element geometry="Left=600;Top=40;Right=800;Bottom=190;" subject="cls_Unit" seqno="3"/>
+        </elements>
+      </diagram>
+      <diagram xmi:id="dia_Workflow">
+        <model package="pkg_Workflow" owner="pkg_Workflow" localID="1"/>
+        <properties name="ATS v2 - Workflow" type="Logical"/>
+        <project author="Claude Code" version="1.0"/>
+        <elements>
+          <element geometry="Left=40;Top=40;Right=240;Bottom=190;" subject="cls_Stage" seqno="1"/>
+          <element geometry="Left=320;Top=40;Right=520;Bottom=190;" subject="cls_WorkflowTemplate" seqno="2"/>
+          <element geometry="Left=600;Top=40;Right=800;Bottom=190;" subject="cls_WorkflowTemplateSnapshot" seqno="3"/>
+          <element geometry="Left=880;Top=40;Right=1080;Bottom=190;" subject="cls_WorkflowTemplateSnapshotStage" seqno="4"/>
+        </elements>
+      </diagram>
+      <diagram xmi:id="dia_Candidate">
+        <model package="pkg_Candidate" owner="pkg_Candidate" localID="1"/>
+        <properties name="ATS v2 - Candidate Profile" type="Logical"/>
+        <project author="Claude Code" version="1.0"/>
+        <elements>
+          <element geometry="Left=40;Top=40;Right=240;Bottom=190;" subject="cls_Candidate" seqno="1"/>
+          <element geometry="Left=320;Top=40;Right=520;Bottom=190;" subject="cls_CandidateSibling" seqno="2"/>
+          <element geometry="Left=600;Top=40;Right=800;Bottom=190;" subject="cls_CandidateSpouse" seqno="3"/>
+          <element geometry="Left=880;Top=40;Right=1080;Bottom=190;" subject="cls_CandidateChild" seqno="4"/>
+          <element geometry="Left=40;Top=260;Right=240;Bottom=410;" subject="cls_CandidateFormalEducation" seqno="5"/>
+          <element geometry="Left=320;Top=260;Right=520;Bottom=410;" subject="cls_CandidateInformalEducation" seqno="6"/>
+          <element geometry="Left=600;Top=260;Right=800;Bottom=410;" subject="cls_CandidateAchievement" seqno="7"/>
+          <element geometry="Left=880;Top=260;Right=1080;Bottom=410;" subject="cls_CandidateLanguageSkill" seqno="8"/>
+          <element geometry="Left=40;Top=480;Right=240;Bottom=630;" subject="cls_CandidateOrganizationExperience" seqno="9"/>
+          <element geometry="Left=320;Top=480;Right=520;Bottom=630;" subject="cls_CandidateWorkExperience" seqno="10"/>
+        </elements>
+      </diagram>
+      <diagram xmi:id="dia_Recruitment">
+        <model package="pkg_Recruitment" owner="pkg_Recruitment" localID="1"/>
+        <properties name="ATS v2 - Recruitment Core" type="Logical"/>
+        <project author="Claude Code" version="1.0"/>
+        <elements>
+          <element geometry="Left=40;Top=40;Right=240;Bottom=190;" subject="cls_Vacancy" seqno="1"/>
+          <element geometry="Left=320;Top=40;Right=520;Bottom=190;" subject="cls_Application" seqno="2"/>
+          <element geometry="Left=600;Top=40;Right=800;Bottom=190;" subject="cls_ApplicationStage" seqno="3"/>
+          <element geometry="Left=880;Top=40;Right=1080;Bottom=190;" subject="cls_ApplicationReference" seqno="4"/>
+          <element geometry="Left=40;Top=260;Right=240;Bottom=410;" subject="cls_ApplicationSocialMediaAccount" seqno="5"/>
+        </elements>
+      </diagram>
+      <diagram xmi:id="dia_Assessment">
+        <model package="pkg_Assessment" owner="pkg_Assessment" localID="1"/>
+        <properties name="ATS v2 - Assessment" type="Logical"/>
+        <project author="Claude Code" version="1.0"/>
+        <elements>
+          <element geometry="Left=40;Top=40;Right=240;Bottom=190;" subject="cls_QuestionBankTemplate" seqno="1"/>
+          <element geometry="Left=320;Top=40;Right=520;Bottom=190;" subject="cls_Question" seqno="2"/>
+          <element geometry="Left=600;Top=40;Right=800;Bottom=190;" subject="cls_QuestionOption" seqno="3"/>
+          <element geometry="Left=880;Top=40;Right=1080;Bottom=190;" subject="cls_VacancyTest" seqno="4"/>
+          <element geometry="Left=40;Top=260;Right=240;Bottom=410;" subject="cls_VacancyTestQuestion" seqno="5"/>
+          <element geometry="Left=320;Top=260;Right=520;Bottom=410;" subject="cls_VacancyTestSnapshot" seqno="6"/>
+          <element geometry="Left=600;Top=260;Right=800;Bottom=410;" subject="cls_VacancyTestSnapshotQuestion" seqno="7"/>
+          <element geometry="Left=880;Top=260;Right=1080;Bottom=410;" subject="cls_VacancyTestSnapshotOption" seqno="8"/>
+          <element geometry="Left=40;Top=480;Right=240;Bottom=630;" subject="cls_TestSubmission" seqno="9"/>
+          <element geometry="Left=320;Top=480;Right=520;Bottom=630;" subject="cls_TestAnswer" seqno="10"/>
+          <element geometry="Left=600;Top=480;Right=800;Bottom=630;" subject="cls_DiscQuestion" seqno="11"/>
+          <element geometry="Left=880;Top=480;Right=1080;Bottom=630;" subject="cls_DiscQuestionWord" seqno="12"/>
+          <element geometry="Left=40;Top=700;Right=240;Bottom=850;" subject="cls_DiscSubmission" seqno="13"/>
+          <element geometry="Left=320;Top=700;Right=520;Bottom=850;" subject="cls_DiscAnswer" seqno="14"/>
+          <element geometry="Left=600;Top=700;Right=800;Bottom=850;" subject="cls_DiscResult" seqno="15"/>
+          <element geometry="Left=880;Top=700;Right=1080;Bottom=850;" subject="cls_MbtiQuestion" seqno="16"/>
+          <element geometry="Left=40;Top=920;Right=240;Bottom=1070;" subject="cls_MbtiSubmission" seqno="17"/>
+          <element geometry="Left=320;Top=920;Right=520;Bottom=1070;" subject="cls_MbtiAnswer" seqno="18"/>
+          <element geometry="Left=600;Top=920;Right=800;Bottom=1070;" subject="cls_MbtiResult" seqno="19"/>
+        </elements>
+      </diagram>
+      <diagram xmi:id="dia_Interview">
+        <model package="pkg_Interview" owner="pkg_Interview" localID="1"/>
+        <properties name="ATS v2 - Interview &amp; Outcomes" type="Logical"/>
+        <project author="Claude Code" version="1.0"/>
+        <elements>
+          <element geometry="Left=40;Top=40;Right=240;Bottom=190;" subject="cls_InterviewTemplate" seqno="1"/>
+          <element geometry="Left=320;Top=40;Right=520;Bottom=190;" subject="cls_InterviewTemplateItem" seqno="2"/>
+          <element geometry="Left=600;Top=40;Right=800;Bottom=190;" subject="cls_VacancyInterviewTemplate" seqno="3"/>
+          <element geometry="Left=880;Top=40;Right=1080;Bottom=190;" subject="cls_InterviewResult" seqno="4"/>
+          <element geometry="Left=40;Top=260;Right=240;Bottom=410;" subject="cls_InterviewResultRating" seqno="5"/>
+          <element geometry="Left=320;Top=260;Right=520;Bottom=410;" subject="cls_InterviewReadinessAnswer" seqno="6"/>
+          <element geometry="Left=600;Top=260;Right=800;Bottom=410;" subject="cls_OfferingLetter" seqno="7"/>
+          <element geometry="Left=880;Top=260;Right=1080;Bottom=410;" subject="cls_McuResult" seqno="8"/>
+          <element geometry="Left=40;Top=480;Right=240;Bottom=630;" subject="cls_OnboardingResult" seqno="9"/>
+        </elements>
+      </diagram>
+      <diagram xmi:id="dia_Shared">
+        <model package="pkg_Shared" owner="pkg_Shared" localID="1"/>
+        <properties name="ATS v2 - Shared" type="Logical"/>
+        <project author="Claude Code" version="1.0"/>
+        <elements>
+          <element geometry="Left=40;Top=40;Right=240;Bottom=190;" subject="cls_EmailTemplate" seqno="1"/>
+        </elements>
+      </diagram>
+    </diagrams>
+  </xmi:Extension>
+</xmi:XMI>
