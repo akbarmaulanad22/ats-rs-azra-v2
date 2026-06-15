@@ -251,9 +251,21 @@ function renderUC(repo, pkg, model) {
     var boxes = [];
     if (model.alt) {
         var a = model.alt;
+        // Per-model overrides (default to the UC-16-calibrated globals so the
+        // 3-op pipeline UCs 16/19/21 are NOT affected). 2-op UCs whose regions
+        // hold only 1-2 messages look cramped at the bottom under the locked
+        // 41px pitch -- they set a smaller gapAbove (pushes the inter-branch
+        // divider DOWN, giving the upper region's last message more space below)
+        // and a larger botPad (more room under the last message before the box
+        // floor). Trade: the lower region's first message keeps gapAbove-GUARD_ROW_H
+        // of visible top space; fine for the short fallback branches.
+        var gapAbove = (a.gapAbove != null) ? a.gapAbove : GAP_ABOVE;
+        var botPad   = (a.botPad   != null) ? a.botPad   : FRAG_BOT_PAD;
+        var topPad   = (a.topPad   != null) ? a.topPad   : FRAG_TOP_PAD;
+
         var lx = LIFE_X0 + (a.leftIdx * LIFE_STEP) - FRAG_PAD_X;
         var rx = LIFE_X0 + (a.rightIdx * LIFE_STEP) + LIFE_W + FRAG_PAD_X;
-        var topY = yOf(a.firstSeq) - FRAG_TOP_PAD;
+        var topY = yOf(a.firstSeq) - topPad;
 
         // Operand region heights, computed so each inter-branch divider lands
         // GAP_ABOVE px above the LOWER branch's first message (and ~PITCH-GAP
@@ -271,12 +283,12 @@ function renderUC(repo, pkg, model) {
         var k;
         for (k = 0; k < a.operands.length; k++) {
             var op = a.operands[k];
-            var regTop = (k === 0) ? topY : (yOf(op.firstSeq) - GAP_ABOVE);
+            var regTop = (k === 0) ? topY : (yOf(op.firstSeq) - gapAbove);
             var regBot;
             if (k < a.operands.length - 1) {
-                regBot = yOf(a.operands[k + 1].firstSeq) - GAP_ABOVE;
+                regBot = yOf(a.operands[k + 1].firstSeq) - gapAbove;
             } else {
-                regBot = yOf(op.lastSeq) + FRAG_BOT_PAD;
+                regBot = yOf(op.lastSeq) + botPad;
             }
             // EA adds GUARD_ROW_H of label height to EACH operand region beyond
             // the Size we write, and it ACCUMULATES downward (divider 1 ok,
@@ -370,6 +382,205 @@ var UC16 = {
     }
 };
 
+/* ============================== UC-19 data ============================== */
+/*
+ * Tinjau Jawaban Tes. TestReviewController.decide -> pipelineService
+ * advance/fail/reserve (SAME 3-operand pipeline tail as UC-16). Lifelines read
+ * from TestReviewController + ApplicationPipelineService. No self-calls/returns.
+ */
+var UC19 = {
+    ucId: "UC-19",
+    title: "Tinjau Jawaban Tes",
+    lifelines: [
+        "HR Admin",
+        "TestReviewController",
+        "ApplicationPipelineService",
+        "ApplicationStage",
+        "EmailNotificationService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "decide(request, lowongan, submission)", seq: 1 },
+        { from: 1, to: 3, name: "update(catatan)",                       seq: 2 },
+        // alt [lulus]
+        { from: 1, to: 2, name: "advance(application)",                  seq: 3 },
+        { from: 2, to: 3, name: "update(status: Selesai/Aktif)",         seq: 4 },
+        { from: 2, to: 4, name: "dispatch('transisi_tahap', ...)",       seq: 5 },
+        // alt [gagal]
+        { from: 1, to: 2, name: "fail(application)",                     seq: 6 },
+        { from: 2, to: 3, name: "update(status: Gagal)",                 seq: 7 },
+        { from: 2, to: 4, name: "dispatch('kandidat_ditolak', ...)",     seq: 8 },
+        // alt [ditangguhkan]
+        { from: 1, to: 2, name: "reserve(application)",                  seq: 9 },
+        { from: 2, to: 3, name: "update(status: Reserved)",              seq: 10 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 10, leftIdx: 1, rightIdx: 4,
+        operands: [
+            { guard: "lulus",        firstSeq: 3, lastSeq: 5 },
+            { guard: "gagal",        firstSeq: 6, lastSeq: 8 },
+            { guard: "ditangguhkan", firstSeq: 9, lastSeq: 10 }
+        ]
+    }
+};
+
+/* ============================== UC-21 data ============================== */
+/*
+ * Wawancara User. InterviewController.decide records InterviewResult then runs
+ * the same advance/fail/reserve pipeline. 6 lifelines (result + stage are
+ * distinct entities). The 3-op alt tail mirrors UC-16. No self-calls/returns.
+ */
+var UC21 = {
+    ucId: "UC-21",
+    title: "Wawancara User",
+    lifelines: [
+        "Pewawancara",
+        "InterviewController",
+        "InterviewResult",
+        "ApplicationPipelineService",
+        "ApplicationStage",
+        "EmailNotificationService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "decide(request, lowongan, application)", seq: 1 },
+        { from: 1, to: 2, name: "create(keputusan, catatan, ratings)",    seq: 2 },
+        // alt [lulus]
+        { from: 1, to: 3, name: "advance(application)",                   seq: 3 },
+        { from: 3, to: 4, name: "update(status: Selesai/Aktif)",          seq: 4 },
+        { from: 3, to: 5, name: "dispatch('transisi_tahap', ...)",        seq: 5 },
+        // alt [gagal]
+        { from: 1, to: 3, name: "fail(application)",                      seq: 6 },
+        { from: 3, to: 4, name: "update(status: Gagal)",                  seq: 7 },
+        { from: 3, to: 5, name: "dispatch('kandidat_ditolak', ...)",      seq: 8 },
+        // alt [ditangguhkan]
+        { from: 1, to: 3, name: "reserve(application)",                   seq: 9 },
+        { from: 3, to: 4, name: "update(status: Reserved)",               seq: 10 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 10, leftIdx: 1, rightIdx: 5,
+        operands: [
+            { guard: "lulus",        firstSeq: 3, lastSeq: 5 },
+            { guard: "gagal",        firstSeq: 6, lastSeq: 8 },
+            { guard: "ditangguhkan", firstSeq: 9, lastSeq: 10 }
+        ]
+    }
+};
+
+/* ============================== UC-26 data ============================== */
+/*
+ * Kirim Surat Penawaran. OfferingLetterController.send: persist offering ->
+ * dispatch email -> 2-op alt on send outcome. gagal branch returns error to the
+ * actor (drawn as a Call arrow; engine sets no return-type, so pitch holds).
+ * leftIdx=0: the error reply touches the actor lifeline, box spans it.
+ */
+var UC26 = {
+    ucId: "UC-26",
+    title: "Kirim Surat Penawaran",
+    lifelines: [
+        "HR Admin",
+        "OfferingLetterController",
+        "OfferingLetter",
+        "EmailNotificationService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "send(request, lowongan, application)",           seq: 1 },
+        { from: 1, to: 2, name: "updateOrCreate(jabatan, gaji, status: pending)", seq: 2 },
+        { from: 1, to: 3, name: "dispatch('surat_penawaran', email, links)",      seq: 3 },
+        // alt [email terkirim]
+        { from: 1, to: 2, name: "update(sent_at)",                                seq: 4 },
+        // alt [gagal kirim]
+        { from: 1, to: 0, name: "withErrors('Gagal mengirim email penawaran')",   seq: 5 }
+    ],
+    alt: {
+        firstSeq: 4, lastSeq: 5, leftIdx: 0, rightIdx: 2,
+        // topPad raises the box top above update(sent_at) (free space under the
+        // alt tab). withErrors has no free top -- update sits one 41px pitch above
+        // it -- so its top comes from gapAbove, which trades against update's
+        // bottom (sum fixed at 41). gapAbove=34 gives withErrors ~16px visible top
+        // at the cost of update's bottom (~7px); update still has its 46px top.
+        topPad: 46, gapAbove: 34, botPad: 46,
+        operands: [
+            { guard: "email terkirim", firstSeq: 4, lastSeq: 4 },
+            { guard: "gagal kirim",    firstSeq: 5, lastSeq: 5 }
+        ]
+    }
+};
+
+/* ============================== UC-31 data ============================== */
+/*
+ * Lamar Lowongan. ApplicationController.store -> ApplicationService.store ->
+ * persist (Candidate/Application/stages) -> email. 2-op alt on the unique-email
+ * constraint: berhasil (create+dispatch) vs sudah melamar (create throws
+ * UniqueConstraintViolationException). No self-calls/returns.
+ */
+var UC31 = {
+    ucId: "UC-31",
+    title: "Lamar Lowongan",
+    lifelines: [
+        "Kandidat",
+        "ApplicationController",
+        "ApplicationService",
+        "Application",
+        "EmailNotificationService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request, vacancy)",                seq: 1 },
+        { from: 1, to: 2, name: "store(request, vacancy)",                seq: 2 },
+        // alt [berhasil]
+        { from: 2, to: 3, name: "create(candidate, application, stages)", seq: 3 },
+        { from: 2, to: 4, name: "dispatch('lamaran_diterima', ...)",      seq: 4 },
+        // alt [sudah melamar]
+        { from: 2, to: 3, name: "create(application) [UniqueConstraint]", seq: 5 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 5, leftIdx: 1, rightIdx: 4,
+        // gapAbove raised to give create[UniqueConstraint] (lower branch) more
+        // top space; costs dispatch ~6px bottom (still ample). botPad unchanged.
+        gapAbove: 30, botPad: 34,
+        operands: [
+            { guard: "berhasil",      firstSeq: 3, lastSeq: 4 },
+            { guard: "sudah melamar", firstSeq: 5, lastSeq: 5 }
+        ]
+    }
+};
+
+/* ============================== UC-33 data ============================== */
+/*
+ * Kerjakan Tes Kompetensi. TestController.submit -> doSubmit (private; COLLAPSED
+ * to direct Controller->Model calls to avoid a self-call that voids the pitch).
+ * 2-op alt: belum dikerjakan (lock+persist answers+mark) vs sudah dikerjakan
+ * (early redirect, drawn as Call to the actor -> leftIdx=0).
+ */
+var UC33 = {
+    ucId: "UC-33",
+    title: "Kerjakan Tes Kompetensi",
+    lifelines: [
+        "Kandidat",
+        "TestController",
+        "TestSubmission",
+        "TestAnswer"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "submit(request, token)",             seq: 1 },
+        { from: 1, to: 2, name: "where(token).firstOrFail()",         seq: 2 },
+        // alt [belum dikerjakan]
+        { from: 1, to: 2, name: "lockForUpdate().findOrFail(id)",     seq: 3 },
+        { from: 1, to: 3, name: "create(answers, skor, is_reviewed)", seq: 4 },
+        { from: 1, to: 2, name: "update(submitted_at, total_skor)",   seq: 5 },
+        // alt [sudah dikerjakan]
+        { from: 1, to: 0, name: "redirect('tes.show', token)",        seq: 6 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 6, leftIdx: 0, rightIdx: 3,
+        // gapAbove raised to give redirect (lower branch) more top space; costs
+        // update bottom (41-34=7px, still ok). botPad unchanged.
+        gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "belum dikerjakan", firstSeq: 3, lastSeq: 5 },
+            { guard: "sudah dikerjakan", firstSeq: 6, lastSeq: 6 }
+        ]
+    }
+};
+
 /* ================================ main ================================ */
 
 function resolveTargetPackage(repo) {
@@ -393,9 +604,21 @@ function main() {
         return;
     }
     Session.Output("Target package: " + pkg.Name);
-    renderUC(repo, pkg, UC16);
-    Session.Output("DONE. If the alt box does not enclose msgs 3-10, report how");
-    Session.Output("many px off (top/bottom) and adjust MSG_ORIGIN / MSG_PITCH.");
+
+    // UC16 is the calibrated exemplar (already committed). MODELS = batch to
+    // render. Run on a FRESH empty package; each UC gets its own diagram.
+    // Branchy batch (activity-diagram notes): 19/21/26/31/33. All reuse the
+    // locked constants -- UC19/21 share UC16's 3-op pipeline tail; 26/31/33 are
+    // 2-op. None has self-calls (33's doSubmit collapsed) so the 41px pitch
+    // holds; re-render + eyeball each alt box anyway (Y is unreadable).
+    var MODELS = [UC19, UC21, UC26, UC31, UC33];
+    var totalIssues = 0, i;
+    for (i = 0; i < MODELS.length; i++) {
+        totalIssues += renderUC(repo, pkg, MODELS[i]);
+    }
+    Session.Output("DONE. " + MODELS.length + " diagram(s), " + totalIssues +
+        " sanity issue(s). Eyeball each alt box; if a box mis-encloses, report" +
+        " px off and which UC.");
 }
 
 main();
