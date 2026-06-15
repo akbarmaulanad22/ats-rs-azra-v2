@@ -790,6 +790,184 @@ var UC36 = {
     }
 };
 
+/* ============================== UC-24 data ============================== */
+/*
+ * Jadwalkan MCU. McuScheduleController.store: set the MCU stage schedule then
+ * email the candidate. Linear success; the guard fallback (already scheduled /
+ * no active MCU) is the second operand. 2-op alt, lower branch 1 msg -> reuse
+ * UC-31's pads (gapAbove 30 pushes the divider down so dispatch keeps bottom
+ * room; withErrors gets gapAbove-GUARD_ROW_H top). No self-calls/returns.
+ */
+var UC24 = {
+    ucId: "UC-24",
+    title: "Jadwalkan MCU",
+    lifelines: [
+        "HR Admin",
+        "McuScheduleController",
+        "ApplicationStage",
+        "EmailNotificationService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request, lowongan, application)", seq: 1 },
+        // alt [belum dijadwalkan]
+        { from: 1, to: 2, name: "update(jadwal, lokasi)",               seq: 2 },
+        { from: 1, to: 3, name: "dispatch('instruksi_mcu', ...)",       seq: 3 },
+        // alt [sudah dijadwalkan]
+        { from: 1, to: 0, name: "withErrors('MCU sudah dijadwalkan')",  seq: 4 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 4, leftIdx: 0, rightIdx: 3,
+        // store(seq1) is PRE-alt: its bottom = box-top gap = 41-topPad, traded
+        // against update-top (topPad-GUARD_ROW_H). Lower topPad to give store
+        // more bottom. dispatch(seq3) bottom = 41-gapAbove, traded against
+        // withErrors-top; lower gapAbove to give dispatch more bottom. Both
+        // upper-msg bottoms preferred over the (comfortable) lower-msg tops.
+        topPad: 26, gapAbove: 22, botPad: 34,
+        operands: [
+            { guard: "belum dijadwalkan", firstSeq: 2, lastSeq: 3 },
+            { guard: "sudah dijadwalkan", firstSeq: 4, lastSeq: 4 }
+        ]
+    }
+};
+
+/* ============================== UC-32 data ============================== */
+/*
+ * Isi Data Pribadi. ValidateApplicationStepController.__invoke: per-step AJAX
+ * validation, persists nothing. Builds a Validator from StoreApplicationRequest
+ * rules; step 1 also checks whether the email already applied. 2-op alt on the
+ * validation outcome, BOTH operands 1 msg -> reuse UC-26's pads (topPad 46 free
+ * above json(ok); botPad 46 free below json(errors); gapAbove 34 splits the
+ * pitch between them). No self-calls/returns.
+ */
+var UC32 = {
+    ucId: "UC-32",
+    title: "Isi Data Pribadi",
+    lifelines: [
+        "Kandidat",
+        "ValidateApplicationStepController",
+        "StoreApplicationRequest",
+        "Validator",
+        "Application"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "validate(request, vacancy)",            seq: 1 },
+        { from: 1, to: 2, name: "rulesForStep(step)",                    seq: 2 },
+        { from: 1, to: 3, name: "make(data, rules)",                     seq: 3 },
+        { from: 1, to: 4, name: "where(vacancy).whereHas(email).exists()", seq: 4 },
+        // alt [valid]
+        { from: 1, to: 0, name: "json(['ok' => true])",                  seq: 5 },
+        // alt [tidak valid]
+        { from: 1, to: 0, name: "json(['errors'], 422)",                 seq: 6 }
+    ],
+    alt: {
+        firstSeq: 5, lastSeq: 6, leftIdx: 0, rightIdx: 1,
+        topPad: 46, gapAbove: 34, botPad: 46,
+        operands: [
+            { guard: "valid",       firstSeq: 5, lastSeq: 5 },
+            { guard: "tidak valid", firstSeq: 6, lastSeq: 6 }
+        ]
+    }
+};
+
+/* ============================== UC-34 data ============================== */
+/*
+ * Kerjakan Tes DiSC. DiscTestController.submit -> doSubmit (private; COLLAPSED
+ * to direct Controller->Model calls to dodge the self-call that voids pitch,
+ * same as UC-33). DiSC auto-scores and advances (UC-33 competency did neither):
+ * after persisting answers it calls scoringService.calculate then
+ * pipelineService.advance. 2-op alt: belum dikerjakan (lock+persist+score+
+ * advance, 5 msgs) vs sudah dikerjakan (early redirect, 1 msg, leftIdx 0).
+ * Reuse UC-33's pads (gapAbove 34, botPad 34).
+ */
+var UC34 = {
+    ucId: "UC-34",
+    title: "Kerjakan Tes DiSC",
+    lifelines: [
+        "Kandidat",
+        "DiscTestController",
+        "DiscSubmission",
+        "DiscAnswer",
+        "DiscScoringService",
+        "ApplicationPipelineService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "submit(request, token)",            seq: 1 },
+        { from: 1, to: 2, name: "where(token).firstOrFail()",        seq: 2 },
+        // alt [belum dikerjakan]
+        { from: 1, to: 2, name: "lockForUpdate().findOrFail(id)",    seq: 3 },
+        { from: 1, to: 3, name: "create(most, least)",               seq: 4 },
+        { from: 1, to: 2, name: "update(submitted_at)",              seq: 5 },
+        { from: 1, to: 4, name: "calculate(submission)",             seq: 6 },
+        { from: 1, to: 5, name: "advance(application)",              seq: 7 },
+        // alt [sudah dikerjakan]
+        { from: 1, to: 0, name: "redirect('tes-disc.show', token)",  seq: 8 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 8, leftIdx: 0, rightIdx: 5,
+        // 1-msg "sudah dikerjakan" stays the BOTTOM operand (top-operand reorder
+        // REJECTED: small top op collides the two guard labels at the box top).
+        // redirect_top = gapAbove - GUARD_ROW_H is PITCH-INDEPENDENT, so it keeps
+        // growing with gapAbove; the only cap is advance(seq7) staying above the
+        // divider (advance_bottom = realPitch - gapAbove). The 41px "wall" was a
+        // calibrated average, never verified -- user's silence on advance proved
+        // headroom. Diagnostic: gapAbove 46. If advance still clears the divider,
+        // realPitch > 41 and this is fine; else back off to the largest clearing.
+        gapAbove: 46, botPad: 34,
+        operands: [
+            { guard: "belum dikerjakan", firstSeq: 3, lastSeq: 7 },
+            { guard: "sudah dikerjakan", firstSeq: 8, lastSeq: 8 }
+        ]
+    }
+};
+
+/* ============================== UC-35 data ============================== */
+/*
+ * Kerjakan Tes MBTI. MbtiTestController.submit -> doSubmit (COLLAPSED, same
+ * self-call dodge as UC-33/34). Identical shape to UC-34: persist answers,
+ * scoringService.calculate, pipelineService.advance, or early redirect if
+ * already submitted. Reuse UC-33's pads (gapAbove 34, botPad 34).
+ */
+var UC35 = {
+    ucId: "UC-35",
+    title: "Kerjakan Tes MBTI",
+    lifelines: [
+        "Kandidat",
+        "MbtiTestController",
+        "MbtiSubmission",
+        "MbtiAnswer",
+        "MbtiScoringService",
+        "ApplicationPipelineService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "submit(request, token)",            seq: 1 },
+        { from: 1, to: 2, name: "where(token).firstOrFail()",        seq: 2 },
+        // alt [belum dikerjakan]
+        { from: 1, to: 2, name: "lockForUpdate().findOrFail(id)",    seq: 3 },
+        { from: 1, to: 3, name: "create(jawaban)",                   seq: 4 },
+        { from: 1, to: 2, name: "update(submitted_at)",              seq: 5 },
+        { from: 1, to: 4, name: "calculate(submission)",             seq: 6 },
+        { from: 1, to: 5, name: "advance(application)",              seq: 7 },
+        // alt [sudah dikerjakan]
+        { from: 1, to: 0, name: "redirect('tes-mbti.show', token)",  seq: 8 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 8, leftIdx: 0, rightIdx: 5,
+        // 1-msg "sudah dikerjakan" stays the BOTTOM operand (top-operand reorder
+        // REJECTED: small top op collides the two guard labels at the box top).
+        // redirect_top = gapAbove - GUARD_ROW_H is PITCH-INDEPENDENT, so it keeps
+        // growing with gapAbove; the only cap is advance(seq7) staying above the
+        // divider (advance_bottom = realPitch - gapAbove). The 41px "wall" was a
+        // calibrated average, never verified -- user's silence on advance proved
+        // headroom. Diagnostic: gapAbove 46. If advance still clears the divider,
+        // realPitch > 41 and this is fine; else back off to the largest clearing.
+        gapAbove: 46, botPad: 34,
+        operands: [
+            { guard: "belum dikerjakan", firstSeq: 3, lastSeq: 7 },
+            { guard: "sudah dikerjakan", firstSeq: 8, lastSeq: 8 }
+        ]
+    }
+};
+
 /* ================================ main ================================ */
 
 function resolveTargetPackage(repo) {
@@ -816,13 +994,14 @@ function main() {
 
     // UC16 is the calibrated exemplar (already committed). MODELS = batch to
     // render. Run on a FRESH empty package; each UC gets its own diagram.
-    // Batch 2 (decision UCs): 17/22/23/25/36. All reuse the locked constants on
-    // DEFAULT pads -- UC17 clones UC16's 3-op tail; UC22/23 clone UC21's
-    // InterviewResult+pipeline; UC25 is an asymmetric 3-op (MCU lulus->onboarding
-    // is silent, no dispatch); UC36 is a symmetric 2-op offer response. None has
-    // self-calls/returns so the 41px pitch holds; re-render + eyeball each alt
-    // box anyway (Y is unreadable). Earlier batch 19/21/26/31/33 already committed.
-    var MODELS = [UC17, UC22, UC23, UC25, UC36];
+    // Batch 3 (candidate token tests + scheduling/validation): 24/32/34/35.
+    // UC34/35 clone UC33 (doSubmit self-call COLLAPSED) + auto-score/advance
+    // tail, reuse UC33 pads (gapAbove34/botPad34); UC24 reuses UC31 pads
+    // (gapAbove30/botPad34, lower 1-msg); UC32 reuses UC26 pads (topPad46/
+    // gapAbove34/botPad46, both operands 1-msg). Batches 1-2 (19/21/26/31/33,
+    // 17/22/23/25/36) already committed. UC27 onboarding deferred (dual-action,
+    // needs a modelling decision). Re-render + eyeball each alt box.
+    var MODELS = [UC24, UC32, UC34, UC35];
     var totalIssues = 0, i;
     for (i = 0; i < MODELS.length; i++) {
         totalIssues += renderUC(repo, pkg, MODELS[i]);
