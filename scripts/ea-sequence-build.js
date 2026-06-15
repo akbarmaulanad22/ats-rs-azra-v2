@@ -40,15 +40,35 @@ var LIFE_W     = 110;    // lifeline head box width
 var LIFE_TOP   = 30;     // y of lifeline head top
 var LIFE_FOOT_PAD = 60;  // extra lifeline length below the last message
 
-// PREDICTED message stacking (CALIBRATE on first UC-16 render):
-var MSG_ORIGIN = 90;     // y of the FIRST message (seqNo 1)
-var MSG_PITCH  = 45;     // vertical gap EA leaves between consecutive messages
+// MEASURED message stacking. EA stores NO message Y (probe3: Geometry/Path
+// empty, t_diagramlinks zero rows) -- it computes position from SequenceNo at
+// a FIXED pitch. These two were read off the UC-16 render (probe3 image):
+// messages evenly spaced, seq1 y~136 .. seq10 y~505 => pitch (505-136)/9 ~= 41.
+// Uniform pitch held WITH activation bars on. WARNING: self-messages (from==to)
+// and return/dashed replies are NOT proven at this pitch -- EA draws a self-call
+// bracket ~1.5-2x a row. UC-16 has neither; re-verify before trusting on a UC
+// that does. Verification = re-render + eyeball (Y is unreadable, no auto-check).
+var MSG_ORIGIN = 136;    // y of the FIRST message (seqNo 1)
+var MSG_PITCH  = 41;     // vertical gap EA leaves between consecutive messages
 
 // alt fragment box padding around the messages it encloses
 var FRAG_PAD_X   = 24;   // box extends this far left/right beyond outermost lifeline
-var FRAG_TOP_PAD = 24;   // room above first enclosed msg for the "alt" operator tab
-var FRAG_BOT_PAD = 16;   // room below last enclosed msg
-var OPERAND_GUARD_H = 4; // EA adds a little height per operand for its guard row
+var FRAG_TOP_PAD = 34;   // room above first enclosed msg for "alt" tab + advance() clearance
+var FRAG_BOT_PAD = 13;   // room below last enclosed msg (calibrated on UC-16)
+// Clearance placed ABOVE each branch's first message (below the divider that
+// opens its operand). EA prints the guard label (~GUARD_ROW_H) at the top of
+// that gap, so the VISIBLE space before the message is GAP_ABOVE - GUARD_ROW_H.
+// Set to FRAG_TOP_PAD (34) so fail()/reserve() get the same label+gap look as
+// advance() under the box top. Pitch is fixed ~41, so the upper branch's last
+// message keeps only ~MSG_PITCH - GAP_ABOVE (~7px) below it -- intentional: the
+// user prioritised first-message margin. Lower toward ~28 if an upper message
+// ever touches its divider.
+var GAP_ABOVE = 34;
+// EA adds a guard-label row to each operand region's height that we do not
+// control and that ACCUMULATES down the box (lower dividers drift a full row).
+// Subtract this from every region Size to cancel it. Calibrate on UC-16: if the
+// last divider still sits too low, raise it; if dividers ride too high, lower.
+var GUARD_ROW_H = 18;
 
 /* ============================== primitives ============================== */
 
@@ -234,19 +254,50 @@ function renderUC(repo, pkg, model) {
         var lx = LIFE_X0 + (a.leftIdx * LIFE_STEP) - FRAG_PAD_X;
         var rx = LIFE_X0 + (a.rightIdx * LIFE_STEP) + LIFE_W + FRAG_PAD_X;
         var topY = yOf(a.firstSeq) - FRAG_TOP_PAD;
-        var botY = yOf(a.lastSeq) + FRAG_BOT_PAD;
 
-        var fragEl = pkg.Elements.AddNew("", "InteractionFragment");
-        fragEl.Update();
-        place(dia, fragEl, lx, topY, rx - lx, botY - topY);
-
-        // operand region heights from each operand's enclosed message span
-        var operands = [];
+        // Operand region heights, computed so each inter-branch divider lands
+        // GAP_ABOVE px above the LOWER branch's first message (and ~PITCH-GAP
+        // below the upper branch's last). Region boundaries are explicit Y's:
+        //   region[k] top    = (k==0) ? topY : yOf(branch[k].first) - GAP_ABOVE
+        //   region[k] bottom = (k==last) ? yOf(lastSeq)+FRAG_BOT_PAD
+        //                                 : yOf(branch[k+1].first) - GAP_ABOVE
+        // CRUCIAL: the box bottom is DERIVED from the size sum (botY=topY+sum),
+        // not the other way round. EA appears to NORMALIZE operand sizes to the
+        // box height; if box height != sum, lower dividers drift (seen as
+        // 'reserve' sitting on its divider while 'fail' was fine). Forcing
+        // height==sum makes scale exactly 1 so divider_k = topY+cumsum either
+        // way -- robust to whether EA normalizes.
+        var sizes = [];    // top -> bottom
         var k;
         for (k = 0; k < a.operands.length; k++) {
             var op = a.operands[k];
-            var hgt = (yOf(op.lastSeq) - yOf(op.firstSeq)) + MSG_PITCH + OPERAND_GUARD_H;
-            operands.push({ guard: op.guard, size: Math.round(hgt) });
+            var regTop = (k === 0) ? topY : (yOf(op.firstSeq) - GAP_ABOVE);
+            var regBot;
+            if (k < a.operands.length - 1) {
+                regBot = yOf(a.operands[k + 1].firstSeq) - GAP_ABOVE;
+            } else {
+                regBot = yOf(op.lastSeq) + FRAG_BOT_PAD;
+            }
+            // EA adds GUARD_ROW_H of label height to EACH operand region beyond
+            // the Size we write, and it ACCUMULATES downward (divider 1 ok,
+            // divider 2 drifts a full row). Subtract it per region so EA's added
+            // rows restore the intended divider Y. (Tune GUARD_ROW_H if needed.)
+            sizes.push({ guard: op.guard, size: Math.round(regBot - regTop) - GUARD_ROW_H });
+        }
+        var sumH = 0;
+        for (k = 0; k < sizes.length; k++) { sumH += sizes[k].size; }
+        var botY = topY + sumH;
+
+        var fragEl = pkg.Elements.AddNew("", "InteractionFragment");
+        fragEl.Update();
+        place(dia, fragEl, lx, topY, rx - lx, sumH);
+
+        // EA stacks the Partitions blob BOTTOM-TO-TOP (probe3: input order
+        // lulus/gagal/ditangguhkan rendered top->bottom as ditangguhkan/gagal/
+        // lulus). a.operands stays top->bottom for the reader; emit REVERSED.
+        var operands = [];
+        for (k = 0; k < sizes.length; k++) {
+            operands.unshift(sizes[k]);
         }
         configureAlt(repo, fragEl, operands);
 
