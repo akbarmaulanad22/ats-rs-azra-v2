@@ -1229,6 +1229,198 @@ var UC11 = {
     }
 };
 
+/* ============================== UC-03 data ============================== */
+/*
+ * Lihat Notifikasi (display). NotifikasiController.index: paginate the user's
+ * notifications, and IF any are unread, mark them read; then render. The
+ * `if ($unreadIds->isNotEmpty())` is a REAL controller branch -> 2-op alt whose
+ * operands differ by the genuine update(read_at) message (the view is shared but
+ * the decision is real). 2 pre-alt msgs (index, paginate) -> topPad 34.
+ */
+var UC03 = {
+    ucId: "UC-03",
+    title: "Lihat Notifikasi",
+    lifelines: [
+        "Pengguna Internal",
+        "NotifikasiController",
+        "DatabaseNotification"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "index(request)",                                 seq: 1 },
+        { from: 1, to: 2, name: "notifications().paginate(15)",                   seq: 2 },
+        // alt [ada belum dibaca]
+        { from: 1, to: 2, name: "unreadNotifications().whereIn(ids).update(read_at)", seq: 3 },
+        { from: 1, to: 0, name: "view('notifikasi.index')",                       seq: 4 },
+        // alt [sudah dibaca semua]
+        { from: 1, to: 0, name: "view('notifikasi.index')",                       seq: 5 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 5, leftIdx: 0, rightIdx: 2,
+        topPad: 34, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "ada belum dibaca",  firstSeq: 3, lastSeq: 4 },
+            { guard: "sudah dibaca semua", firstSeq: 5, lastSeq: 5 }
+        ]
+    }
+};
+
+/* ============================== UC-14 data ============================== */
+/*
+ * Lihat Pipeline (display, LINEAR -- NO alt). VacancyPipelineController.index
+ * authorizes, loads the vacancy, queries applications (optional search/stage/
+ * status filters), and ALWAYS returns view('pipeline.index'). The "belum ada
+ * kandidat" empty state is a Blade @if, NOT a controller branch -- drawing an alt
+ * here would be two identical view() operands (fabricated), so it is rendered
+ * linear with no combined fragment.
+ */
+var UC14 = {
+    ucId: "UC-14",
+    title: "Lihat Pipeline",
+    lifelines: [
+        "HR Admin",
+        "VacancyPipelineController",
+        "Vacancy",
+        "Application"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "index(request, lowongan)",                       seq: 1 },
+        { from: 1, to: 2, name: "load(unit, workflowTemplateSnapshot.stages)",    seq: 2 },
+        { from: 1, to: 3, name: "with(candidate, stages).where(vacancy_id).paginate()", seq: 3 },
+        { from: 1, to: 0, name: "view('pipeline.index')",                         seq: 4 }
+    ]
+};
+
+/* ============================== UC-15 data ============================== */
+/*
+ * Lihat Detail Kandidat (display). VacancyPipelineController.showApplication:
+ * authorize, then `abort_if($application->vacancy_id !== $lowongan->id, 404)` --
+ * a REAL branch. 2-op alt: [lamaran milik lowongan] eager-loads the full profile
+ * graph + renders; [bukan milik lowongan] aborts 404. Single pre-alt msg
+ * (showApplication) -> topPad 26 (UC-24 twin). leftIdx 0 (view/abort to actor).
+ */
+var UC15 = {
+    ucId: "UC-15",
+    title: "Lihat Detail Kandidat",
+    lifelines: [
+        "HR Admin",
+        "VacancyPipelineController",
+        "Application"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "showApplication(lowongan, application)",         seq: 1 },
+        // alt [lamaran milik lowongan]
+        { from: 1, to: 2, name: "load(candidate.*, stages.*, mcuResult)",         seq: 2 },
+        { from: 1, to: 0, name: "view('pipeline.show')",                          seq: 3 },
+        // alt [bukan milik lowongan]
+        { from: 1, to: 0, name: "abort(404)",                                     seq: 4 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 4, leftIdx: 0, rightIdx: 2,
+        // UC-24 twin (single pre-alt, 2-msg top / 1-msg-to-actor bottom). view()
+        // is the top operand's last msg; gapAbove pushes the divider DOWN so it
+        // clears view's dashed line. gapAbove 34 left it touching; 22 (UC-24's
+        // confirmed value) opens it. abort(404) keeps gapAbove-GUARD_ROW_H top.
+        topPad: 26, gapAbove: 22, botPad: 34,
+        operands: [
+            { guard: "lamaran milik lowongan", firstSeq: 2, lastSeq: 3 },
+            { guard: "bukan milik lowongan",   firstSeq: 4, lastSeq: 4 }
+        ]
+    }
+};
+
+/* ============================== UC-20 data ============================== */
+/*
+ * Lihat Hasil DiSC/MBTI (display, LINEAR -- NO alt). Part of the candidate detail
+ * page: VacancyPipelineController.showApplication eager-loads discSubmission.result
+ * + mbtiSubmission.result and renders. "Tes belum dikerjakan" is a view @if on a
+ * null result, NOT a controller branch -- no alt (would be two identical view()
+ * operands). Rendered linear.
+ */
+var UC20 = {
+    ucId: "UC-20",
+    title: "Lihat Hasil DiSC/MBTI",
+    lifelines: [
+        "HR Admin",
+        "VacancyPipelineController",
+        "DiscSubmission",
+        "MbtiSubmission"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "showApplication(lowongan, application)",         seq: 1 },
+        { from: 1, to: 2, name: "with('discSubmission.result')",                  seq: 2 },
+        { from: 1, to: 3, name: "with('mbtiSubmission.result')",                  seq: 3 },
+        { from: 1, to: 0, name: "view('pipeline.show')",                          seq: 4 }
+    ]
+};
+
+/* ============================== UC-30 data ============================== */
+/*
+ * Lihat Lowongan (display). CareerController.show:
+ * `abort_unless($vacancy->status === Published && tenggat->gte(now), 404)` -- a
+ * REAL branch. 2-op alt: [tersedia] loads unit/snapshot + renders the public
+ * detail; [tidak tersedia] aborts 404. Single pre-alt msg -> topPad 26.
+ */
+var UC30 = {
+    ucId: "UC-30",
+    title: "Lihat Lowongan",
+    lifelines: [
+        "Kandidat",
+        "CareerController",
+        "Vacancy"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "show(vacancy)",                                  seq: 1 },
+        // alt [tersedia]
+        { from: 1, to: 2, name: "load(unit, workflowTemplateSnapshot)",           seq: 2 },
+        { from: 1, to: 0, name: "view('career.show')",                            seq: 3 },
+        // alt [tidak tersedia]
+        { from: 1, to: 0, name: "abort(404)",                                     seq: 4 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 4, leftIdx: 0, rightIdx: 2,
+        // UC-24 twin: gapAbove 22 pushes the divider clear of view('career.show').
+        topPad: 26, gapAbove: 22, botPad: 34,
+        operands: [
+            { guard: "tersedia",       firstSeq: 2, lastSeq: 3 },
+            { guard: "tidak tersedia", firstSeq: 4, lastSeq: 4 }
+        ]
+    }
+};
+
+/* ============================== UC-37 data ============================== */
+/*
+ * Lihat Status Lamaran (display, tokenized). CandidateStatusController.show:
+ * `Application::where('token')->...->firstOrFail()` -- the firstOrFail is a REAL
+ * 404 branch. 2-op alt: [token valid] the query returns + renders the status page;
+ * [token tidak valid] firstOrFail aborts 404. Single pre-alt msg -> topPad 26.
+ */
+var UC37 = {
+    ucId: "UC-37",
+    title: "Lihat Status Lamaran",
+    lifelines: [
+        "Kandidat",
+        "CandidateStatusController",
+        "Application"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "show(token)",                                    seq: 1 },
+        // alt [token valid]
+        { from: 1, to: 2, name: "where(token).with(candidate, vacancy.unit, stages).firstOrFail()", seq: 2 },
+        { from: 1, to: 0, name: "view('career.status')",                          seq: 3 },
+        // alt [token tidak valid]
+        { from: 1, to: 0, name: "abort(404)",                                     seq: 4 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 4, leftIdx: 0, rightIdx: 2,
+        // UC-24 twin: gapAbove 22 pushes the divider clear of view('career.status').
+        topPad: 26, gapAbove: 22, botPad: 34,
+        operands: [
+            { guard: "token valid",       firstSeq: 2, lastSeq: 3 },
+            { guard: "token tidak valid", firstSeq: 4, lastSeq: 4 }
+        ]
+    }
+};
+
 /* ================================ main ================================ */
 
 function resolveTargetPackage(repo) {
@@ -1255,16 +1447,15 @@ function main() {
 
     // UC16 is the calibrated exemplar (already committed). MODELS = batch to
     // render. Run on a FRESH empty package; each UC gets its own diagram.
-    // Batch 4 = the shared CRUD family (UC-05..11, narrative line 164): each is a
-    // validation 2-op alt [valid]/[tidak valid] -- valid persists + redirects to
-    // index, tidak valid is the FormRequest/Validator redirect()->back() to the
-    // actor (1 msg). seq1 store/update is PRE-alt (UC-24 twin) so topPad=26; all 7
-    // share gapAbove 34 / botPad 34 (lower-branch top margin is pitch-independent,
-    // so the valid-branch height -- 3 to 5 msgs -- does not change it). No self-
-    // calls (WorkflowTemplate helpers routed to Stage/WorkflowTemplate models).
-    // Batches 1-3 (19/21/26/31/33, 17/22/23/25/36, 24/32/34/35) committed. UC27
-    // onboarding deferred (dual-action). Re-render + eyeball each alt box.
-    var MODELS = [UC05, UC06, UC07, UC08, UC09, UC10, UC11];
+    // Batch 5 = the display/list family (UC-03/14/15/20/30/37). FAITHFULNESS RULE:
+    // an alt is only drawn when the CONTROLLER branches; a Blade @if empty-state is
+    // NOT a branch. UC-03 (if unread isNotEmpty), UC-15 (abort_if 404), UC-30
+    // (abort_unless 404), UC-37 (firstOrFail 404) have real branches -> 2-op alt.
+    // UC-14 (index always returns view) + UC-20 (showApplication always renders)
+    // have NO controller branch -> rendered LINEAR, no fragment. Alt pads: single
+    // pre-alt msg -> topPad 26 (15/30/37); 2 pre-alt -> topPad 34 (03); all
+    // gapAbove 34 / botPad 34. Batches 1-4 committed. UC27 onboarding deferred.
+    var MODELS = [UC03, UC14, UC15, UC20, UC30, UC37];
     var totalIssues = 0, i;
     for (i = 0; i < MODELS.length; i++) {
         totalIssues += renderUC(repo, pkg, MODELS[i]);
