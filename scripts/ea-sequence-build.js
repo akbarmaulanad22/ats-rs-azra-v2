@@ -968,6 +968,267 @@ var UC35 = {
     }
 };
 
+/* ============================== UC-05 data ============================== */
+/*
+ * Kelola Unit (CRUD). UnitController.store: FormRequest validates, persist, then
+ * redirect. The defining decision is the validation outcome -> 2-op alt
+ * [valid]/[tidak valid]. seq1 store() is PRE-alt (above the box, like UC-24), so
+ * topPad is lowered to 26 to keep it off the box top. The [tidak valid] branch is
+ * the FormRequest's own redirect()->back()->withErrors() (StoreUnitRequest ->
+ * actor), drawn as a Call so pitch holds. No self-calls. Shared CRUD template for
+ * UC-05..11 (narrative line 164). Pads: topPad 26, gapAbove 34, botPad 34.
+ */
+var UC05 = {
+    ucId: "UC-05",
+    title: "Kelola Unit",
+    lifelines: [
+        "HR Admin",
+        "UnitController",
+        "StoreUnitRequest",
+        "Unit"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request)",                       seq: 1 },
+        // alt [valid]
+        { from: 1, to: 2, name: "validated()",                          seq: 2 },
+        { from: 1, to: 3, name: "create(validated)",                    seq: 3 },
+        { from: 1, to: 0, name: "redirect('unit.index').with(status)",  seq: 4 },
+        // alt [tidak valid]
+        { from: 2, to: 0, name: "redirect()->back()->withErrors()",     seq: 5 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 5, leftIdx: 0, rightIdx: 3,
+        topPad: 26, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "valid",       firstSeq: 2, lastSeq: 4 },
+            { guard: "tidak valid", firstSeq: 5, lastSeq: 5 }
+        ]
+    }
+};
+
+/* ============================== UC-06 data ============================== */
+/*
+ * Kelola Akun (CRUD). AccountController.store: find the employee, create the User
+ * account, link it back onto the employee, redirect. 5 lifelines (Employee + User
+ * are distinct). Same validation 2-op alt as UC-05. valid branch holds 5 msgs;
+ * branch height does NOT change the lower-branch divider math (seesaw is pitch-
+ * independent), so the shared CRUD pads still apply. No self-calls.
+ */
+var UC06 = {
+    ucId: "UC-06",
+    title: "Kelola Akun",
+    lifelines: [
+        "HR Admin",
+        "AccountController",
+        "StoreAccountRequest",
+        "Employee",
+        "User"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request)",                          seq: 1 },
+        // alt [valid]
+        { from: 1, to: 2, name: "validated()",                             seq: 2 },
+        { from: 1, to: 3, name: "findOrFail(employee_id)",                 seq: 3 },
+        { from: 1, to: 4, name: "create(username, role, password)",        seq: 4 },
+        { from: 1, to: 3, name: "update(user_id)",                         seq: 5 },
+        { from: 1, to: 0, name: "redirect('akun.index').with(status)",     seq: 6 },
+        // alt [tidak valid]
+        { from: 2, to: 0, name: "redirect()->back()->withErrors()",        seq: 7 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 7, leftIdx: 0, rightIdx: 4,
+        topPad: 26, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "valid",       firstSeq: 2, lastSeq: 6 },
+            { guard: "tidak valid", firstSeq: 7, lastSeq: 7 }
+        ]
+    }
+};
+
+/* ============================== UC-07 data ============================== */
+/*
+ * Kelola Karyawan (CRUD). EmployeeController.store: FormRequest validates,
+ * Employee::create, redirect. Structurally identical to UC-05. Shared CRUD pads.
+ */
+var UC07 = {
+    ucId: "UC-07",
+    title: "Kelola Karyawan",
+    lifelines: [
+        "HR Admin",
+        "EmployeeController",
+        "StoreEmployeeRequest",
+        "Employee"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request)",                          seq: 1 },
+        // alt [valid]
+        { from: 1, to: 2, name: "validated()",                             seq: 2 },
+        { from: 1, to: 3, name: "create(validated)",                       seq: 3 },
+        { from: 1, to: 0, name: "redirect('karyawan.index').with(status)", seq: 4 },
+        // alt [tidak valid]
+        { from: 2, to: 0, name: "redirect()->back()->withErrors()",        seq: 5 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 5, leftIdx: 0, rightIdx: 3,
+        topPad: 26, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "valid",       firstSeq: 2, lastSeq: 4 },
+            { guard: "tidak valid", firstSeq: 5, lastSeq: 5 }
+        ]
+    }
+};
+
+/* ============================== UC-08 data ============================== */
+/*
+ * Kelola Template Alur (CRUD). WorkflowTemplateController.store: validate the
+ * stage constraints (locked first/last), create the template, sync its stages,
+ * redirect. validateStageConstraints/syncStages are private helpers -> routed to
+ * model lifelines (Stage / WorkflowTemplate) NOT self, to dodge the pitch-breaking
+ * self-call. Same validation 2-op alt. Shared CRUD pads.
+ */
+var UC08 = {
+    ucId: "UC-08",
+    title: "Kelola Template Alur",
+    lifelines: [
+        "HR Admin",
+        "WorkflowTemplateController",
+        "StoreWorkflowTemplateRequest",
+        "WorkflowTemplate",
+        "Stage"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request)",                              seq: 1 },
+        // alt [valid]
+        { from: 1, to: 2, name: "validated()",                                 seq: 2 },
+        { from: 1, to: 4, name: "validateStageConstraints(stages)",            seq: 3 },
+        { from: 1, to: 3, name: "create(nama)",                                seq: 4 },
+        { from: 1, to: 3, name: "syncStages(stageIds)",                        seq: 5 },
+        { from: 1, to: 0, name: "redirect('template-alur.index').with(status)", seq: 6 },
+        // alt [tidak valid]
+        { from: 2, to: 0, name: "redirect()->back()->withErrors()",            seq: 7 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 7, leftIdx: 0, rightIdx: 4,
+        topPad: 26, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "valid",       firstSeq: 2, lastSeq: 6 },
+            { guard: "tidak valid", firstSeq: 7, lastSeq: 7 }
+        ]
+    }
+};
+
+/* ============================== UC-09 data ============================== */
+/*
+ * Kelola Template Wawancara (CRUD). InterviewTemplateController.store validates
+ * INLINE ($request->validate) -> a "Validator" lifeline (like UC-32) instead of a
+ * FormRequest. DB::transaction: create the template then create its items in a
+ * loop (drawn as ONE items().create() message per the one-fragment design).
+ * Shared CRUD pads.
+ */
+var UC09 = {
+    ucId: "UC-09",
+    title: "Kelola Template Wawancara",
+    lifelines: [
+        "HR Admin",
+        "InterviewTemplateController",
+        "Validator",
+        "InterviewTemplate",
+        "InterviewTemplateItem"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request)",                                  seq: 1 },
+        // alt [valid]
+        { from: 1, to: 2, name: "validate(rules)",                                 seq: 2 },
+        { from: 1, to: 3, name: "create(nama, tipe)",                              seq: 3 },
+        { from: 1, to: 4, name: "items().create(teks, urutan)",                    seq: 4 },
+        { from: 1, to: 0, name: "redirect('template-wawancara.index').with(success)", seq: 5 },
+        // alt [tidak valid]
+        { from: 2, to: 0, name: "redirect()->back()->withErrors()",                seq: 6 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 6, leftIdx: 0, rightIdx: 4,
+        topPad: 26, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "valid",       firstSeq: 2, lastSeq: 5 },
+            { guard: "tidak valid", firstSeq: 6, lastSeq: 6 }
+        ]
+    }
+};
+
+/* ============================== UC-10 data ============================== */
+/*
+ * Kelola Bank Soal (CRUD). QuestionBankTemplateController.store validates INLINE
+ * -> Validator lifeline. DB::transaction: create template -> create questions ->
+ * create options (nested loops collapsed to one message each per the one-fragment
+ * design). 6 lifelines. Shared CRUD pads.
+ */
+var UC10 = {
+    ucId: "UC-10",
+    title: "Kelola Bank Soal",
+    lifelines: [
+        "HR Admin",
+        "QuestionBankTemplateController",
+        "Validator",
+        "QuestionBankTemplate",
+        "Question",
+        "QuestionOption"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request)",                                   seq: 1 },
+        // alt [valid]
+        { from: 1, to: 2, name: "validate(rules)",                                  seq: 2 },
+        { from: 1, to: 3, name: "create(nama)",                                     seq: 3 },
+        { from: 1, to: 4, name: "questions().create(tipe, pertanyaan, nilai_poin)", seq: 4 },
+        { from: 1, to: 5, name: "options().create(teks_opsi, is_correct)",          seq: 5 },
+        { from: 1, to: 0, name: "redirect('template-bank-soal.index').with(status)", seq: 6 },
+        // alt [tidak valid]
+        { from: 2, to: 0, name: "redirect()->back()->withErrors()",                 seq: 7 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 7, leftIdx: 0, rightIdx: 5,
+        topPad: 26, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "valid",       firstSeq: 2, lastSeq: 6 },
+            { guard: "tidak valid", firstSeq: 7, lastSeq: 7 }
+        ]
+    }
+};
+
+/* ============================== UC-11 data ============================== */
+/*
+ * Kelola Template Email (CRUD, UPDATE-only). EmailTemplateController.update:
+ * FormRequest validates, EmailTemplate::update, redirect. No create/destroy. seq1
+ * is update() (not store) but the shape is the same validation 2-op alt. Shared
+ * CRUD pads.
+ */
+var UC11 = {
+    ucId: "UC-11",
+    title: "Kelola Template Email",
+    lifelines: [
+        "HR Admin",
+        "EmailTemplateController",
+        "UpdateEmailTemplateRequest",
+        "EmailTemplate"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "update(request, templateEmail)",            seq: 1 },
+        // alt [valid]
+        { from: 1, to: 2, name: "validated()",                               seq: 2 },
+        { from: 1, to: 3, name: "update(validated)",                         seq: 3 },
+        { from: 1, to: 0, name: "redirect('template-email.index').with(status)", seq: 4 },
+        // alt [tidak valid]
+        { from: 2, to: 0, name: "redirect()->back()->withErrors()",          seq: 5 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 5, leftIdx: 0, rightIdx: 3,
+        topPad: 26, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "valid",       firstSeq: 2, lastSeq: 4 },
+            { guard: "tidak valid", firstSeq: 5, lastSeq: 5 }
+        ]
+    }
+};
+
 /* ================================ main ================================ */
 
 function resolveTargetPackage(repo) {
@@ -994,14 +1255,16 @@ function main() {
 
     // UC16 is the calibrated exemplar (already committed). MODELS = batch to
     // render. Run on a FRESH empty package; each UC gets its own diagram.
-    // Batch 3 (candidate token tests + scheduling/validation): 24/32/34/35.
-    // UC34/35 clone UC33 (doSubmit self-call COLLAPSED) + auto-score/advance
-    // tail, reuse UC33 pads (gapAbove34/botPad34); UC24 reuses UC31 pads
-    // (gapAbove30/botPad34, lower 1-msg); UC32 reuses UC26 pads (topPad46/
-    // gapAbove34/botPad46, both operands 1-msg). Batches 1-2 (19/21/26/31/33,
-    // 17/22/23/25/36) already committed. UC27 onboarding deferred (dual-action,
-    // needs a modelling decision). Re-render + eyeball each alt box.
-    var MODELS = [UC24, UC32, UC34, UC35];
+    // Batch 4 = the shared CRUD family (UC-05..11, narrative line 164): each is a
+    // validation 2-op alt [valid]/[tidak valid] -- valid persists + redirects to
+    // index, tidak valid is the FormRequest/Validator redirect()->back() to the
+    // actor (1 msg). seq1 store/update is PRE-alt (UC-24 twin) so topPad=26; all 7
+    // share gapAbove 34 / botPad 34 (lower-branch top margin is pitch-independent,
+    // so the valid-branch height -- 3 to 5 msgs -- does not change it). No self-
+    // calls (WorkflowTemplate helpers routed to Stage/WorkflowTemplate models).
+    // Batches 1-3 (19/21/26/31/33, 17/22/23/25/36, 24/32/34/35) committed. UC27
+    // onboarding deferred (dual-action). Re-render + eyeball each alt box.
+    var MODELS = [UC05, UC06, UC07, UC08, UC09, UC10, UC11];
     var totalIssues = 0, i;
     for (i = 0; i < MODELS.length; i++) {
         totalIssues += renderUC(repo, pkg, MODELS[i]);
