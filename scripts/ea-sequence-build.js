@@ -581,6 +581,215 @@ var UC33 = {
     }
 };
 
+/* ============================== UC-17 data ============================== */
+/*
+ * Skrining CV User. CvScreeningController.decide with the user stage
+ * (skrining_cv_user). Structurally IDENTICAL to UC-16 (same controller, same
+ * 3-op pipeline tail) -- only the actor differs (Kepala Unit / Karyawan).
+ * DEFAULT pads. No self-calls/returns.
+ */
+var UC17 = {
+    ucId: "UC-17",
+    title: "Skrining CV User",
+    lifelines: [
+        "Kepala Unit",
+        "CvScreeningController",
+        "ApplicationPipelineService",
+        "ApplicationStage",
+        "EmailNotificationService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "decide(request, lowongan, application)", seq: 1 },
+        { from: 1, to: 3, name: "update(catatan, reviewed_by)",          seq: 2 },
+        // alt [lulus]
+        { from: 1, to: 2, name: "advance(application)",                  seq: 3 },
+        { from: 2, to: 3, name: "update(status: Selesai/Aktif)",         seq: 4 },
+        { from: 2, to: 4, name: "dispatch('transisi_tahap', ...)",       seq: 5 },
+        // alt [gagal]
+        { from: 1, to: 2, name: "fail(application)",                     seq: 6 },
+        { from: 2, to: 3, name: "update(status: Gagal)",                 seq: 7 },
+        { from: 2, to: 4, name: "dispatch('kandidat_ditolak', ...)",     seq: 8 },
+        // alt [ditangguhkan]
+        { from: 1, to: 2, name: "reserve(application)",                  seq: 9 },
+        { from: 2, to: 3, name: "update(status: Reserved)",              seq: 10 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 10, leftIdx: 1, rightIdx: 4,
+        operands: [
+            { guard: "lulus",        firstSeq: 3, lastSeq: 5 },
+            { guard: "gagal",        firstSeq: 6, lastSeq: 8 },
+            { guard: "ditangguhkan", firstSeq: 9, lastSeq: 10 }
+        ]
+    }
+};
+
+/* ============================== UC-22 data ============================== */
+/*
+ * Wawancara Manajer HR. InterviewController.decide with stage
+ * wawancara_manajer_hr. Same shape as UC-21 (records InterviewResult then the
+ * advance/fail/reserve pipeline). Only the actor differs. DEFAULT pads.
+ */
+var UC22 = {
+    ucId: "UC-22",
+    title: "Wawancara Manajer HR",
+    lifelines: [
+        "Manajer HR",
+        "InterviewController",
+        "InterviewResult",
+        "ApplicationPipelineService",
+        "ApplicationStage",
+        "EmailNotificationService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "decide(request, lowongan, application)", seq: 1 },
+        { from: 1, to: 2, name: "create(keputusan, catatan, ratings)",    seq: 2 },
+        // alt [lulus]
+        { from: 1, to: 3, name: "advance(application)",                   seq: 3 },
+        { from: 3, to: 4, name: "update(status: Selesai/Aktif)",          seq: 4 },
+        { from: 3, to: 5, name: "dispatch('transisi_tahap', ...)",        seq: 5 },
+        // alt [gagal]
+        { from: 1, to: 3, name: "fail(application)",                      seq: 6 },
+        { from: 3, to: 4, name: "update(status: Gagal)",                  seq: 7 },
+        { from: 3, to: 5, name: "dispatch('kandidat_ditolak', ...)",      seq: 8 },
+        // alt [ditangguhkan]
+        { from: 1, to: 3, name: "reserve(application)",                   seq: 9 },
+        { from: 3, to: 4, name: "update(status: Reserved)",               seq: 10 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 10, leftIdx: 1, rightIdx: 5,
+        operands: [
+            { guard: "lulus",        firstSeq: 3, lastSeq: 5 },
+            { guard: "gagal",        firstSeq: 6, lastSeq: 8 },
+            { guard: "ditangguhkan", firstSeq: 9, lastSeq: 10 }
+        ]
+    }
+};
+
+/* ============================== UC-23 data ============================== */
+/*
+ * Wawancara Direktur. InterviewController.decide with stage wawancara_direktur.
+ * Clone of UC-22 with the Direktur actor. DEFAULT pads.
+ */
+var UC23 = {
+    ucId: "UC-23",
+    title: "Wawancara Direktur",
+    lifelines: [
+        "Direktur",
+        "InterviewController",
+        "InterviewResult",
+        "ApplicationPipelineService",
+        "ApplicationStage",
+        "EmailNotificationService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "decide(request, lowongan, application)", seq: 1 },
+        { from: 1, to: 2, name: "create(keputusan, catatan, ratings)",    seq: 2 },
+        // alt [lulus]
+        { from: 1, to: 3, name: "advance(application)",                   seq: 3 },
+        { from: 3, to: 4, name: "update(status: Selesai/Aktif)",          seq: 4 },
+        { from: 3, to: 5, name: "dispatch('transisi_tahap', ...)",        seq: 5 },
+        // alt [gagal]
+        { from: 1, to: 3, name: "fail(application)",                      seq: 6 },
+        { from: 3, to: 4, name: "update(status: Gagal)",                  seq: 7 },
+        { from: 3, to: 5, name: "dispatch('kandidat_ditolak', ...)",      seq: 8 },
+        // alt [ditangguhkan]
+        { from: 1, to: 3, name: "reserve(application)",                   seq: 9 },
+        { from: 3, to: 4, name: "update(status: Reserved)",               seq: 10 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 10, leftIdx: 1, rightIdx: 5,
+        operands: [
+            { guard: "lulus",        firstSeq: 3, lastSeq: 5 },
+            { guard: "gagal",        firstSeq: 6, lastSeq: 8 },
+            { guard: "ditangguhkan", firstSeq: 9, lastSeq: 10 }
+        ]
+    }
+};
+
+/* ============================== UC-25 data ============================== */
+/*
+ * Keputusan MCU. McuController.store records an McuResult then runs the
+ * pipeline. ASYMMETRIC 3-op: MCU lulus advances to onboarding, which is a
+ * SILENT stage (no email) -> lulus branch = advance + update only, NO dispatch.
+ * tidak lulus = fail + update(Gagal) + dispatch('kandidat_ditolak').
+ * ditangguhkan = reserve + update(Reserved). DEFAULT pads (operand row counts
+ * 2/3/2 mirror UC-16's tolerances). No self-calls/returns.
+ */
+var UC25 = {
+    ucId: "UC-25",
+    title: "Keputusan MCU",
+    lifelines: [
+        "HR Admin",
+        "McuController",
+        "McuResult",
+        "ApplicationPipelineService",
+        "ApplicationStage",
+        "EmailNotificationService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request, lowongan, application)",  seq: 1 },
+        { from: 1, to: 2, name: "create(keputusan, dokumen_path, catatan)", seq: 2 },
+        // alt [lulus]
+        { from: 1, to: 3, name: "advance(application)",                   seq: 3 },
+        { from: 3, to: 4, name: "update(status: Selesai/Aktif)",          seq: 4 },
+        // alt [tidak lulus]
+        { from: 1, to: 3, name: "fail(application)",                      seq: 5 },
+        { from: 3, to: 4, name: "update(status: Gagal)",                  seq: 6 },
+        { from: 3, to: 5, name: "dispatch('kandidat_ditolak', ...)",      seq: 7 },
+        // alt [ditangguhkan]
+        { from: 1, to: 3, name: "reserve(application)",                   seq: 8 },
+        { from: 3, to: 4, name: "update(status: Reserved)",               seq: 9 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 9, leftIdx: 1, rightIdx: 5,
+        operands: [
+            { guard: "lulus",        firstSeq: 3, lastSeq: 4 },
+            { guard: "tidak lulus",  firstSeq: 5, lastSeq: 7 },
+            { guard: "ditangguhkan", firstSeq: 8, lastSeq: 9 }
+        ]
+    }
+};
+
+/* ============================== UC-36 data ============================== */
+/*
+ * Terima/Tolak Penawaran. OfferingResponseController accept()/reject() -- the
+ * candidate responds to the offer via a signed link. Modelled as a 2-op alt on
+ * the response. terima: update(Accepted) + advance + notify HR. tolak:
+ * update(Rejected) + offering stage update(Gagal) + notify HR. Both branches
+ * hold 3 messages (symmetric) so DEFAULT pads sit evenly like UC-16. The
+ * already-responded guard path is omitted (main success flow only).
+ */
+var UC36 = {
+    ucId: "UC-36",
+    title: "Terima/Tolak Penawaran",
+    lifelines: [
+        "Kandidat",
+        "OfferingResponseController",
+        "OfferingLetter",
+        "ApplicationPipelineService",
+        "ApplicationStage",
+        "Notification"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "accept(offering) / reject(offering)",    seq: 1 },
+        // alt [terima]
+        { from: 1, to: 2, name: "update(status: Accepted, responded_at)", seq: 2 },
+        { from: 1, to: 3, name: "advance(application)",                   seq: 3 },
+        { from: 1, to: 5, name: "send(hrAdmins, PenawaranDirespon)",      seq: 4 },
+        // alt [tolak]
+        { from: 1, to: 2, name: "update(status: Rejected, rejection_reason)", seq: 5 },
+        { from: 1, to: 4, name: "update(status: Gagal)",                  seq: 6 },
+        { from: 1, to: 5, name: "send(hrAdmins, PenawaranDirespon)",      seq: 7 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 7, leftIdx: 1, rightIdx: 5,
+        operands: [
+            { guard: "terima", firstSeq: 2, lastSeq: 4 },
+            { guard: "tolak",  firstSeq: 5, lastSeq: 7 }
+        ]
+    }
+};
+
 /* ================================ main ================================ */
 
 function resolveTargetPackage(repo) {
@@ -607,11 +816,13 @@ function main() {
 
     // UC16 is the calibrated exemplar (already committed). MODELS = batch to
     // render. Run on a FRESH empty package; each UC gets its own diagram.
-    // Branchy batch (activity-diagram notes): 19/21/26/31/33. All reuse the
-    // locked constants -- UC19/21 share UC16's 3-op pipeline tail; 26/31/33 are
-    // 2-op. None has self-calls (33's doSubmit collapsed) so the 41px pitch
-    // holds; re-render + eyeball each alt box anyway (Y is unreadable).
-    var MODELS = [UC19, UC21, UC26, UC31, UC33];
+    // Batch 2 (decision UCs): 17/22/23/25/36. All reuse the locked constants on
+    // DEFAULT pads -- UC17 clones UC16's 3-op tail; UC22/23 clone UC21's
+    // InterviewResult+pipeline; UC25 is an asymmetric 3-op (MCU lulus->onboarding
+    // is silent, no dispatch); UC36 is a symmetric 2-op offer response. None has
+    // self-calls/returns so the 41px pitch holds; re-render + eyeball each alt
+    // box anyway (Y is unreadable). Earlier batch 19/21/26/31/33 already committed.
+    var MODELS = [UC17, UC22, UC23, UC25, UC36];
     var totalIssues = 0, i;
     for (i = 0; i < MODELS.length; i++) {
         totalIssues += renderUC(repo, pkg, MODELS[i]);
