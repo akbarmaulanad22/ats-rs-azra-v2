@@ -1421,6 +1421,283 @@ var UC37 = {
     }
 };
 
+/* ============================== UC-01 data ============================== */
+/*
+ * Login (auth). Laravel Fortify: AuthenticatedSessionController.store runs the
+ * Fortify::authenticateUsing closure (FortifyServiceProvider) -> User lookup by
+ * username, Hash::check, then THREE real outcomes: return the user (valid+aktif),
+ * throw ValidationException 'dinonaktifkan' (akun nonaktif), or return null which
+ * Fortify turns into the generic 'credentials' error (kredensial salah). The two
+ * failure modes (nonaktif, salah) are the SAME interaction -- controller -> actor
+ * ValidationException back to login -- differing only in the error string, so they
+ * are ONE operand (splitting them is a fabricated fork, same class as UC-14/20, and
+ * its render cramps because a 1-msg middle operand is height-locked to the pitch).
+ * Login's decision is binary -> 2-op alt. The success branch is SPLIT into two real
+ * Fortify post-auth actions (session regenerate, then redirect intended) so the top
+ * operand is 2-msg -- a single-msg top operand renders cramped (its one long label
+ * overlaps the guard row; the region is height-short). That makes this the standard
+ * multi-top / 1-msg-to-actor shape -> 2 pre-alt msgs -> topPad 34. SEESAW: the
+ * divider splits redirect (top-last, bottom clearance realPitch-gapAbove) and
+ * ValidationException (bottom-first, top clearance gapAbove-GUARD_ROW_H). gapAbove
+ * 22 starved ValidationException (4px, collided its guard); gapAbove 34 gives it
+ * 16px while redirect keeps realPitch-34 (~13px, realPitch>46 per UC-34) -- both
+ * clear. This is the CRUD multi-top/1-bottom value, not the display 22. botPad 34.
+ * The is_active rule lives in the guard text
+ * (a guard condition, not an interaction). Hash::check folded into the lookup msg;
+ * rate limit (login 5/min) is a pre-gate, omitted.
+ */
+var UC01 = {
+    ucId: "UC-01",
+    title: "Login",
+    lifelines: [
+        "Pengguna Internal",
+        "AuthenticatedSessionController",
+        "User"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(LoginRequest)",                         seq: 1 },
+        { from: 1, to: 2, name: "where('username').first() + Hash::check",      seq: 2 },
+        // alt [kredensial valid & akun aktif]
+        { from: 1, to: 0, name: "session()->regenerate()",                     seq: 3 },
+        { from: 1, to: 0, name: "redirect()->intended('dashboard')",           seq: 4 },
+        // alt [gagal -- akun nonaktif / kredensial salah]
+        { from: 1, to: 0, name: "ValidationException(...) -> back()",           seq: 5 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 5, leftIdx: 0, rightIdx: 1,
+        topPad: 34, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "kredensial valid & akun aktif",      firstSeq: 3, lastSeq: 4 },
+            { guard: "gagal: akun nonaktif / kredensial salah", firstSeq: 5, lastSeq: 5 }
+        ]
+    }
+};
+
+/* ============================== UC-02 data ============================== */
+/*
+ * Ubah Password (auth). PasswordChangeController.update validates INLINE
+ * (current_password + confirmed + Password::min(8)) -> Validator lifeline, then
+ * User::update(password, must_change_password:false), redirect. Direct CRUD-update
+ * twin (UC-05 shape): single pre-alt update() -> topPad 26 / gapAbove 34 / botPad 34.
+ */
+var UC02 = {
+    ucId: "UC-02",
+    title: "Ubah Password",
+    lifelines: [
+        "Pengguna Internal",
+        "PasswordChangeController",
+        "Validator",
+        "User"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "update(request)",                                 seq: 1 },
+        // alt [valid]
+        { from: 1, to: 2, name: "validate(current_password, password|confirmed|min:8)", seq: 2 },
+        { from: 1, to: 3, name: "update(password, must_change_password: false)",    seq: 3 },
+        { from: 1, to: 0, name: "redirect('dashboard').with(status)",              seq: 4 },
+        // alt [tidak valid]
+        { from: 2, to: 0, name: "redirect()->back()->withErrors()",                seq: 5 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 5, leftIdx: 0, rightIdx: 3,
+        topPad: 26, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "valid",       firstSeq: 2, lastSeq: 4 },
+            { guard: "tidak valid", firstSeq: 5, lastSeq: 5 }
+        ]
+    }
+};
+
+/* ============================== UC-12 data ============================== */
+/*
+ * Kelola Lowongan (CRUD + snapshot). VacancyController.store loads the chosen
+ * workflow template, then has a REAL guard: publishing a workflow that CONTAINS an
+ * unconfigured tes_kompetensi stage is rejected with back()->withErrors. Else it
+ * snapshots the template («extend» UC-13) and creates the vacancy. 2-op alt; 2
+ * pre-alt msgs (store, findOrFail) -> topPad 34. Guard label matches the withErrors
+ * text (publishing blocked until the test is configured).
+ */
+var UC12 = {
+    ucId: "UC-12",
+    title: "Kelola Lowongan",
+    lifelines: [
+        "HR Admin",
+        "VacancyController",
+        "WorkflowTemplate",
+        "WorkflowTemplateSnapshot",
+        "Vacancy"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request)",                                  seq: 1 },
+        { from: 1, to: 2, name: "with('stages').findOrFail(workflow_template_id)", seq: 2 },
+        // alt [draft / boleh publish]
+        { from: 1, to: 3, name: "createFromTemplate(template)",                    seq: 3 },
+        { from: 1, to: 4, name: "create(data, workflow_template_snapshot_id)",     seq: 4 },
+        { from: 1, to: 0, name: "redirect('lowongan.index').with(status)",         seq: 5 },
+        // alt [publish, tes belum dikonfigurasi]
+        { from: 1, to: 0, name: "back()->withErrors('tes kompetensi belum dikonfigurasi')", seq: 6 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 6, leftIdx: 0, rightIdx: 4,
+        topPad: 34, gapAbove: 34, botPad: 34,
+        operands: [
+            { guard: "draft / boleh publish",        firstSeq: 3, lastSeq: 5 },
+            { guard: "publish, tes belum dikonfigurasi", firstSeq: 6, lastSeq: 6 }
+        ]
+    }
+};
+
+/* ============================== UC-13 data ============================== */
+/*
+ * Terapkan Template Alur (LINEAR, «extend» of UC-12). The snapshot copy detail:
+ * VacancyController.store -> WorkflowTemplateSnapshot::createFromTemplate which
+ * self::create()s the snapshot then loops the template's stages creating one
+ * WorkflowTemplateSnapshotStage each (real body read from the model). No branch --
+ * the copy always runs once the template is valid -> no fragment. This UC exists to
+ * SHOW that copy, so the snapshot->stage create is modelled explicitly (not opaque).
+ */
+var UC13 = {
+    ucId: "UC-13",
+    title: "Terapkan Template Alur",
+    lifelines: [
+        "HR Admin",
+        "VacancyController",
+        "WorkflowTemplate",
+        "WorkflowTemplateSnapshot",
+        "WorkflowTemplateSnapshotStage"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "store(request) [pilih template alur]",           seq: 1 },
+        { from: 1, to: 2, name: "with('stages').findOrFail(workflow_template_id)", seq: 2 },
+        { from: 1, to: 3, name: "createFromTemplate(template)",                    seq: 3 },
+        { from: 3, to: 4, name: "stages().create(position, key, nama, is_locked_*)", seq: 4 },
+        { from: 1, to: 0, name: "redirect('lowongan.index').with(status)",         seq: 5 }
+    ]
+};
+
+/* ============================== UC-18 data ============================== */
+/*
+ * Kelola Tes Kompetensi (config + snapshot). VacancyTestController.save validates
+ * INLINE -> Validator lifeline; firstOrNew + save the VacancyTest, sync its
+ * questions, then VacancyTestSnapshot::createFromVacancyTest (shown OPAQUE -- a
+ * snapshot factory like UC-25/36's advance, the UC's focus is the config save not
+ * the copy internals). 2-op valid/invalid; single pre-alt save() -> topPad 26.
+ * Bottom withErrors needs top room (seesaw, same as UC-27): gapAbove 40 -> 22px top,
+ * redirect('lowongan.tes.show') keeps realPitch-40 (~7-10px) below. botPad 34.
+ */
+var UC18 = {
+    ucId: "UC-18",
+    title: "Kelola Tes Kompetensi",
+    lifelines: [
+        "HR Admin",
+        "VacancyTestController",
+        "Validator",
+        "VacancyTest",
+        "VacancyTestSnapshot"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "save(request, lowongan)",                         seq: 1 },
+        // alt [valid]
+        { from: 1, to: 2, name: "validate(batas_waktu_menit, question_ids)",       seq: 2 },
+        { from: 1, to: 3, name: "firstOrNew().save()",                             seq: 3 },
+        { from: 1, to: 3, name: "questions().sync(question_ids)",                  seq: 4 },
+        { from: 1, to: 4, name: "createFromVacancyTest(vacancyTest)",              seq: 5 },
+        { from: 1, to: 0, name: "redirect('lowongan.tes.show').with(success)",     seq: 6 },
+        // alt [tidak valid]
+        { from: 2, to: 0, name: "redirect()->back()->withErrors()",                seq: 7 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 7, leftIdx: 0, rightIdx: 4,
+        topPad: 26, gapAbove: 40, botPad: 34,
+        operands: [
+            { guard: "valid",       firstSeq: 2, lastSeq: 6 },
+            { guard: "tidak valid", firstSeq: 7, lastSeq: 7 }
+        ]
+    }
+};
+
+/* ============================== UC-27 data ============================== */
+/*
+ * Proses Onboarding (two-phase, dual-action). OnboardingController.sendInvitation
+ * then complete -- TWO HR actions in one flow. sendInvitation (save onboarding +
+ * email) is linear pre-alt. complete() has the REAL branch
+ * `if (! onboardingStage->status->isAdvanceable()) return back()->withErrors(...)`
+ * -> wrapped in a 2-op alt [tahap advanceable: advance + redirect] / [onboarding
+ * sudah selesai: withErrors]. (Resolves the deferred dual-action decision: render
+ * both phases sequentially, alt only on complete's guard.) seq4 complete is the
+ * 2nd actor call, just above the box -> topPad 26. SEESAW (same as UC-01): the lone
+ * bottom msg withErrors needs gapAbove-GUARD_ROW_H of top -- 22 gave 4px, 34 gave
+ * 16px (still tight). gapAbove 40 -> 22px top; redirect keeps realPitch-40 (~7-10px,
+ * realPitch>=47 per UC-34) below it. This is near the seesaw ceiling -- pushing
+ * gapAbove higher would starve redirect. gapAbove 40 / botPad 34.
+ */
+var UC27 = {
+    ucId: "UC-27",
+    title: "Proses Onboarding",
+    lifelines: [
+        "HR Admin",
+        "OnboardingController",
+        "OnboardingResult",
+        "EmailNotificationService",
+        "ApplicationPipelineService"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "sendInvitation(request, lowongan, application)",  seq: 1 },
+        { from: 1, to: 2, name: "updateOrCreate(tanggal_bergabung, catatan, sent_at)", seq: 2 },
+        { from: 1, to: 3, name: "dispatch('undangan_onboarding', ...)",           seq: 3 },
+        { from: 0, to: 1, name: "complete(lowongan, application)",                 seq: 4 },
+        // alt [tahap advanceable]
+        { from: 1, to: 4, name: "advance(application)",                            seq: 5 },
+        { from: 1, to: 0, name: "redirect('lowongan.pipeline').with(success)",     seq: 6 },
+        // alt [onboarding sudah selesai]
+        { from: 1, to: 0, name: "back()->withErrors('Tahap onboarding sudah selesai')", seq: 7 }
+    ],
+    alt: {
+        firstSeq: 5, lastSeq: 7, leftIdx: 0, rightIdx: 4,
+        topPad: 26, gapAbove: 40, botPad: 34,
+        operands: [
+            { guard: "tahap advanceable",     firstSeq: 5, lastSeq: 6 },
+            { guard: "onboarding sudah selesai", firstSeq: 7, lastSeq: 7 }
+        ]
+    }
+};
+
+/* ============================== UC-29 data ============================== */
+/*
+ * Tandai Reserved («extend»). The "Ditangguhkan" decision path:
+ * ApplicationPipelineService.reserve, called from the stage-decision controllers
+ * (CvScreeningController shown as the representative caller). 2-op alt: [ada tahap
+ * aktif] reserve -> ApplicationStage update(Reserved); [tidak ada tahap aktif]
+ * withErrors. Single pre-alt decide(); 2-msg-top (reserve forward-call + update) /
+ * 1-msg-to-actor bottom = UC-24 twin -> topPad 26 / gapAbove 22 / botPad 34.
+ */
+var UC29 = {
+    ucId: "UC-29",
+    title: "Tandai Reserved",
+    lifelines: [
+        "HR Admin",
+        "CvScreeningController",
+        "ApplicationPipelineService",
+        "ApplicationStage"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "decide(keputusan: Ditangguhkan)",                seq: 1 },
+        // alt [ada tahap aktif]
+        { from: 1, to: 2, name: "reserve(application)",                           seq: 2 },
+        { from: 2, to: 3, name: "update(status: Reserved)",                       seq: 3 },
+        // alt [tidak ada tahap aktif]
+        { from: 1, to: 0, name: "withErrors('Tidak ada tahap aktif yang dapat ditangguhkan')", seq: 4 }
+    ],
+    alt: {
+        firstSeq: 2, lastSeq: 4, leftIdx: 0, rightIdx: 3,
+        topPad: 26, gapAbove: 22, botPad: 34,
+        operands: [
+            { guard: "ada tahap aktif",       firstSeq: 2, lastSeq: 3 },
+            { guard: "tidak ada tahap aktif", firstSeq: 4, lastSeq: 4 }
+        ]
+    }
+};
+
 /* ================================ main ================================ */
 
 function resolveTargetPackage(repo) {
@@ -1447,15 +1724,19 @@ function main() {
 
     // UC16 is the calibrated exemplar (already committed). MODELS = batch to
     // render. Run on a FRESH empty package; each UC gets its own diagram.
-    // Batch 5 = the display/list family (UC-03/14/15/20/30/37). FAITHFULNESS RULE:
-    // an alt is only drawn when the CONTROLLER branches; a Blade @if empty-state is
-    // NOT a branch. UC-03 (if unread isNotEmpty), UC-15 (abort_if 404), UC-30
-    // (abort_unless 404), UC-37 (firstOrFail 404) have real branches -> 2-op alt.
-    // UC-14 (index always returns view) + UC-20 (showApplication always renders)
-    // have NO controller branch -> rendered LINEAR, no fragment. Alt pads: single
-    // pre-alt msg -> topPad 26 (15/30/37); 2 pre-alt -> topPad 34 (03); all
-    // gapAbove 34 / botPad 34. Batches 1-4 committed. UC27 onboarding deferred.
-    var MODELS = [UC03, UC14, UC15, UC20, UC30, UC37];
+    // Batch 6 (FINAL pipeline tail) = UC-01/02/12/13/18/27/29. UC-01 login
+    // (Fortify, 2-op alt; the two ValidationException failures share one interaction
+    // so they collapse to one gagal operand; success split into 2 msgs to avoid a
+    // cramped 1-msg top operand -> multi-top/1-bottom, 34/34/34). UC-02 password
+    // (CRUD-update twin 26/34/34).
+    // UC-12 vacancy store (publish-guard 2-op, 2 pre-alt -> topPad 34). UC-13
+    // snapshot copy (LINEAR, real createFromTemplate body). UC-18 test config
+    // (valid/invalid 2-op, opaque snapshot factory, 26/34/34). UC-27 onboarding
+    // (two-phase: sendInvitation linear + complete's isAdvanceable 2-op, 26/22/34).
+    // UC-29 reserved («extend», UC-24 twin 26/22/34). UC-04 DEFERRED (no dedicated
+    // "profil sendiri" controller -- DashboardController's isHrAdmin branch is
+    // dashboard-metrics, not profil; flagged to user). Batches 1-5 committed.
+    var MODELS = [UC01, UC02, UC12, UC13, UC18, UC27, UC29];
     var totalIssues = 0, i;
     for (i = 0; i < MODELS.length; i++) {
         totalIssues += renderUC(repo, pkg, MODELS[i]);
