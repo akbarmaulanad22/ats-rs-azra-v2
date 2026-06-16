@@ -1698,6 +1698,86 @@ var UC29 = {
     }
 };
 
+/* ============================== UC-28 data ============================== */
+/*
+ * Kirim Notifikasi Email (shared «include» utility). EmailNotificationService
+ * .dispatch(key, toEmail, payload): look up the EmailTemplate by key, then the
+ * real controller branch `if (!$template) return;` -> 2-op alt. render() is an
+ * intra-object self-call (string token substitution) -> OMITTED (sequence shows
+ * inter-object messages only; its output rides on the queue() label). The Mail
+ * facade fluent chain to(toEmail)->queue(new TemplatedMail(...)) splits into 2
+ * messages so the [template ditemukan] TOP operand is multi-msg (a 1-msg top
+ * operand cramps its long label against the guard row). [template tidak
+ * ditemukan] = silent return to caller, 1 msg to actor. EXACT structural twin
+ * of UC-15 (2-msg-top / 1-msg-to-actor bottom): queue() is the top operand's
+ * LAST msg, so the divider crowds it -> lower gapAbove (seesaw: top-last-crowds
+ * -> toward 22). Pads = UC-15's confirmed recipe topPad 26 / gapAbove 22 /
+ * botPad 34 (gapAbove 40 was wrong here -- that is the 1-msg-bottom-guard rule,
+ * but it is the TOP msg that crowds). Caller lane = "Sistem"
+ * (dispatch is invoked internally by other services on domain events).
+ */
+var UC28 = {
+    ucId: "UC-28",
+    title: "Kirim Notifikasi Email",
+    lifelines: [
+        "Sistem",
+        "EmailNotificationService",
+        "EmailTemplate",
+        "Mail"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "dispatch(key, toEmail, payload)",            seq: 1 },
+        { from: 1, to: 2, name: "where('key', key)->first()",                 seq: 2 },
+        // alt [template ditemukan]
+        { from: 1, to: 3, name: "to(toEmail)",                                seq: 3 },
+        { from: 1, to: 3, name: "queue(new TemplatedMail(subject, body, key))", seq: 4 },
+        // alt [template tidak ditemukan]
+        { from: 1, to: 0, name: "return (tanpa kirim)",                       seq: 5 }
+    ],
+    alt: {
+        firstSeq: 3, lastSeq: 5, leftIdx: 0, rightIdx: 3,
+        // topPad 34: to(toEmail) was crowding the alt tab at 26 -> box top up.
+        // gapAbove 32: at 22 the bottom-op return() had only 22-18=4px above it;
+        // raising the divider gives return ~14px top. queue() (top-op last) had a
+        // generous margin at 22, so it absorbs the 10px divider shift and still
+        // clears. topPad/gapAbove are independent (divider = yOf(5)-gapAbove).
+        topPad: 34, gapAbove: 32, botPad: 34,
+        operands: [
+            { guard: "template ditemukan",       firstSeq: 3, lastSeq: 4 },
+            { guard: "template tidak ditemukan", firstSeq: 5, lastSeq: 5 }
+        ]
+    }
+};
+
+/* ============================== UC-04 data ============================== */
+/*
+ * Lihat Profil Sendiri (display, LINEAR -- NO alt). A karyawan hits
+ * DashboardController.index; the non-HR branch is `return view('dashboard')`.
+ * The own-profile data (unit, jabatan, info kepegawaian) is pulled in Blade via
+ * the auth user->employee relation -- modelled here as a load on Employee so the
+ * diagram conveys "melihat data dirinya" (the controller itself only checks the
+ * role and renders; this one relation message is view-layer, included for
+ * meaning). E1 "akun belum tertaut data karyawan" is a Blade @if empty-state,
+ * NOT a controller branch -> no alt (two identical view() operands would be
+ * fabricated), same call as UC-14/20. Linear, no combined fragment.
+ */
+var UC04 = {
+    ucId: "UC-04",
+    title: "Lihat Profil Sendiri",
+    lifelines: [
+        "Karyawan",
+        "DashboardController",
+        "User",
+        "Employee"
+    ],
+    messages: [
+        { from: 0, to: 1, name: "index(request)",                         seq: 1 },
+        { from: 1, to: 2, name: "isHrAdmin()",                            seq: 2 },
+        { from: 1, to: 3, name: "auth()->user()->employee (unit, jabatan)", seq: 3 },
+        { from: 1, to: 0, name: "view('dashboard')",                      seq: 4 }
+    ]
+};
+
 /* ================================ main ================================ */
 
 function resolveTargetPackage(repo) {
@@ -1736,7 +1816,7 @@ function main() {
     // UC-29 reserved («extend», UC-24 twin 26/22/34). UC-04 DEFERRED (no dedicated
     // "profil sendiri" controller -- DashboardController's isHrAdmin branch is
     // dashboard-metrics, not profil; flagged to user). Batches 1-5 committed.
-    var MODELS = [UC01, UC02, UC12, UC13, UC18, UC27, UC29];
+    var MODELS = [UC28, UC04];
     var totalIssues = 0, i;
     for (i = 0; i < MODELS.length; i++) {
         totalIssues += renderUC(repo, pkg, MODELS[i]);
