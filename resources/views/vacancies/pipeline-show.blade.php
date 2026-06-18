@@ -41,6 +41,69 @@
                     {{ $stageStatusLabel }}
                 </span>
             @endif
+
+            @php $candidate = $application->candidate; @endphp
+            @if ($candidate->isInTalentPool())
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    Kandidat Potensial
+                </span>
+                @can('unflagTalentPool', $candidate)
+                    <form method="POST" action="{{ route('kandidat-potensial.destroy', $candidate) }}"
+                          onsubmit="return confirm('Hapus kandidat ini dari Kandidat Potensial?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors ease-out duration-150 cursor-pointer">
+                            Hapus dari Kandidat Potensial
+                        </button>
+                    </form>
+                @endcan
+            @elseif ($currentStage?->status === \App\Enums\ApplicationStageStatus::Reserved)
+                @can('flagTalentPool', $candidate)
+                    <div x-data="{ open: {{ $errors->has('alasan') ? 'true' : 'false' }} }">
+                        <button type="button" @click="open = true"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 transition-colors ease-out duration-150 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                            </svg>
+                            Tandai Kandidat Potensial
+                        </button>
+
+                        <div x-show="open" x-cloak @keydown.escape.window="open = false"
+                             class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                            <div @click.outside="open = false" class="bg-white rounded-xl shadow-xl w-full max-w-md p-5">
+                                <h3 class="text-sm font-semibold text-gray-800 mb-1">Tandai sebagai Kandidat Potensial</h3>
+                                <p class="text-xs text-gray-500 mb-4">{{ $candidate->nama_lengkap }} akan disimpan di Kandidat Potensial untuk dipertimbangkan pada lowongan lain.</p>
+                                <form method="POST" action="{{ route('kandidat-potensial.store', $candidate) }}">
+                                    @csrf
+                                    <label class="block text-[10px] font-medium text-gray-700 uppercase tracking-wide mb-1">
+                                        Alasan <span class="text-red-500">*</span>
+                                    </label>
+                                    <textarea name="alasan" rows="4" required
+                                              placeholder="Mis. kualifikasi kuat, cocok untuk posisi serupa di masa depan..."
+                                              class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 resize-none placeholder:text-gray-400">{{ old('alasan') }}</textarea>
+                                    @error('alasan')
+                                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                                    @enderror
+                                    <div class="flex items-center justify-end gap-2 mt-4">
+                                        <button type="button" @click="open = false"
+                                                class="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 cursor-pointer">
+                                            Batal
+                                        </button>
+                                        <button type="submit"
+                                                class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 cursor-pointer">
+                                            Simpan
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endcan
+            @endif
             </div>{{-- /flex items-center --}}
         </div>{{-- /flex items-start justify-between --}}
     </div>{{-- /mb-5 --}}

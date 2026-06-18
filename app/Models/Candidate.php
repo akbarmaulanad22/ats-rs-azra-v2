@@ -7,8 +7,10 @@ use App\Enums\JenisKelamin;
 use App\Enums\JenisPendidikan;
 use App\Enums\StatusPerkawinan;
 use Database\Factories\CandidateFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Candidate extends Model
@@ -48,6 +50,9 @@ class Candidate extends Model
         'pernah_sakit_serius',
         'diagnosis_sakit',
         'vaksinasi_covid',
+        'talent_pool_flagged_at',
+        'talent_pool_flagged_by',
+        'talent_pool_reason',
     ];
 
     protected function casts(): array
@@ -61,12 +66,31 @@ class Candidate extends Model
             'ibu_pendidikan_terakhir' => JenisPendidikan::class,
             'is_fresh_graduate' => 'boolean',
             'pernah_sakit_serius' => 'boolean',
+            'talent_pool_flagged_at' => 'datetime',
         ];
+    }
+
+    public function isInTalentPool(): bool
+    {
+        return $this->talent_pool_flagged_at !== null;
+    }
+
+    /**
+     * @param  Builder<Candidate>  $query
+     */
+    public function scopeInTalentPool(Builder $query): void
+    {
+        $query->whereNotNull('talent_pool_flagged_at');
     }
 
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
+    }
+
+    public function talentPoolFlaggedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'talent_pool_flagged_by');
     }
 
     public function siblings(): HasMany
