@@ -14,6 +14,7 @@ use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class VacancyController extends Controller
@@ -88,8 +89,9 @@ class VacancyController extends Controller
 
         $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
 
-        $data = collect($request->validated())->except('workflow_template_id')->all();
+        $data = collect($request->validated())->except(['workflow_template_id', 'flyer'])->all();
         $data['workflow_template_snapshot_id'] = $snapshot->id;
+        $data['flyer_path'] = $request->file('flyer')->store('flyers', 'public');
 
         $vacancy = Vacancy::create($data);
 
@@ -114,6 +116,14 @@ class VacancyController extends Controller
         Gate::authorize('update', $lowongan);
 
         $data = $request->validated();
+        unset($data['flyer']);
+
+        if ($request->hasFile('flyer')) {
+            if ($lowongan->flyer_path) {
+                Storage::disk('public')->delete($lowongan->flyer_path);
+            }
+            $data['flyer_path'] = $request->file('flyer')->store('flyers', 'public');
+        }
 
         if (isset($data['workflow_template_id'])) {
             $template = WorkflowTemplate::with('stages')->findOrFail($data['workflow_template_id']);
@@ -141,6 +151,10 @@ class VacancyController extends Controller
     public function destroy(Vacancy $lowongan): RedirectResponse
     {
         Gate::authorize('delete', $lowongan);
+
+        if ($lowongan->flyer_path) {
+            Storage::disk('public')->delete($lowongan->flyer_path);
+        }
 
         $lowongan->delete();
 

@@ -146,5 +146,47 @@
             @enderror
         </div>
 
+        <div x-data="{ preview: null }">
+            <label for="flyer" class="block text-xs font-medium text-gray-700 mb-1">
+                Flyer Lowongan <span class="text-red-500">*</span>
+            </label>
+            <p class="text-[11px] text-gray-500 mb-2">Gambar poster yang ditampilkan di halaman karier. Format JPG, PNG, atau WEBP. Maksimal 4 MB.</p>
+
+            <div class="flex items-start gap-3">
+                @if (($lowongan->flyer_path ?? null))
+                    <img
+                        x-show="!preview"
+                        src="{{ $lowongan->flyerUrl() }}"
+                        alt="Flyer {{ $lowongan->judul_posisi }}"
+                        class="w-28 aspect-[3/4] object-cover rounded border border-gray-200 bg-gray-50"
+                    >
+                @endif
+                <img
+                    x-show="preview"
+                    x-cloak
+                    :src="preview"
+                    alt="Pratinjau flyer"
+                    class="w-28 aspect-[3/4] object-cover rounded border border-gray-200 bg-gray-50"
+                >
+
+                <div class="flex-1">
+                    <input
+                        type="file"
+                        id="flyer"
+                        name="flyer"
+                        accept="image/jpeg,image/png,image/webp"
+                        x-on:change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null"
+                        class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-primary file:text-white hover:file:bg-primary-dark file:cursor-pointer cursor-pointer @error('flyer') text-red-600 @enderror"
+                    >
+                    @if (($lowongan->flyer_path ?? null))
+                        <p class="mt-1.5 text-[11px] text-gray-500">Biarkan kosong untuk mempertahankan flyer saat ini.</p>
+                    @endif
+                    @error('flyer')
+                        <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

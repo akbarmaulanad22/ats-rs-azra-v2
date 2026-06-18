@@ -52,17 +52,19 @@ class DummyCandidateSeeder extends Seeder
                 'jabatan' => 'Kepala Unit',
             ]
         );
-        $vacancy = Vacancy::create([
-            'judul_posisi' => 'Koordinator Medis (Demo)',
-            'unit_id' => $unit->id,
-            'workflow_template_snapshot_id' => $snapshot->id,
-            'jenis_pekerjaan' => EmploymentType::FullTime,
-            'deskripsi_pekerjaan' => 'Posisi demo untuk pengujian pipeline kandidat.',
-            'kualifikasi' => 'Digunakan untuk data dummy.',
-            'jumlah_posisi' => 12,
-            'tenggat_lamaran' => now()->addMonths(3)->format('Y-m-d'),
-            'status' => VacancyStatus::Published,
-        ]);
+        $vacancy = Vacancy::factory()
+            ->withGeneratedFlyer()
+            ->create([
+                'judul_posisi' => 'Koordinator Medis (Demo)',
+                'unit_id' => $unit->id,
+                'workflow_template_snapshot_id' => $snapshot->id,
+                'jenis_pekerjaan' => EmploymentType::FullTime,
+                'deskripsi_pekerjaan' => 'Posisi demo untuk pengujian pipeline kandidat.',
+                'kualifikasi' => 'Digunakan untuk data dummy.',
+                'jumlah_posisi' => 12,
+                'tenggat_lamaran' => now()->addMonths(3)->format('Y-m-d'),
+                'status' => VacancyStatus::Published,
+            ]);
 
         $snapshotStages = $snapshot->stages()->orderBy('position')->get();
         $lastIndex = $snapshotStages->count() - 1;

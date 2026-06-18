@@ -36,6 +36,17 @@ class PublicCareerPageTest extends TestCase
         $response->assertSee('Perawat ICU');
     }
 
+    public function test_career_page_renders_flyer_image(): void
+    {
+        $this->seedStages();
+        $vacancy = Vacancy::factory()->published()->create(['judul_posisi' => 'Perawat ICU']);
+
+        $response = $this->get(route('karier.index'));
+
+        $response->assertSee($vacancy->flyer_path, false);
+        $response->assertSee('alt="Flyer lowongan Perawat ICU', false);
+    }
+
     public function test_career_page_hides_draft_vacancies(): void
     {
         $this->seedStages();
