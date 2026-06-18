@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ApplicationStageStatus;
 use App\Enums\GolonganDarah;
 use App\Enums\JenisKelamin;
 use App\Enums\JenisPendidikan;
@@ -73,6 +74,17 @@ class Candidate extends Model
     public function isInTalentPool(): bool
     {
         return $this->talent_pool_flagged_at !== null;
+    }
+
+    /**
+     * Whether any of the candidate's applications is currently Reserved (Ditangguhkan).
+     * Precondition for flagging into the talent pool.
+     */
+    public function hasReservedApplication(): bool
+    {
+        return $this->applications->contains(
+            fn (Application $application): bool => $application->currentStage()?->status === ApplicationStageStatus::Reserved
+        );
     }
 
     /**

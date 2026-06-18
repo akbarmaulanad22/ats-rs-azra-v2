@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Candidate;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -18,7 +19,10 @@ class TalentPoolController extends Controller
             ->with(['talentPoolFlaggedBy', 'applications.vacancy.unit']);
 
         if ($search = $request->query('search')) {
-            $query->where('nama_lengkap', 'ilike', "%{$search}%");
+            $query->where(function (Builder $q) use ($search): void {
+                $q->where('nama_lengkap', 'ilike', "%{$search}%")
+                    ->orWhere('email', 'ilike', "%{$search}%");
+            });
         }
 
         $candidates = $query->orderByDesc('talent_pool_flagged_at')->paginate(15)->withQueryString();
@@ -60,6 +64,14 @@ class TalentPoolController extends Controller
     public function store(Request $request, Candidate $candidate): RedirectResponse
     {
         Gate::authorize('flagTalentPool', $candidate);
+
+        $candidate->loadMissing('applications.stages');
+
+        abort_unless($candidate->hasReservedApplication(), 403);
+
+        if ($candidate->isInTalentPool()) {
+            return back()->with('status', 'Kandidat sudah ada di Kandidat Potensial.');
+        }
 
         $validated = $request->validate([
             'alasan' => ['required', 'string', 'max:1000'],
