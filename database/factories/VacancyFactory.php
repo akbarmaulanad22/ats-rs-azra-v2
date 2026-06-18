@@ -64,8 +64,13 @@ class VacancyFactory extends Factory
         $bg = imagecolorallocate($image, random_int(0, 80), random_int(80, 160), random_int(100, 150));
         $fg = imagecolorallocate($image, 255, 255, 255);
         imagefilledrectangle($image, 0, 0, 600, 800, $bg);
-        imagestring($image, 5, 40, 360, wordwrap($title, 40), $fg);
-        imagestring($image, 3, 40, 400, 'RS Azra · Lowongan Kerja', $fg);
+
+        $y = 360;
+        foreach (explode("\n", wordwrap($title, 32)) as $line) {
+            imagestring($image, 5, 40, $y, $line, $fg);
+            $y += 22;
+        }
+        imagestring($image, 3, 40, $y + 20, 'RS Azra · Lowongan Kerja', $fg);
 
         ob_start();
         imagepng($image);

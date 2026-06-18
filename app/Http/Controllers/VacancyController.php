@@ -93,7 +93,13 @@ class VacancyController extends Controller
         $data['workflow_template_snapshot_id'] = $snapshot->id;
         $data['flyer_path'] = $request->file('flyer')->store('flyers', 'public');
 
-        $vacancy = Vacancy::create($data);
+        try {
+            Vacancy::create($data);
+        } catch (\Throwable $e) {
+            Storage::disk('public')->delete($data['flyer_path']);
+
+            throw $e;
+        }
 
         return redirect()->route('lowongan.index')
             ->with('status', 'Lowongan berhasil dibuat.');
