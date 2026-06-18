@@ -157,73 +157,73 @@
     }
     .results-count em { font-style: normal; color: #005f5c; }
 
-    /* ── Job rows ────────────────────────────────────────── */
-    .jobs { display: flex; flex-direction: column; }
-    .job {
+    /* ── Poster grid ─────────────────────────────────────── */
+    .poster-grid {
         display: grid;
-        grid-template-columns: 80px 1fr auto;
-        gap: 24px;
-        padding: 16px 20px;
-        padding-top: 22px;
-        margin: 0 -20px;
-        border-bottom: 1px solid #ebeeea;
-        align-items: start;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        margin-top: 28px;
+    }
+    .poster-card {
         position: relative;
-        transition: background 0.15s;
-    }
-    .job:nth-child(odd) { background: #efede5; }
-    .job:hover { background: linear-gradient(to right, #e5f1f0 0%, transparent 60%) !important; }
-    .job-num {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px; color: #8a948f; letter-spacing: 0.04em;
-    }
-    .job-num strong {
         display: block;
+        text-decoration: none;
+        background: #ffffff;
+        border: 1px solid #0d1614;
+        overflow: hidden;
+        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    }
+    .poster-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 22px 40px -22px rgba(13,22,20,0.45);
+    }
+    .poster-figure {
+        position: relative;
+        aspect-ratio: 3 / 4;
+        background: #efede5;
+        overflow: hidden;
+    }
+    .poster-figure img {
+        width: 100%; height: 100%;
+        object-fit: cover; display: block;
+        transition: transform 0.4s ease-out;
+    }
+    .poster-card:hover .poster-figure img { transform: scale(1.04); }
+    /* Hover scrim reveals the title for sighted users on the image-only card */
+    .poster-overlay {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column; justify-content: flex-end;
+        padding: 16px;
+        background: linear-gradient(to top, rgba(13,22,20,0.88) 0%, rgba(13,22,20,0.35) 42%, transparent 72%);
+        opacity: 0; transition: opacity 0.25s ease-out;
+    }
+    .poster-card:hover .poster-overlay,
+    .poster-card:focus-visible .poster-overlay { opacity: 1; }
+    .poster-card:focus-visible { outline: 3px solid rgb(0,119,116); outline-offset: 2px; }
+    .poster-title {
         font-family: "IBM Plex Serif", serif;
-        font-size: 22px; color: #0d1614; font-weight: 500;
-        margin-bottom: 4px; letter-spacing: -0.01em;
+        font-size: 17px; font-weight: 500; line-height: 1.2;
+        color: #ffffff; letter-spacing: -0.01em; margin: 0 0 8px;
     }
-    .job-body { min-width: 0; }
-    .job-title {
-        font-family: "IBM Plex Serif", serif;
-        font-size: 21px; font-weight: 500;
-        letter-spacing: -0.015em; margin: 0 0 6px; line-height: 1.2;
-    }
-    .job-title a {
-        text-decoration: none; color: #0d1614;
-        background-image: linear-gradient(rgb(0,119,116), rgb(0,119,116));
-        background-size: 0 1px; background-repeat: no-repeat;
-        background-position: 0 100%; transition: background-size 0.25s;
-    }
-    .job:hover .job-title a { background-size: 100% 1px; color: #005f5c; }
-    .job-tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 10px; }
-    .job-tag {
+    .poster-cta {
         font-family: "IBM Plex Mono", monospace;
-        font-size: 10.5px; text-transform: uppercase;
-        letter-spacing: 0.06em; padding: 3px 8px;
-        background: #efede5; color: #2a3835; border-radius: 2px;
+        font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+        color: #b6e3a0; font-weight: 500;
+        display: inline-flex; align-items: center; gap: 6px;
     }
-    .job-tag.dept { background: #e5f1f0; color: #005f5c; }
-    .job-tag.urgent { background: #f8e6e1; color: #b54327; }
-    .job-tag.new { background: #f0f7e6; color: #5e9425; }
-    .job-meta {
-        display: flex; gap: 18px; flex-wrap: wrap;
-        font-size: 12.5px; color: #5a6864;
+    /* Corner badges */
+    .poster-badges {
+        position: absolute; top: 10px; left: 10px;
+        display: flex; gap: 6px; z-index: 2;
     }
-    .job-aside {
-        text-align: right; display: flex;
-        flex-direction: column; align-items: flex-end; gap: 10px;
+    .poster-badge {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+        padding: 3px 8px; border-radius: 2px; font-weight: 600;
+        box-shadow: 0 2px 6px rgba(13,22,20,0.18);
     }
-    .apply-btn {
-        padding: 8px 16px;
-        background: rgb(0,119,116); color: white;
-        font-size: 12px; font-weight: 600;
-        border-radius: 2px; text-decoration: none;
-        display: inline-flex; align-items: center; gap: 8px;
-        transition: background 0.15s; white-space: nowrap;
-        font-family: "IBM Plex Sans", system-ui, sans-serif;
-    }
-    .apply-btn:hover { background: rgb(0,88,85); }
+    .poster-badge.new { background: #f0f7e6; color: #4d7e1c; }
+    .poster-badge.urgent { background: #f8e6e1; color: #b54327; }
 
     /* ── Pagination ──────────────────────────────────────── */
     .pagination-wrap {
@@ -259,23 +259,20 @@
         .listings-wrap { grid-template-columns: 1fr; padding: 90px 16px 50px; gap: 24px; }
         .career-sidebar { position: static; }
         .results-count { font-size: 20px; }
-        .job { grid-template-columns: 1fr; gap: 12px; padding: 16px; margin: 0 -16px; }
-        .job-summary { display: none; }
-        .meta-detail { display: none; }
-        .job-num { display: flex; gap: 10px; align-items: baseline; }
-        .job-num strong { font-size: 18px; margin: 0; }
-        .job-aside {
-            flex-direction: row; align-items: center;
-            justify-content: space-between; width: 100%;
-            text-align: left;
-            border-top: 1px dashed #d9ddd9; padding-top: 12px;
-        }
+        .poster-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
         .pagination-wrap { justify-content: center; }
         .pagination-info { width: 100%; text-align: center; }
     }
     @media (max-width: 520px) {
         .hero-meta { flex-wrap: wrap; gap: 16px 22px; }
+        .poster-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .poster-title { font-size: 15px; }
     }
+    /* Touch devices have no hover — keep the title overlay always visible */
+    @media (hover: none) {
+        .poster-overlay { opacity: 1; background: linear-gradient(to top, rgba(13,22,20,0.9) 0%, rgba(13,22,20,0.25) 50%, transparent 80%); }
+    }
+    [x-cloak] { display: none !important; }
 </style>
 
 {{-- Hidden filter form --}}
@@ -450,53 +447,40 @@
                 @endif
             </div>
         @else
-            {{-- Job rows --}}
-            <div class="jobs">
+            {{-- Poster grid --}}
+            <div class="poster-grid">
                 @foreach ($vacancies as $vacancy)
                     @php
-                        $rowNum  = ($vacancies->currentPage() - 1) * $vacancies->perPage() + $loop->iteration;
                         $isNew    = $vacancy->created_at->gte(now()->subDays(3));
                         $isUrgent = $vacancy->tenggat_lamaran->lte(now()->addDays(7));
-                        $summary  = \Illuminate\Support\Str::limit(strip_tags($vacancy->deskripsi_pekerjaan ?? ''), 140);
                     @endphp
-                    <article class="job">
-                        {{-- Number --}}
-                        <div class="job-num">
-                            <strong>{{ str_pad($rowNum, 2, '0', STR_PAD_LEFT) }}</strong>
-                        </div>
-
-                        {{-- Body --}}
-                        <div class="job-body">
-                            <h3 class="job-title">
-                                <a href="{{ route('karier.show', $vacancy) }}">{{ $vacancy->judul_posisi }}</a>
-                            </h3>
-                            <div class="job-tags">
-                                <span class="job-tag dept">{{ $vacancy->unit->nama }}</span>
-                                <span class="job-tag">{{ $vacancy->jenis_pekerjaan->label() }}</span>
+                    <a href="{{ route('karier.show', $vacancy) }}" class="poster-card" aria-label="Lihat lowongan {{ $vacancy->judul_posisi }} — {{ $vacancy->unit->nama }}">
+                        @if ($isNew || $isUrgent)
+                            <div class="poster-badges">
                                 @if ($isNew)
-                                    <span class="job-tag new">Baru</span>
+                                    <span class="poster-badge new">Baru</span>
                                 @endif
                                 @if ($isUrgent)
-                                    <span class="job-tag urgent">Mendesak</span>
+                                    <span class="poster-badge urgent">Mendesak</span>
                                 @endif
                             </div>
-                            @if ($summary)
-                                <p class="job-summary" style="margin: 0 0 10px; color: #2a3835; font-size: 13.5px; line-height: 1.55; max-width: 60ch;">{{ $summary }}</p>
-                            @endif
-                            <div class="job-meta">
-                                <span>Ditayangkan {{ $vacancy->created_at->locale('id')->diffForHumans() }}</span>
-                                <span class="meta-detail">&nbsp;·&nbsp; Tenggat {{ $vacancy->tenggat_lamaran->format('d M Y') }}</span>
+                        @endif
+                        <figure class="poster-figure">
+                            <img
+                                src="{{ $vacancy->flyerUrl() }}"
+                                alt="Flyer lowongan {{ $vacancy->judul_posisi }} di {{ $vacancy->unit->nama }}"
+                                loading="lazy"
+                                width="600" height="800"
+                            >
+                            <div class="poster-overlay">
+                                <h3 class="poster-title">{{ $vacancy->judul_posisi }}</h3>
+                                <span class="poster-cta">
+                                    Lihat &amp; Lamar
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+                                </span>
                             </div>
-                        </div>
-
-                        {{-- Aside: apply CTA --}}
-                        <div class="job-aside">
-                            <a href="{{ route('karier.show', $vacancy) }}" class="apply-btn">
-                                Lamar
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-                            </a>
-                        </div>
-                    </article>
+                        </figure>
+                    </a>
                 @endforeach
             </div>
 

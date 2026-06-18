@@ -16,7 +16,7 @@ class CareerController extends Controller
         $unitFilter = array_filter(array_map('intval', (array) request('unit', [])));
         $typeFilter = array_filter((array) request('type', []));
 
-        $query = Vacancy::with('unit')->published();
+        $query = Vacancy::with('unit')->published()->whereNotNull('flyer_path');
 
         if ($q !== '') {
             $escaped = addcslashes($q, '%_\\');
@@ -33,14 +33,14 @@ class CareerController extends Controller
 
         $vacancies = $query->orderByDesc('created_at')->paginate(8)->withQueryString();
 
-        $totalRoles = Vacancy::published()->count();
+        $totalRoles = Vacancy::published()->whereNotNull('flyer_path')->count();
 
-        $units = Unit::whereHas('vacancies', fn ($q) => $q->published())
-            ->withCount(['vacancies as published_count' => fn ($q) => $q->published()])
+        $units = Unit::whereHas('vacancies', fn ($q) => $q->published()->whereNotNull('flyer_path'))
+            ->withCount(['vacancies as published_count' => fn ($q) => $q->published()->whereNotNull('flyer_path')])
             ->orderBy('nama')
             ->get();
 
-        $typeCounts = Vacancy::published()
+        $typeCounts = Vacancy::published()->whereNotNull('flyer_path')
             ->selectRaw('jenis_pekerjaan, count(*) as count')
             ->groupBy('jenis_pekerjaan')
             ->pluck('count', 'jenis_pekerjaan');

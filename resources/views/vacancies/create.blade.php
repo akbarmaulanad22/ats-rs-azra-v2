@@ -11,7 +11,7 @@
     </div>
 
     <div class="bg-white/80 border border-gray-200 rounded-md">
-        <form method="POST" action="{{ route('lowongan.store') }}">
+        <form method="POST" action="{{ route('lowongan.store') }}" enctype="multipart/form-data">
             @csrf
 
             @include('vacancies._form')

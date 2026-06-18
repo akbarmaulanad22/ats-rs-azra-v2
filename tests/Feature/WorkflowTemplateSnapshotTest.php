@@ -12,11 +12,20 @@ use App\Models\WorkflowTemplate;
 use App\Models\WorkflowTemplateSnapshot;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class WorkflowTemplateSnapshotTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake('public');
+    }
 
     private function seedStages(): void
     {
@@ -47,6 +56,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
             'jumlah_posisi' => 1,
             'tenggat_lamaran' => now()->addMonth()->format('Y-m-d'),
             'status' => VacancyStatus::Draft->value,
+            'flyer' => UploadedFile::fake()->image('flyer.jpg', 600, 800),
         ];
     }
 

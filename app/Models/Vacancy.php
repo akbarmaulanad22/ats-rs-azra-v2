@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 class Vacancy extends Model
 {
@@ -25,6 +26,7 @@ class Vacancy extends Model
         'jenis_pekerjaan',
         'deskripsi_pekerjaan',
         'kualifikasi',
+        'flyer_path',
         'jumlah_posisi',
         'tenggat_lamaran',
         'status',
@@ -38,6 +40,13 @@ class Vacancy extends Model
             'tenggat_lamaran' => 'date',
             'jumlah_posisi' => 'integer',
         ];
+    }
+
+    public function flyerUrl(): ?string
+    {
+        return $this->flyer_path
+            ? Storage::disk('public')->url($this->flyer_path)
+            : null;
     }
 
     public function unit(): BelongsTo

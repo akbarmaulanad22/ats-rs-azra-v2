@@ -11,11 +11,20 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Models\WorkflowTemplate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class VacancyManagementTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake('public');
+    }
 
     private function seedStages(): void
     {
@@ -37,6 +46,7 @@ class VacancyManagementTest extends TestCase
             'jumlah_posisi' => 2,
             'tenggat_lamaran' => now()->addMonth()->format('Y-m-d'),
             'status' => VacancyStatus::Draft->value,
+            'flyer' => UploadedFile::fake()->image('flyer.jpg', 600, 800),
         ];
     }
 
@@ -277,8 +287,34 @@ class VacancyManagementTest extends TestCase
         $response->assertSessionHasErrors([
             'judul_posisi', 'unit_id', 'workflow_template_id',
             'jenis_pekerjaan', 'deskripsi_pekerjaan', 'kualifikasi',
-            'jumlah_posisi', 'tenggat_lamaran',
+            'flyer', 'jumlah_posisi', 'tenggat_lamaran',
         ]);
+    }
+
+    public function test_store_persists_flyer_to_public_disk(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $this->seedStages();
+        $payload = $this->validPayload();
+
+        $this->actingAs($admin)->post(route('lowongan.store'), $payload);
+
+        $vacancy = Vacancy::firstWhere('judul_posisi', 'Perawat ICU');
+        $this->assertNotNull($vacancy->flyer_path);
+        $this->assertStringStartsWith('flyers/', $vacancy->flyer_path);
+        Storage::disk('public')->assertExists($vacancy->flyer_path);
+    }
+
+    public function test_store_rejects_non_image_flyer(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $this->seedStages();
+        $payload = $this->validPayload();
+        $payload['flyer'] = UploadedFile::fake()->create('flyer.pdf', 100, 'application/pdf');
+
+        $response = $this->actingAs($admin)->post(route('lowongan.store'), $payload);
+
+        $response->assertSessionHasErrors('flyer');
     }
 
     public function test_store_rejects_past_deadline(): void
@@ -337,6 +373,40 @@ class VacancyManagementTest extends TestCase
         ]);
     }
 
+    public function test_update_replaces_flyer_and_deletes_old_file(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $this->seedStages();
+
+        $oldPath = 'flyers/old-flyer.jpg';
+        Storage::disk('public')->put($oldPath, 'old');
+        $vacancy = Vacancy::factory()->create(['flyer_path' => $oldPath]);
+
+        $payload = $this->validPayload($vacancy->unit, WorkflowTemplate::factory()->create());
+        $payload['flyer'] = UploadedFile::fake()->image('new-flyer.jpg', 600, 800);
+
+        $this->actingAs($admin)->put(route('lowongan.update', $vacancy), $payload);
+
+        $vacancy->refresh();
+        $this->assertNotEquals($oldPath, $vacancy->flyer_path);
+        Storage::disk('public')->assertMissing($oldPath);
+        Storage::disk('public')->assertExists($vacancy->flyer_path);
+    }
+
+    public function test_update_without_new_flyer_keeps_existing(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $this->seedStages();
+
+        $vacancy = Vacancy::factory()->create(['flyer_path' => 'flyers/keep-me.jpg']);
+        $payload = $this->validPayload($vacancy->unit, WorkflowTemplate::factory()->create());
+        unset($payload['flyer']);
+
+        $this->actingAs($admin)->put(route('lowongan.update', $vacancy), $payload);
+
+        $this->assertEquals('flyers/keep-me.jpg', $vacancy->fresh()->flyer_path);
+    }
+
     public function test_status_transition_draft_to_published(): void
     {
         $admin = User::factory()->hrAdmin()->create();
@@ -387,6 +457,20 @@ class VacancyManagementTest extends TestCase
 
         $response->assertRedirect(route('lowongan.index'));
         $this->assertDatabaseMissing('vacancies', ['id' => $vacancy->id]);
+    }
+
+    public function test_deleting_vacancy_removes_flyer_file(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $this->seedStages();
+
+        $path = 'flyers/to-delete.jpg';
+        Storage::disk('public')->put($path, 'content');
+        $vacancy = Vacancy::factory()->create(['flyer_path' => $path]);
+
+        $this->actingAs($admin)->delete(route('lowongan.destroy', $vacancy));
+
+        Storage::disk('public')->assertMissing($path);
     }
 
     public function test_non_hr_admin_cannot_delete_vacancy(): void

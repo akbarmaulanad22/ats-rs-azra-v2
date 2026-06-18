@@ -12,7 +12,7 @@
     </div>
 
     <div class="bg-white/80 border border-gray-200 rounded-md">
-        <form method="POST" action="{{ route('lowongan.update', $lowongan) }}">
+        <form method="POST" action="{{ route('lowongan.update', $lowongan) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 

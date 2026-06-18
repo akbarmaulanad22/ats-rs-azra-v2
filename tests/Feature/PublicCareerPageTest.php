@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\VacancyStatus;
 use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PublicCareerPageTest extends TestCase
@@ -34,6 +35,19 @@ class PublicCareerPageTest extends TestCase
         $response = $this->get(route('karier.index'));
 
         $response->assertSee('Perawat ICU');
+    }
+
+    public function test_career_page_renders_flyer_image(): void
+    {
+        Storage::fake('public');
+        $this->seedStages();
+        $vacancy = Vacancy::factory()->published()->withGeneratedFlyer()->create(['judul_posisi' => 'Perawat ICU']);
+
+        $response = $this->get(route('karier.index'));
+
+        Storage::disk('public')->assertExists($vacancy->flyer_path);
+        $response->assertSee($vacancy->flyer_path, false);
+        $response->assertSee('alt="Flyer lowongan Perawat ICU', false);
     }
 
     public function test_career_page_hides_draft_vacancies(): void

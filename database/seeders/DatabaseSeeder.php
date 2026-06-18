@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             EmailTemplateSeeder::class,
             InterviewTemplateSeeder::class,
             DiscQuestionSeeder::class,
+            VacancySeeder::class,
         ]);
     }
 }
