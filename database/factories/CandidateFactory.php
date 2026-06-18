@@ -16,6 +16,10 @@ class CandidateFactory extends Factory
             'nama_lengkap' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'no_telepon' => fake()->numerify('08##########'),
+            'nama_ibu_kandung' => fake()->name('female'),
+            'kontak_darurat_nama' => fake()->name(),
+            'kontak_darurat_no_telp' => fake()->numerify('08##########'),
+            'kontak_darurat_hubungan' => fake()->randomElement(['Ibu', 'Ayah', 'Suami', 'Istri', 'Saudara']),
         ];
     }
 }

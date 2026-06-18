@@ -64,6 +64,10 @@ class ApplicationSubmissionTest extends TestCase
             'no_telepon' => '081234567890',
             'email' => 'budi@example.com',
             'no_ktp' => '3174012301900001',
+            'nama_ibu_kandung' => 'Siti Aminah',
+            'kontak_darurat_nama' => 'Andi Santoso',
+            'kontak_darurat_no_telp' => '081298765432',
+            'kontak_darurat_hubungan' => 'Saudara',
             'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
             // Step 3 — required min:1
             'formal_educations' => [

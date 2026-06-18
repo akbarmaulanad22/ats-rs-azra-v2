@@ -92,10 +92,10 @@ class StoreApplicationRequest extends FormRequest
             'email' => ['required', 'email', 'max:255'],
             'no_ktp' => ['required', 'string', 'size:16'],
             'npwp' => ['nullable', 'string', 'max:30'],
-            'nama_ibu_kandung' => ['nullable', 'string', 'max:255'],
-            'kontak_darurat_nama' => ['nullable', 'string', 'max:255'],
-            'kontak_darurat_no_telp' => ['nullable', 'string', 'max:20'],
-            'kontak_darurat_hubungan' => ['nullable', 'string', 'max:100'],
+            'nama_ibu_kandung' => ['required', 'string', 'max:255'],
+            'kontak_darurat_nama' => ['required', 'string', 'max:255'],
+            'kontak_darurat_no_telp' => ['required', 'string', 'max:20'],
+            'kontak_darurat_hubungan' => ['required', 'string', 'max:100'],
 
             // Step 2 — Latar Belakang Keluarga
             'ayah_nama' => ['nullable', 'string', 'max:255'],

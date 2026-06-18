@@ -420,22 +420,22 @@
                             <input id="npwp" name="npwp" type="text" value="{{ old('npwp') }}">
                         </div>
                         <div class="field">
-                            <label for="nama_ibu_kandung">Nama Ibu Kandung</label>
+                            <label for="nama_ibu_kandung">Nama Ibu Kandung <span class="req">*</span></label>
                             <input id="nama_ibu_kandung" name="nama_ibu_kandung" type="text" value="{{ old('nama_ibu_kandung') }}">
                         </div>
                     </div>
                     <h3 class="form-section-h" style="margin-top:32px;">Kontak Darurat</h3>
                     <div class="form-row cols-3">
                         <div class="field">
-                            <label>Nama</label>
+                            <label>Nama <span class="req">*</span></label>
                             <input name="kontak_darurat_nama" type="text" value="{{ old('kontak_darurat_nama') }}">
                         </div>
                         <div class="field">
-                            <label>No. Telp</label>
+                            <label>No. Telp <span class="req">*</span></label>
                             <input name="kontak_darurat_no_telp" type="text" value="{{ old('kontak_darurat_no_telp') }}">
                         </div>
                         <div class="field">
-                            <label>Hubungan</label>
+                            <label>Hubungan <span class="req">*</span></label>
                             <input name="kontak_darurat_hubungan" type="text" value="{{ old('kontak_darurat_hubungan') }}" placeholder="mis. Ibu, Suami">
                         </div>
                     </div>
