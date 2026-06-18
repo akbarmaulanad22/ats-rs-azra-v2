@@ -427,16 +427,16 @@
                     <h3 class="form-section-h" style="margin-top:32px;">Kontak Darurat</h3>
                     <div class="form-row cols-3">
                         <div class="field">
-                            <label>Nama <span class="req">*</span></label>
-                            <input name="kontak_darurat_nama" type="text" value="{{ old('kontak_darurat_nama') }}">
+                            <label for="kontak_darurat_nama">Nama <span class="req">*</span></label>
+                            <input id="kontak_darurat_nama" name="kontak_darurat_nama" type="text" value="{{ old('kontak_darurat_nama') }}">
                         </div>
                         <div class="field">
-                            <label>No. Telp <span class="req">*</span></label>
-                            <input name="kontak_darurat_no_telp" type="text" value="{{ old('kontak_darurat_no_telp') }}">
+                            <label for="kontak_darurat_no_telp">No. Telp <span class="req">*</span></label>
+                            <input id="kontak_darurat_no_telp" name="kontak_darurat_no_telp" type="text" value="{{ old('kontak_darurat_no_telp') }}">
                         </div>
                         <div class="field">
-                            <label>Hubungan <span class="req">*</span></label>
-                            <input name="kontak_darurat_hubungan" type="text" value="{{ old('kontak_darurat_hubungan') }}" placeholder="mis. Ibu, Suami">
+                            <label for="kontak_darurat_hubungan">Hubungan <span class="req">*</span></label>
+                            <input id="kontak_darurat_hubungan" name="kontak_darurat_hubungan" type="text" value="{{ old('kontak_darurat_hubungan') }}" placeholder="mis. Ibu, Suami">
                         </div>
                     </div>
                 </div>

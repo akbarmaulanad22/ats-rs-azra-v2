@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('nama_ibu_kandung')->nullable(false)->change();
             $table->string('kontak_darurat_nama')->nullable(false)->change();
             $table->string('kontak_darurat_no_telp', 20)->nullable(false)->change();
-            $table->string('kontak_darurat_hubungan')->nullable(false)->change();
+            $table->string('kontak_darurat_hubungan', 100)->nullable(false)->change();
         });
     }
 
