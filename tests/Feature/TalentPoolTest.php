@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Models\Application;
 use App\Models\Candidate;
 use App\Models\User;
+use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -97,6 +99,60 @@ class TalentPoolTest extends TestCase
         $user = User::factory()->withRole(Role::UnitHead)->create();
 
         $response = $this->actingAs($user)->get(route('kandidat-potensial.index'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_hr_can_view_candidate_detail(): void
+    {
+        $user = User::factory()->withRole(Role::HrAdmin)->create();
+        $candidate = Candidate::factory()->create([
+            'nama_lengkap' => 'Budi Detail',
+            'talent_pool_flagged_at' => now(),
+            'talent_pool_flagged_by' => $user->id,
+            'talent_pool_reason' => 'Sangat potensial.',
+        ]);
+        Application::factory()->create([
+            'candidate_id' => $candidate->id,
+            'vacancy_id' => Vacancy::factory(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('kandidat-potensial.show', $candidate));
+
+        $response->assertOk();
+        $response->assertViewIs('talent-pool.show');
+        $response->assertSee('Budi Detail');
+        $response->assertSee('Sangat potensial.');
+    }
+
+    public function test_candidate_detail_returns_404_without_application(): void
+    {
+        $user = User::factory()->withRole(Role::HrAdmin)->create();
+        $candidate = Candidate::factory()->create([
+            'talent_pool_flagged_at' => now(),
+            'talent_pool_flagged_by' => $user->id,
+            'talent_pool_reason' => 'Tanpa lamaran.',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('kandidat-potensial.show', $candidate));
+
+        $response->assertNotFound();
+    }
+
+    public function test_non_hr_cannot_view_candidate_detail(): void
+    {
+        $user = User::factory()->withRole(Role::UnitHead)->create();
+        $candidate = Candidate::factory()->create([
+            'talent_pool_flagged_at' => now(),
+            'talent_pool_flagged_by' => $user->id,
+            'talent_pool_reason' => 'X.',
+        ]);
+        Application::factory()->create([
+            'candidate_id' => $candidate->id,
+            'vacancy_id' => Vacancy::factory(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('kandidat-potensial.show', $candidate));
 
         $response->assertForbidden();
     }

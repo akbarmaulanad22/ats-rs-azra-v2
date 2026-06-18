@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/kandidat-potensial', [TalentPoolController::class, 'index'])->name('kandidat-potensial.index');
+    Route::get('/kandidat-potensial/{candidate}', [TalentPoolController::class, 'show'])->name('kandidat-potensial.show');
     Route::post('/kandidat-potensial/{candidate}', [TalentPoolController::class, 'store'])->name('kandidat-potensial.store');
     Route::delete('/kandidat-potensial/{candidate}', [TalentPoolController::class, 'destroy'])->name('kandidat-potensial.destroy');
 

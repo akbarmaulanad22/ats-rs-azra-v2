@@ -50,7 +50,7 @@
                     @forelse ($candidates as $candidate)
                         <tr class="odd:bg-white even:bg-primary/5 hover:bg-primary/10 transition-colors ease-out duration-100 align-top">
                             <td class="px-3 py-2 text-xs">
-                                <span class="font-medium text-gray-800 leading-tight block">{{ $candidate->nama_lengkap }}</span>
+                                <a href="{{ route('kandidat-potensial.show', $candidate) }}" class="font-medium text-gray-800 hover:text-primary transition-colors ease-out duration-150 leading-tight block">{{ $candidate->nama_lengkap }}</a>
                                 <span class="text-gray-400">{{ $candidate->email }}</span>
                             </td>
                             <td class="px-3 py-2 text-xs text-gray-600 max-w-xs">{{ $candidate->talent_pool_reason }}</td>

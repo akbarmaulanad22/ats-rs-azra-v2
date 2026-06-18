@@ -26,6 +26,37 @@ class TalentPoolController extends Controller
         return view('talent-pool.index', compact('candidates'));
     }
 
+    public function show(Candidate $candidate): View
+    {
+        Gate::authorize('viewTalentPool', Candidate::class);
+
+        $candidate->load([
+            'talentPoolFlaggedBy',
+            'formalEducations',
+            'informalEducations',
+            'workExperiences',
+            'organizationExperiences',
+            'siblings',
+            'spouses',
+            'children',
+            'languageSkills',
+            'achievements',
+            'applications' => fn ($q) => $q->latest(),
+            'applications.vacancy.unit',
+            'applications.stages',
+            'applications.socialMediaAccounts',
+            'applications.references',
+            'applications.discSubmission.result',
+            'applications.mbtiSubmission.result',
+        ]);
+
+        $application = $candidate->applications->first();
+
+        abort_if($application === null, 404);
+
+        return view('talent-pool.show', compact('candidate', 'application'));
+    }
+
     public function store(Request $request, Candidate $candidate): RedirectResponse
     {
         Gate::authorize('flagTalentPool', $candidate);
