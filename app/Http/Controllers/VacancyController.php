@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Enums\EmploymentType;
 use App\Enums\Role;
 use App\Enums\VacancyStatus;
-use App\Http\Requests\StoreVacancyRequest;
 use App\Http\Requests\UpdateVacancyRequest;
 use App\Models\Unit;
 use App\Models\Vacancy;
@@ -60,49 +59,6 @@ class VacancyController extends Controller
             : Unit::orderBy('nama')->get();
 
         return view('vacancies.index', compact('vacancies', 'units'));
-    }
-
-    public function create(): View
-    {
-        Gate::authorize('create', Vacancy::class);
-
-        $employmentTypes = EmploymentType::cases();
-        $statuses = [VacancyStatus::Draft, VacancyStatus::Published];
-
-        return view('vacancies.create', compact('employmentTypes', 'statuses'));
-    }
-
-    public function store(StoreVacancyRequest $request): RedirectResponse
-    {
-        Gate::authorize('create', Vacancy::class);
-
-        $template = WorkflowTemplate::with('stages')->findOrFail($request->validated('workflow_template_id'));
-
-        $status = $request->validated('status') ?? VacancyStatus::Draft->value;
-        $hasTestStage = $template->stages->contains('key', 'tes_kompetensi');
-
-        if ($status === VacancyStatus::Published->value && $hasTestStage) {
-            return back()->withInput()->withErrors([
-                'status' => 'Lowongan tidak dapat dipublikasikan sebelum tes kompetensi dikonfigurasi. Simpan sebagai draft terlebih dahulu, lalu konfigurasi tes.',
-            ]);
-        }
-
-        $snapshot = WorkflowTemplateSnapshot::createFromTemplate($template);
-
-        $data = collect($request->validated())->except(['workflow_template_id', 'flyer'])->all();
-        $data['workflow_template_snapshot_id'] = $snapshot->id;
-        $data['flyer_path'] = $request->file('flyer')->store('flyers', 'public');
-
-        try {
-            Vacancy::create($data);
-        } catch (\Throwable $e) {
-            Storage::disk('public')->delete($data['flyer_path']);
-
-            throw $e;
-        }
-
-        return redirect()->route('lowongan.index')
-            ->with('status', 'Lowongan berhasil dibuat.');
     }
 
     public function edit(Vacancy $lowongan): View

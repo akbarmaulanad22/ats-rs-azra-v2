@@ -5,15 +5,15 @@
             <h1 class="text-xl font-semibold text-gray-900">Lowongan Kerja</h1>
             <p class="text-xs text-gray-500 mt-0.5">Kelola lowongan kerja RS Azra</p>
         </div>
-        @can('create', App\Models\Vacancy::class)
+        @can('viewAny', App\Models\JobTemplate::class)
         <a
-            href="{{ route('lowongan.create') }}"
+            href="{{ route('template-lowongan.index') }}"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
             </svg>
-            Buat Lowongan
+            Terbitkan dari Template
         </a>
         @endcan
     </div>
@@ -209,17 +209,17 @@
                                     @else
                                         <div>
                                             <p class="text-sm font-medium text-gray-700">Belum ada lowongan</p>
-                                            <p class="text-xs text-gray-400 mt-0.5">Buat lowongan kerja pertama RS Azra</p>
+                                            <p class="text-xs text-gray-400 mt-0.5">Terbitkan lowongan dari template lowongan</p>
                                         </div>
-                                        @can('create', App\Models\Vacancy::class)
+                                        @can('viewAny', App\Models\JobTemplate::class)
                                         <a
-                                            href="{{ route('lowongan.create') }}"
+                                            href="{{ route('template-lowongan.index') }}"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors ease-out duration-150"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                                             </svg>
-                                            Buat Lowongan
+                                            Terbitkan dari Template
                                         </a>
                                         @endcan
                                     @endif

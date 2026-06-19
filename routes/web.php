@@ -15,6 +15,9 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewScheduleController;
 use App\Http\Controllers\InterviewTemplateController;
+use App\Http\Controllers\JobTemplateController;
+use App\Http\Controllers\JobTemplateInterviewTemplateController;
+use App\Http\Controllers\JobTemplateTestController;
 use App\Http\Controllers\MbtiTestController;
 use App\Http\Controllers\McuController;
 use App\Http\Controllers\McuScheduleController;
@@ -92,9 +95,19 @@ Route::middleware('auth')->group(function () {
         ->parameters(['template-alur' => 'templateAlur'])
         ->except(['show']);
 
+    Route::resource('template-lowongan', JobTemplateController::class)
+        ->parameters(['template-lowongan' => 'templateLowongan'])
+        ->except(['show']);
+    Route::get('/template-lowongan/{templateLowongan}/terbitkan', [JobTemplateController::class, 'publishForm'])->name('template-lowongan.terbitkan.form');
+    Route::post('/template-lowongan/{templateLowongan}/terbitkan', [JobTemplateController::class, 'publish'])->name('template-lowongan.terbitkan');
+    Route::get('/template-lowongan/{templateLowongan}/tes', [JobTemplateTestController::class, 'show'])->name('template-lowongan.tes.show');
+    Route::post('/template-lowongan/{templateLowongan}/tes', [JobTemplateTestController::class, 'save'])->name('template-lowongan.tes.save');
+    Route::get('/template-lowongan/{templateLowongan}/template-wawancara', [JobTemplateInterviewTemplateController::class, 'show'])->name('template-lowongan.template-wawancara.show');
+    Route::post('/template-lowongan/{templateLowongan}/template-wawancara', [JobTemplateInterviewTemplateController::class, 'save'])->name('template-lowongan.template-wawancara.save');
+
     Route::resource('lowongan', VacancyController::class)
         ->parameters(['lowongan' => 'lowongan'])
-        ->except(['show']);
+        ->except(['show', 'create', 'store']);
     Route::get('/lowongan/{lowongan}/pipeline', [VacancyPipelineController::class, 'index'])->name('lowongan.pipeline');
     Route::get('/lowongan/{lowongan}/pipeline/{application}', [VacancyPipelineController::class, 'showApplication'])->scopeBindings()->name('lowongan.pipeline.show');
     Route::get('/lowongan/{lowongan}/pipeline/{application}/export-pdf', [VacancyPipelineController::class, 'exportPdf'])->scopeBindings()->name('lowongan.pipeline.show.export-pdf');

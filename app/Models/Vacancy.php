@@ -20,6 +20,7 @@ class Vacancy extends Model
     use HasFactory;
 
     protected $fillable = [
+        'job_template_id',
         'judul_posisi',
         'unit_id',
         'workflow_template_snapshot_id',
@@ -47,6 +48,11 @@ class Vacancy extends Model
         return $this->flyer_path
             ? Storage::disk('public')->url($this->flyer_path)
             : null;
+    }
+
+    public function jobTemplate(): BelongsTo
+    {
+        return $this->belongsTo(JobTemplate::class);
     }
 
     public function unit(): BelongsTo
