@@ -26,7 +26,6 @@ use App\Http\Controllers\OfferingLetterController;
 use App\Http\Controllers\OfferingResponseController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\QuestionBankTemplateController;
-use App\Http\Controllers\TalentPoolController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestReviewController;
 use App\Http\Controllers\UnitController;
@@ -74,11 +73,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/ubah-password', [PasswordChangeController::class, 'update'])->name('password.update')->middleware('throttle:5,1');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    Route::get('/kandidat-potensial', [TalentPoolController::class, 'index'])->name('kandidat-potensial.index');
-    Route::get('/kandidat-potensial/{candidate}', [TalentPoolController::class, 'show'])->name('kandidat-potensial.show');
-    Route::post('/kandidat-potensial/{candidate}', [TalentPoolController::class, 'store'])->name('kandidat-potensial.store');
-    Route::delete('/kandidat-potensial/{candidate}', [TalentPoolController::class, 'destroy'])->name('kandidat-potensial.destroy');
 
     Route::resource('karyawan', EmployeeController::class)->parameters(['karyawan' => 'employee']);
     Route::resource('unit', UnitController::class)->except(['show']);
