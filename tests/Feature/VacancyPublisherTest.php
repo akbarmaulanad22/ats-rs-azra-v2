@@ -152,6 +152,25 @@ class VacancyPublisherTest extends TestCase
         $this->assertSame(45, $snapshotMinutes);
     }
 
+    public function test_publishing_as_published_with_unconfigured_test_stage_throws(): void
+    {
+        $template = JobTemplate::factory()->create([
+            'workflow_template_id' => $this->workflowTemplateWithStages(['lamaran', 'tes_kompetensi', 'onboarding'])->id,
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+
+        try {
+            app(VacancyPublisher::class)->publish($template, [
+                ...$this->payload(),
+                'status' => VacancyStatus::Published->value,
+            ]);
+        } finally {
+            $this->assertSame(0, $template->vacancies()->count());
+            $this->assertSame(0, WorkflowTemplateSnapshot::count());
+        }
+    }
+
     public function test_publish_is_atomic_rolls_back_on_failure(): void
     {
         $template = JobTemplate::factory()->create([

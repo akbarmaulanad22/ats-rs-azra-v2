@@ -67,4 +67,14 @@ class JobTemplate extends Model
     {
         $query->where('status', JobTemplateStatus::Active);
     }
+
+    /**
+     * Whether the workflow carries a competency-test stage that has no test
+     * configured yet — publishing as Published is blocked until it is set up.
+     */
+    public function hasUnconfiguredTestStage(): bool
+    {
+        return $this->workflowTemplate->stages->contains('key', 'tes_kompetensi')
+            && ! $this->jobTemplateTest;
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\JobTemplateStatus;
 use App\Models\JobTemplate;
 use App\Models\User;
 
@@ -29,7 +30,7 @@ class JobTemplatePolicy
 
     public function publish(User $user, JobTemplate $jobTemplate): bool
     {
-        return $user->isHrAdmin();
+        return $user->isHrAdmin() && $jobTemplate->status === JobTemplateStatus::Active;
     }
 
     public function manageTest(User $user, JobTemplate $jobTemplate): bool

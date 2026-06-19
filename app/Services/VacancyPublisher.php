@@ -26,6 +26,13 @@ class VacancyPublisher
             'interviewTemplates',
         ]);
 
+        $status = $attributes['status'] ?? VacancyStatus::Draft;
+        $statusValue = $status instanceof VacancyStatus ? $status->value : $status;
+
+        if ($statusValue === VacancyStatus::Published->value && $jobTemplate->hasUnconfiguredTestStage()) {
+            throw new \RuntimeException('Cannot publish a Vacancy with an unconfigured competency-test stage.');
+        }
+
         return DB::transaction(function () use ($jobTemplate, $attributes): Vacancy {
             $snapshot = WorkflowTemplateSnapshot::createFromTemplate($jobTemplate->workflowTemplate);
 

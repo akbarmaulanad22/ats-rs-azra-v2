@@ -237,6 +237,23 @@ class JobTemplateManagementTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_archived_template_cannot_be_published(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create([
+            'workflow_template_id' => $this->workflowWithStages()->id,
+            'status' => JobTemplateStatus::Archived->value,
+        ]);
+
+        $this->actingAs($admin)->get(route('template-lowongan.terbitkan.form', $template))
+            ->assertForbidden();
+
+        $this->actingAs($admin)->post(route('template-lowongan.terbitkan', $template), $this->publishPayload())
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('vacancies', ['job_template_id' => $template->id]);
+    }
+
     // ── Test config ───────────────────────────────────────────────────────────
 
     public function test_hr_admin_can_save_test_config(): void

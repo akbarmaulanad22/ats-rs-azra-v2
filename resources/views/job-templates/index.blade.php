@@ -143,10 +143,10 @@
                                         </svg>
                                     </button>
                                     <div x-show="open" x-transition x-cloak class="absolute right-0 top-full mt-1 z-10 w-44 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-xs">
-                                        @if ($jobTemplate->status === \App\Enums\JobTemplateStatus::Active)
+                                        @can('publish', $jobTemplate)
                                             <a href="{{ route('template-lowongan.terbitkan.form', $jobTemplate) }}" class="block px-3 py-1.5 text-primary font-medium hover:bg-primary/5">Terbitkan Lowongan</a>
                                             <hr class="my-1 border-gray-100">
-                                        @endif
+                                        @endcan
                                         <a href="{{ route('template-lowongan.tes.show', $jobTemplate) }}" class="block px-3 py-1.5 text-gray-700 hover:bg-gray-50">Konfigurasi Tes</a>
                                         <a href="{{ route('template-lowongan.template-wawancara.show', $jobTemplate) }}" class="block px-3 py-1.5 text-gray-700 hover:bg-gray-50">Template Wawancara</a>
                                         <a href="{{ route('template-lowongan.edit', $jobTemplate) }}" class="block px-3 py-1.5 text-gray-700 hover:bg-gray-50">Edit</a>

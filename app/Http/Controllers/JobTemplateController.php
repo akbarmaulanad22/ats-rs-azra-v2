@@ -55,6 +55,8 @@ class JobTemplateController extends Controller
 
     public function store(StoreJobTemplateRequest $request): RedirectResponse
     {
+        Gate::authorize('create', JobTemplate::class);
+
         $data = $request->validated();
         $data['status'] = JobTemplateStatus::Active->value;
 
@@ -79,6 +81,8 @@ class JobTemplateController extends Controller
 
     public function update(UpdateJobTemplateRequest $request, JobTemplate $templateLowongan): RedirectResponse
     {
+        Gate::authorize('update', $templateLowongan);
+
         $templateLowongan->update($request->validated());
 
         return redirect()->route('template-lowongan.index')
@@ -120,11 +124,8 @@ class JobTemplateController extends Controller
 
         $templateLowongan->load('workflowTemplate.stages', 'jobTemplateTest');
 
-        $hasTestStage = $templateLowongan->workflowTemplate->stages->contains('key', 'tes_kompetensi');
-
         if ($request->validated('status') === VacancyStatus::Published->value
-            && $hasTestStage
-            && ! $templateLowongan->jobTemplateTest) {
+            && $templateLowongan->hasUnconfiguredTestStage()) {
             return back()->withInput()->withErrors([
                 'status' => 'Lowongan tidak dapat dipublikasikan sebelum tes kompetensi dikonfigurasi pada template. Konfigurasi tes terlebih dahulu, atau terbitkan sebagai draf.',
             ]);
