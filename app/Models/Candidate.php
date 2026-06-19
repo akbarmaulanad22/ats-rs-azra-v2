@@ -69,6 +69,11 @@ class Candidate extends Model
         return $this->hasMany(Application::class);
     }
 
+    public function callbackInvites(): HasMany
+    {
+        return $this->hasMany(CallbackInvite::class);
+    }
+
     public function siblings(): HasMany
     {
         return $this->hasMany(CandidateSibling::class);

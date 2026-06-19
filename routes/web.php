@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationPipelineController;
 use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\CallbackController;
 use App\Http\Controllers\CandidateExportController;
 use App\Http\Controllers\CandidateStatusController;
 use App\Http\Controllers\CareerController;
@@ -109,6 +110,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/lowongan/{lowongan}/lamaran/{application}/gagal', [ApplicationPipelineController::class, 'fail'])->scopeBindings()->name('lowongan.lamaran.gagal');
 
     Route::post('/lowongan/{lowongan}/skrining/{application}/keputusan', [CvScreeningController::class, 'decide'])->scopeBindings()->name('lowongan.skrining.keputusan');
+
+    Route::get('/lowongan/{lowongan}/panggil-kembali', [CallbackController::class, 'index'])->name('callback.index');
+    Route::post('/lowongan/{lowongan}/panggil-kembali', [CallbackController::class, 'invite'])->name('callback.invite');
 
     Route::get('/pengaturan/template-email', [EmailTemplateController::class, 'index'])->name('template-email.index');
     Route::get('/pengaturan/template-email/{templateEmail}/edit', [EmailTemplateController::class, 'edit'])->name('template-email.edit');
