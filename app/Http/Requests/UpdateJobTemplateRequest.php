@@ -3,13 +3,12 @@
 namespace App\Http\Requests;
 
 use App\Enums\EmploymentType;
-use App\Enums\VacancyStatus;
+use App\Enums\JobTemplateStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
-class StoreVacancyRequest extends FormRequest
+class UpdateJobTemplateRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -28,10 +27,7 @@ class StoreVacancyRequest extends FormRequest
             'jenis_pekerjaan' => ['required', new Enum(EmploymentType::class)],
             'deskripsi_pekerjaan' => ['required', 'string'],
             'kualifikasi' => ['required', 'string'],
-            'flyer' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
-            'jumlah_posisi' => ['required', 'integer', 'min:1'],
-            'tenggat_lamaran' => ['required', 'date', 'after_or_equal:today'],
-            'status' => ['sometimes', Rule::in([VacancyStatus::Draft->value, VacancyStatus::Published->value])],
+            'status' => ['required', new Enum(JobTemplateStatus::class)],
         ];
     }
 
@@ -46,14 +42,7 @@ class StoreVacancyRequest extends FormRequest
             'jenis_pekerjaan.required' => 'Jenis pekerjaan wajib dipilih.',
             'deskripsi_pekerjaan.required' => 'Deskripsi pekerjaan wajib diisi.',
             'kualifikasi.required' => 'Kualifikasi wajib diisi.',
-            'flyer.required' => 'Flyer lowongan wajib diunggah.',
-            'flyer.image' => 'Flyer harus berupa gambar.',
-            'flyer.mimes' => 'Flyer harus berformat JPG, PNG, atau WEBP.',
-            'flyer.max' => 'Ukuran flyer maksimal 4 MB.',
-            'jumlah_posisi.required' => 'Jumlah posisi wajib diisi.',
-            'jumlah_posisi.min' => 'Jumlah posisi minimal 1.',
-            'tenggat_lamaran.required' => 'Tenggat lamaran wajib diisi.',
-            'tenggat_lamaran.after_or_equal' => 'Tenggat lamaran tidak boleh di masa lalu.',
+            'status.required' => 'Status wajib dipilih.',
         ];
     }
 }

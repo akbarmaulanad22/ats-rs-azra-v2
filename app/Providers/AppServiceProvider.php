@@ -11,6 +11,7 @@ use App\Models\EmailTemplate;
 use App\Models\Employee;
 use App\Models\InterviewResult;
 use App\Models\InterviewTemplate;
+use App\Models\JobTemplate;
 use App\Models\MbtiSubmission;
 use App\Models\McuResult;
 use App\Models\OfferingLetter;
@@ -86,6 +87,7 @@ class AppServiceProvider extends ServiceProvider
             Employee::class,
             InterviewResult::class,
             InterviewTemplate::class,
+            JobTemplate::class,
             McuResult::class,
             MbtiSubmission::class,
             OfferingLetter::class,

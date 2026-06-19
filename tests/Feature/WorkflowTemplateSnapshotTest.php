@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\EmploymentType;
 use App\Enums\VacancyStatus;
+use App\Models\JobTemplate;
 use App\Models\Stage;
 use App\Models\Unit;
 use App\Models\User;
@@ -58,6 +59,27 @@ class WorkflowTemplateSnapshotTest extends TestCase
             'status' => VacancyStatus::Draft->value,
             'flyer' => UploadedFile::fake()->image('flyer.jpg', 600, 800),
         ];
+    }
+
+    /**
+     * Publish a Vacancy from a JobTemplate bound to the given workflow template,
+     * mirroring the production create path (snapshot-on-publish).
+     */
+    private function publishVacancy(User $admin, Unit $unit, WorkflowTemplate $template): Vacancy
+    {
+        $jobTemplate = JobTemplate::factory()->create([
+            'unit_id' => $unit->id,
+            'workflow_template_id' => $template->id,
+        ]);
+
+        $this->actingAs($admin)->post(route('template-lowongan.terbitkan', $jobTemplate), [
+            'jumlah_posisi' => 1,
+            'tenggat_lamaran' => now()->addMonth()->format('Y-m-d'),
+            'flyer' => UploadedFile::fake()->image('flyer.jpg', 600, 800),
+            'status' => VacancyStatus::Draft->value,
+        ]);
+
+        return Vacancy::latest('id')->first();
     }
 
     // ── Snapshot creation ────────────────────────────────────────────────────
@@ -221,11 +243,10 @@ class WorkflowTemplateSnapshotTest extends TestCase
 
         $this->assertDatabaseCount('workflow_template_snapshots', 0);
 
-        $this->actingAs($admin)->post(route('lowongan.store'), $this->vacancyPayload($unit, $template));
+        $vacancy = $this->publishVacancy($admin, $unit, $template);
 
         $this->assertDatabaseCount('workflow_template_snapshots', 1);
 
-        $vacancy = Vacancy::first();
         $snapshot = $vacancy->workflowTemplateSnapshot;
         $this->assertEquals('Alur Dokter', $snapshot->nama);
         $this->assertCount(3, $snapshot->stages);
@@ -239,8 +260,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $templateA = $this->createTemplateWithStages('Template A', ['lamaran', 'onboarding']);
         $templateB = $this->createTemplateWithStages('Template B', ['lamaran', 'skrining_cv_hr', 'onboarding']);
 
-        $this->actingAs($admin)->post(route('lowongan.store'), $this->vacancyPayload($unit, $templateA));
-        $vacancy = Vacancy::first();
+        $vacancy = $this->publishVacancy($admin, $unit, $templateA);
         $oldSnapshotId = $vacancy->workflow_template_snapshot_id;
 
         $updatePayload = $this->vacancyPayload($unit, $templateB);
@@ -260,8 +280,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $templateA = $this->createTemplateWithStages('Template A', ['lamaran', 'onboarding']);
         $templateB = $this->createTemplateWithStages('Template B', ['lamaran', 'skrining_cv_hr', 'onboarding']);
 
-        $this->actingAs($admin)->post(route('lowongan.store'), $this->vacancyPayload($unit, $templateA));
-        $vacancy = Vacancy::first();
+        $vacancy = $this->publishVacancy($admin, $unit, $templateA);
         $oldSnapshotId = $vacancy->workflow_template_snapshot_id;
 
         $updatePayload = $this->vacancyPayload($unit, $templateB);
@@ -281,8 +300,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $unit = Unit::factory()->create();
         $template = $this->createTemplateWithStages();
 
-        $this->actingAs($admin)->post(route('lowongan.store'), $this->vacancyPayload($unit, $template));
-        $vacancy = Vacancy::first();
+        $vacancy = $this->publishVacancy($admin, $unit, $template);
         $snapshotId = $vacancy->workflow_template_snapshot_id;
 
         $this->actingAs($admin)->delete(route('lowongan.destroy', $vacancy));
@@ -298,8 +316,7 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $unit = Unit::factory()->create();
         $template = $this->createTemplateWithStages();
 
-        $this->actingAs($admin)->post(route('lowongan.store'), $this->vacancyPayload($unit, $template));
-        $vacancy = Vacancy::first();
+        $vacancy = $this->publishVacancy($admin, $unit, $template);
         $snapshot = $vacancy->workflowTemplateSnapshot;
 
         $this->expectException(QueryException::class);
@@ -315,10 +332,8 @@ class WorkflowTemplateSnapshotTest extends TestCase
         $unit = Unit::factory()->create();
         $template = $this->createTemplateWithStages('Shared Template', ['lamaran', 'onboarding']);
 
-        $this->actingAs($admin)->post(route('lowongan.store'), $this->vacancyPayload($unit, $template));
-        $payload2 = $this->vacancyPayload($unit, $template);
-        $payload2['judul_posisi'] = 'Dokter Umum';
-        $this->actingAs($admin)->post(route('lowongan.store'), $payload2);
+        $this->publishVacancy($admin, $unit, $template);
+        $this->publishVacancy($admin, $unit, $template);
 
         $vacancies = Vacancy::all();
         $this->assertCount(2, $vacancies);
