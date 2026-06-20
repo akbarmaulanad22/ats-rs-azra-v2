@@ -9,6 +9,7 @@ use App\Services\CallbackCandidateFinder;
 use App\Services\EmailNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -48,21 +49,15 @@ class CallbackController extends Controller
         }
 
         $validated = $request->validate([
-            'candidate_ids' => ['required', 'array'],
+            'candidate_ids' => ['required', 'array', 'max:200'],
             'candidate_ids.*' => ['integer', 'exists:candidates,id'],
         ]);
 
         $requestedIds = array_values(array_unique($validated['candidate_ids']));
 
         // Re-validate against the eligibility query (not just exists:), so a crafted
-        // POST cannot invite a candidate outside the callback list. The widest list
-        // (includeScreening) is used because the screening filter is a view toggle,
-        // not an eligibility rule.
-        $eligibleIds = $this->finder->forVacancy($lowongan, includeScreening: true)
-            ->pluck('application.candidate_id')
-            ->unique()
-            ->all();
-
+        // POST cannot invite a candidate outside the callback list.
+        $eligibleIds = $this->finder->eligibleCandidateIds($lowongan);
         $candidateIds = array_values(array_intersect($requestedIds, $eligibleIds));
 
         if ($candidateIds === []) {
@@ -73,12 +68,19 @@ class CallbackController extends Controller
 
         $candidates = Candidate::query()->whereIn('id', $candidateIds)->get();
 
-        foreach ($candidates as $candidate) {
-            $lowongan->callbackInvites()->updateOrCreate(
-                ['candidate_id' => $candidate->id],
-                ['invited_by' => $request->user()->id, 'invited_at' => now()],
-            );
+        // Persist all invites atomically, then queue emails only after commit so a
+        // mid-loop failure cannot leave invites half-written or emails sent for
+        // records that rolled back.
+        DB::transaction(function () use ($candidates, $lowongan, $request) {
+            foreach ($candidates as $candidate) {
+                $lowongan->callbackInvites()->updateOrCreate(
+                    ['candidate_id' => $candidate->id],
+                    ['invited_by' => $request->user()->id, 'invited_at' => now()],
+                );
+            }
+        });
 
+        foreach ($candidates as $candidate) {
             $this->emailNotificationService->dispatch('undangan_panggil_kembali', $candidate->email, [
                 'nama_kandidat' => $candidate->nama_lengkap,
                 'judul_lowongan' => $lowongan->judul_posisi,

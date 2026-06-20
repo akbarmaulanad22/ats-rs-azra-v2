@@ -213,6 +213,21 @@ class CallbackInviteTest extends TestCase
         Mail::assertQueued(TemplatedMail::class, 1);
     }
 
+    public function test_invite_rejects_oversized_candidate_list(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $target = $this->vacancyWithStages($template->id);
+
+        $this->actingAs($admin)->post(route('callback.invite', $target), [
+            'candidate_ids' => range(1, 201),
+        ])->assertSessionHasErrors('candidate_ids');
+
+        $this->assertEquals(0, $target->callbackInvites()->count());
+        Mail::assertNothingQueued();
+    }
+
     public function test_invite_on_closed_vacancy_is_rejected(): void
     {
         Mail::fake();
