@@ -232,6 +232,55 @@ class CallbackInviteTest extends TestCase
         Mail::assertNothingQueued();
     }
 
+    public function test_invite_skips_ineligible_candidate_not_in_list(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $prior = $this->vacancyWithStages($template->id);
+        $target = $this->vacancyWithStages($template->id);
+
+        $eligible = Candidate::factory()->create();
+        $this->gagalApplication($prior, $eligible, 'wawancara_user');
+
+        // Hired candidate: real id, excluded from the list. A crafted POST must
+        // not invite them.
+        $hired = Candidate::factory()->create();
+        $hiredApp = $this->gagalApplication($prior, $hired, 'wawancara_user');
+        OnboardingResult::create([
+            'application_id' => $hiredApp->id,
+            'tanggal_bergabung' => now(),
+            'sent_at' => now(),
+        ]);
+
+        $this->actingAs($admin)->post(route('callback.invite', $target), [
+            'candidate_ids' => [$eligible->id, $hired->id],
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('callback_invites', ['candidate_id' => $eligible->id]);
+        $this->assertDatabaseMissing('callback_invites', ['candidate_id' => $hired->id]);
+        $this->assertEquals(1, $target->callbackInvites()->count());
+        Mail::assertQueued(TemplatedMail::class, 1);
+    }
+
+    public function test_invite_rejected_when_no_candidate_is_eligible(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create();
+        $target = $this->vacancyWithStages($template->id);
+
+        // Candidate with no prior Gagal application under this template.
+        $outsider = Candidate::factory()->create();
+
+        $this->actingAs($admin)->post(route('callback.invite', $target), [
+            'candidate_ids' => [$outsider->id],
+        ])->assertSessionHasErrors('callback');
+
+        $this->assertEquals(0, $target->callbackInvites()->count());
+        Mail::assertNothingQueued();
+    }
+
     public function test_resend_is_idempotent(): void
     {
         Mail::fake();

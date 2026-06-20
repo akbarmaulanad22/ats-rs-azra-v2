@@ -71,8 +71,9 @@ Scope and shape:
 
 ## Consequences
 
-- The invite endpoint validates `candidate_ids` only against `exists:candidates,id`; the
-  eligibility rules (same-template, not-hired, not-self-applied) live in the display query, not
-  the write path. A crafted POST by an HrAdmin could invite an out-of-list candidate. Accepted:
-  callback is HrAdmin-only and the action is a low-stakes email, so re-validating each id against
-  the finder is not worth the coupling for v1.
+- The invite endpoint re-runs the eligibility query (`CallbackCandidateFinder::forVacancy`,
+  widest set) against the submitted `candidate_ids` and persists/sends only to ids in that set;
+  `exists:candidates,id` remains as a cheap first-pass type guard. A crafted POST cannot invite
+  an out-of-list candidate (hired, wrong template, self-applied-without-invite). The screening
+  filter is treated as a view toggle, not an eligibility rule, so screening-stage failures stay
+  invitable.

@@ -52,7 +52,25 @@ class CallbackController extends Controller
             'candidate_ids.*' => ['integer', 'exists:candidates,id'],
         ]);
 
-        $candidateIds = array_values(array_unique($validated['candidate_ids']));
+        $requestedIds = array_values(array_unique($validated['candidate_ids']));
+
+        // Re-validate against the eligibility query (not just exists:), so a crafted
+        // POST cannot invite a candidate outside the callback list. The widest list
+        // (includeScreening) is used because the screening filter is a view toggle,
+        // not an eligibility rule.
+        $eligibleIds = $this->finder->forVacancy($lowongan, includeScreening: true)
+            ->pluck('application.candidate_id')
+            ->unique()
+            ->all();
+
+        $candidateIds = array_values(array_intersect($requestedIds, $eligibleIds));
+
+        if ($candidateIds === []) {
+            return back()->withErrors([
+                'callback' => 'Tidak ada kandidat yang memenuhi syarat untuk dipanggil kembali.',
+            ]);
+        }
+
         $candidates = Candidate::query()->whereIn('id', $candidateIds)->get();
 
         foreach ($candidates as $candidate) {
