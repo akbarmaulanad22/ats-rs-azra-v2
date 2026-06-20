@@ -221,21 +221,62 @@
         </a>
         @endauth
 
-        {{-- User info: name + role badge + logout --}}
-        <div class="flex items-center gap-3">
-            <span class="text-sm font-medium text-gray-800 hidden sm:block">{{ auth()->user()->name }}</span>
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-primary/10 text-primary whitespace-nowrap">
-                {{ auth()->user()->role->label() }}
-            </span>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button
-                    type="submit"
-                    class="text-sm text-gray-400 hover:text-red-600 transition-colors ease-out duration-150 px-2 py-1 rounded"
-                >
-                    Keluar
-                </button>
-            </form>
+        {{-- User menu: name + role badge + dropdown --}}
+        <div class="relative" x-data="{ menuOpen: false }">
+            <button
+                @click="menuOpen = !menuOpen"
+                class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors ease-out duration-150"
+                aria-label="Menu pengguna"
+                :aria-expanded="menuOpen"
+            >
+                <span class="text-sm font-medium text-gray-800 hidden sm:block">{{ auth()->user()->name }}</span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-primary/10 text-primary whitespace-nowrap">
+                    {{ auth()->user()->role->label() }}
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform ease-out duration-150" :class="menuOpen && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            <div
+                x-show="menuOpen"
+                @click.outside="menuOpen = false"
+                x-transition.origin.top.right
+                class="absolute right-0 mt-2 w-52 bg-white rounded-xl py-1.5 z-40"
+                style="box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);"
+                x-cloak
+            >
+                @if(auth()->user()->employee && auth()->user()->can('view', auth()->user()->employee))
+                <a href="{{ route('karyawan.show', auth()->user()->employee) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                    Profil Saya
+                </a>
+                @endif
+
+                <a href="{{ route('password.change') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                    Ubah Kata Sandi
+                </a>
+
+                <div class="border-t border-gray-100 my-1.5"></div>
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    >
+                        <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Keluar
+                    </button>
+                </form>
+            </div>
         </div>
     </header>
 
