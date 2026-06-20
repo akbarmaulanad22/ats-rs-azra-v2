@@ -184,8 +184,9 @@ class ReportingDashboardTest extends TestCase
         $response = $this->actingAs($user)->get(route('dashboard', ['unit_id' => $unitB->id]));
 
         $response->assertOk();
-        // Own unit (2), never the foreign unit (3).
-        $response->assertSeeInOrder(['Total Lamaran', '2']);
+        // Own unit (2), never the foreign unit (3). Match the Total Lamaran stat's exact
+        // value markup so a stray "2" elsewhere can't satisfy the assertion.
+        $response->assertSee('text-3xl font-bold text-gray-900 leading-none">2</p>', false);
     }
 
     public function test_unit_user_foreign_vacancy_id_yields_empty_not_foreign_data(): void
@@ -207,7 +208,8 @@ class ReportingDashboardTest extends TestCase
         $response = $this->actingAs($user)->get(route('dashboard', ['vacancy_id' => $vacancyB->id]));
 
         $response->assertOk();
-        $response->assertSeeInOrder(['Total Lamaran', '0']);
+        // Match the Total Lamaran stat's exact value markup, not a bare "0".
+        $response->assertSee('text-3xl font-bold text-gray-900 leading-none">0</p>', false);
         // Foreign unit's vacancy title must not leak into the dropdown.
         $response->assertDontSee($vacancyB->judul_posisi);
     }

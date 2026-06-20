@@ -15,9 +15,12 @@ class GetRecruitmentMetrics
 {
     /**
      * @param  array{date_from: ?string, date_to: ?string, unit_id: ?int, vacancy_id: ?int}  $filters
+     * @param  bool  $includeUnitOptions  Whether to load the unit selector options. Unit-tier
+     *                                    dashboards hide the selector, so the list is skipped to
+     *                                    avoid both the query and leaking other units' names.
      * @return array<string, mixed>
      */
-    public function execute(array $filters): array
+    public function execute(array $filters, bool $includeUnitOptions = true): array
     {
         $applicationQuery = Application::query()
             ->when($filters['date_from'] ?? null, fn ($q, $d) => $q->whereDate('created_at', '>=', $d))
@@ -40,7 +43,9 @@ class GetRecruitmentMetrics
             'stageRates' => $this->stageRates($applicationIds),
             ...$this->bottlenecks($applicationIds),
             'vacancySummary' => $this->vacancySummary($filters),
-            'units' => Unit::select('id', 'nama')->orderBy('nama')->get(),
+            'units' => $includeUnitOptions
+                ? Unit::select('id', 'nama')->orderBy('nama')->get()
+                : new Collection,
             'vacancies' => Vacancy::query()
                 ->when($filters['unit_id'] ?? null, fn ($q, $id) => $q->where('unit_id', $id))
                 ->select('id', 'judul_posisi')

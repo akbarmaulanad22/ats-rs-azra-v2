@@ -46,7 +46,7 @@ class DashboardController extends Controller
             'lockedUnit' => $lockedUnit,
             'hasUnit' => $hasUnit,
             'filters' => $filters,
-            ...$metrics->execute($filters),
+            ...$metrics->execute($filters, includeUnitOptions: ! $isUnitScope),
         ]);
     }
 }
