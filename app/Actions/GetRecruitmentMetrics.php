@@ -41,7 +41,11 @@ class GetRecruitmentMetrics
             ...$this->bottlenecks($applicationIds),
             'vacancySummary' => $this->vacancySummary($filters),
             'units' => Unit::select('id', 'nama')->orderBy('nama')->get(),
-            'vacancies' => Vacancy::select('id', 'judul_posisi')->orderBy('judul_posisi')->get(),
+            'vacancies' => Vacancy::query()
+                ->when($filters['unit_id'] ?? null, fn ($q, $id) => $q->where('unit_id', $id))
+                ->select('id', 'judul_posisi')
+                ->orderBy('judul_posisi')
+                ->get(),
         ];
     }
 

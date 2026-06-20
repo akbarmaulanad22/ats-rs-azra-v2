@@ -4,6 +4,11 @@ html {
     font-size: 90%;
 }
 
+/* Hide Alpine-cloaked elements until Alpine initializes */
+[x-cloak] {
+    display: none !important;
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source "../**/*.blade.php";

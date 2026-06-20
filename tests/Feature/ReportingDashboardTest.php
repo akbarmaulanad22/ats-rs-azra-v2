@@ -7,6 +7,7 @@ use App\Enums\Role;
 use App\Models\Application;
 use App\Models\ApplicationStage;
 use App\Models\Candidate;
+use App\Models\Employee;
 use App\Models\Stage;
 use App\Models\Unit;
 use App\Models\User;
@@ -94,45 +95,121 @@ class ReportingDashboardTest extends TestCase
         $response->assertSee('Corong Pipeline');
     }
 
-    public function test_hr_manager_sees_simple_landing_not_reporting_dashboard(): void
+    public function test_hr_manager_sees_org_wide_reporting_dashboard(): void
     {
         $user = User::factory()->withRole(Role::HrManager)->create();
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertDontSee('Dashboard Rekrutmen');
-        $response->assertSee('Selamat datang');
+        $response->assertSee('Dashboard Rekrutmen');
+        $response->assertSee('Corong Pipeline');
+        // Org tier keeps the unit selector.
+        $response->assertSee('Semua Unit');
     }
 
-    public function test_unit_head_sees_simple_landing_not_reporting_dashboard(): void
-    {
-        $user = User::factory()->withRole(Role::UnitHead)->create();
-
-        $response = $this->actingAs($user)->get(route('dashboard'));
-
-        $response->assertOk();
-        $response->assertDontSee('Dashboard Rekrutmen');
-    }
-
-    public function test_director_sees_simple_landing_not_reporting_dashboard(): void
+    public function test_director_sees_org_wide_reporting_dashboard(): void
     {
         $user = User::factory()->withRole(Role::Director)->create();
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertDontSee('Dashboard Rekrutmen');
+        $response->assertSee('Dashboard Rekrutmen');
+        $response->assertSee('Corong Pipeline');
+        $response->assertSee('Semua Unit');
     }
 
-    public function test_employee_sees_simple_landing_not_reporting_dashboard(): void
+    public function test_unit_head_sees_unit_scoped_dashboard(): void
     {
-        $user = User::factory()->withRole(Role::Employee)->create();
+        $unit = Unit::factory()->create(['nama' => 'Unit Bedah Test']);
+        $user = User::factory()->withRole(Role::UnitHead)->create();
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unit->id]);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertDontSee('Dashboard Rekrutmen');
+        $response->assertSee('Dashboard Rekrutmen');
+        $response->assertSee('Corong Pipeline');
+        // Unit name shown in heading, unit selector removed.
+        $response->assertSee('Unit Bedah Test');
+        $response->assertDontSee('Semua Unit');
+    }
+
+    public function test_employee_with_unit_sees_unit_scoped_dashboard(): void
+    {
+        $unit = Unit::factory()->create(['nama' => 'Unit Farmasi Test']);
+        $user = User::factory()->withRole(Role::Employee)->create();
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unit->id]);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Dashboard Rekrutmen');
+        $response->assertSee('Unit Farmasi Test');
+        $response->assertDontSee('Semua Unit');
+    }
+
+    public function test_unit_user_without_unit_sees_empty_state(): void
+    {
+        // No employee record at all.
+        $user = User::factory()->withRole(Role::UnitHead)->create();
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Dashboard Rekrutmen');
+        $response->assertSee('belum terhubung ke unit');
+    }
+
+    public function test_unit_user_cannot_widen_scope_via_url_unit_id(): void
+    {
+        $this->seedStages();
+        $unitA = Unit::factory()->create(['nama' => 'Unit Alpha Scope']);
+        $unitB = Unit::factory()->create(['nama' => 'Unit Beta Scope']);
+
+        $user = User::factory()->withRole(Role::UnitHead)->create();
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unitA->id]);
+
+        $vacancyA = $this->createVacancyWithStages(['lamaran', 'onboarding'], $unitA);
+        $vacancyB = $this->createVacancyWithStages(['lamaran', 'onboarding'], $unitB);
+
+        $this->makeApplication($vacancyA);
+        $this->makeApplication($vacancyA);
+        $this->makeApplication($vacancyB);
+        $this->makeApplication($vacancyB);
+        $this->makeApplication($vacancyB);
+
+        // Forge another unit's id in the URL — must be ignored.
+        $response = $this->actingAs($user)->get(route('dashboard', ['unit_id' => $unitB->id]));
+
+        $response->assertOk();
+        // Own unit (2), never the foreign unit (3).
+        $response->assertSeeInOrder(['Total Lamaran', '2']);
+    }
+
+    public function test_unit_user_foreign_vacancy_id_yields_empty_not_foreign_data(): void
+    {
+        $this->seedStages();
+        $unitA = Unit::factory()->create(['nama' => 'Unit Alpha Vac']);
+        $unitB = Unit::factory()->create(['nama' => 'Unit Beta Vac']);
+
+        $user = User::factory()->withRole(Role::UnitHead)->create();
+        Employee::factory()->create(['user_id' => $user->id, 'unit_id' => $unitA->id]);
+
+        $this->createVacancyWithStages(['lamaran', 'onboarding'], $unitA);
+        $vacancyB = $this->createVacancyWithStages(['lamaran', 'onboarding'], $unitB);
+
+        $this->makeApplication($vacancyB);
+        $this->makeApplication($vacancyB);
+
+        // Foreign vacancy_id: forced unit_id (A) ∩ vacancy_id (B) = empty.
+        $response = $this->actingAs($user)->get(route('dashboard', ['vacancy_id' => $vacancyB->id]));
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['Total Lamaran', '0']);
+        // Foreign unit's vacancy title must not leak into the dropdown.
+        $response->assertDontSee($vacancyB->judul_posisi);
     }
 
     public function test_unauthenticated_user_is_redirected_to_login(): void
