@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\JobTemplateStatus;
-use App\Enums\VacancyStatus;
 use App\Models\Candidate;
 use App\Models\Vacancy;
 use App\Services\CallbackCandidateFinder;
@@ -79,10 +78,9 @@ class CallbackController extends Controller
     private function routeToOpenPeriod(Vacancy $lowongan): RedirectResponse
     {
         $openSibling = Vacancy::query()
+            ->openForApplications()
             ->where('job_template_id', $lowongan->job_template_id)
             ->whereKeyNot($lowongan->id)
-            ->where('status', VacancyStatus::Published)
-            ->where('tenggat_lamaran', '>=', now()->toDateString())
             ->first();
 
         if ($openSibling) {

@@ -47,7 +47,7 @@
                     <thead>
                         <tr class="bg-primary border-b border-primary/10 text-white">
                             <th class="px-3 py-2.5 w-8">
-                                <input type="checkbox" x-data @click="$root.querySelectorAll('input[name=\'candidate_ids[]\']:not(:disabled)').forEach(c => c.checked = $event.target.checked)">
+                                <input type="checkbox" x-data @click="$root.querySelectorAll('input[name=\'candidate_ids[]\']').forEach(c => c.checked = $event.target.checked)">
                             </th>
                             <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider">Kandidat</th>
                             <th class="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider">Gagal di tahap</th>

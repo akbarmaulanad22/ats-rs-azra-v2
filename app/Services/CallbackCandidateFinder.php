@@ -24,7 +24,7 @@ class CallbackCandidateFinder
      * Hard-excludes candidates already hired (completed onboarding) and
      * candidates who self-applied to the target Vacancy without an invite.
      *
-     * @return Collection<int, array{application: Application, failed_stage_label: string, failed_in_screening: bool, invited: bool, responded: bool, active_elsewhere: bool}>
+     * @return Collection<int, array{application: Application, failed_stage_label: string, invited: bool, responded: bool, active_elsewhere: bool}>
      */
     public function forVacancy(Vacancy $vacancy, bool $includeScreening = false): Collection
     {
@@ -101,9 +101,6 @@ class CallbackCandidateFinder
                 return [
                     'application' => $application,
                     'failed_stage_label' => $failedStage?->nama ?? '—',
-                    'failed_in_screening' => $failedStage
-                        ? in_array($failedStage->key, self::SCREENING_STAGE_KEYS, true)
-                        : false,
                     'invited' => $invited,
                     'responded' => $invited && $appliedToTargetIds->has($candidateId),
                     'active_elsewhere' => $activeElsewhereIds->has($candidateId),
