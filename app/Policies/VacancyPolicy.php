@@ -106,4 +106,9 @@ class VacancyPolicy
     {
         return $user->isHrAdmin();
     }
+
+    public function callback(User $user, Vacancy $vacancy): bool
+    {
+        return $user->isHrAdmin();
+    }
 }

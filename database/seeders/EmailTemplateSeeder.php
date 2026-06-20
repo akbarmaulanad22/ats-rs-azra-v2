@@ -70,6 +70,12 @@ class EmailTemplateSeeder extends Seeder
                 'subjek' => 'Tindakan Diperlukan — {judul_lowongan}',
                 'isi' => "Yth. {nama_penerima},\n\nTerdapat kandidat yang memerlukan tindakan Anda untuk posisi {judul_lowongan}.\n\nSilakan masuk ke sistem untuk meninjau dan mengambil tindakan yang diperlukan.\n\nSalam,\nSistem Rekrutmen RS Azra",
             ],
+            [
+                'key' => 'undangan_panggil_kembali',
+                'deskripsi' => 'Dikirim ke kandidat yang pernah gagal, mengundang melamar kembali di periode baru',
+                'subjek' => 'Undangan Melamar Kembali — {judul_lowongan}',
+                'isi' => "Yth. {nama_kandidat},\n\nKami membuka kembali lowongan untuk posisi {judul_lowongan} di RS Azra dan ingin mengundang Anda untuk melamar kembali pada periode ini.\n\nSilakan ajukan lamaran baru melalui tautan berikut:\n{link_lamar}\n\nKami menantikan partisipasi Anda kembali dalam proses rekrutmen kami.\n\nSalam,\nTim HR RS Azra",
+            ],
         ];
 
         foreach ($templates as $template) {

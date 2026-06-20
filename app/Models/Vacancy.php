@@ -70,6 +70,29 @@ class Vacancy extends Model
         return $this->hasMany(Application::class);
     }
 
+    public function callbackInvites(): HasMany
+    {
+        return $this->hasMany(CallbackInvite::class);
+    }
+
+    public function isOpenForApplications(): bool
+    {
+        return $this->status === VacancyStatus::Published
+            && $this->tenggat_lamaran !== null
+            && ! $this->tenggat_lamaran->isBefore(now()->startOfDay());
+    }
+
+    /**
+     * Vacancies currently accepting applications: Published with a deadline
+     * on or after today. Query-side counterpart to {@see isOpenForApplications()}.
+     */
+    public function scopeOpenForApplications(Builder $query): void
+    {
+        $query->where('status', VacancyStatus::Published)
+            ->whereNotNull('tenggat_lamaran')
+            ->whereDate('tenggat_lamaran', '>=', now()->startOfDay());
+    }
+
     public function vacancyTest(): HasOne
     {
         return $this->hasOne(VacancyTest::class);

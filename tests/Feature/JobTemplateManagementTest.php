@@ -188,6 +188,24 @@ class JobTemplateManagementTest extends TestCase
         Storage::disk('public')->assertExists(Vacancy::first()->flyer_path);
     }
 
+    public function test_publish_with_callback_flag_redirects_to_callback_list(): void
+    {
+        $admin = User::factory()->hrAdmin()->create();
+        $template = JobTemplate::factory()->create([
+            'workflow_template_id' => $this->workflowWithStages()->id,
+        ]);
+
+        $payload = $this->publishPayload();
+        $payload['status'] = VacancyStatus::Published->value;
+        $payload['callback'] = 1;
+
+        $response = $this->actingAs($admin)
+            ->post(route('template-lowongan.terbitkan', $template), $payload);
+
+        $vacancy = Vacancy::where('job_template_id', $template->id)->firstOrFail();
+        $response->assertRedirect(route('callback.index', $vacancy));
+    }
+
     public function test_publish_blocks_published_status_when_test_stage_unconfigured(): void
     {
         $admin = User::factory()->hrAdmin()->create();

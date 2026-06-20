@@ -115,6 +115,7 @@ class JobTemplateController extends Controller
             'templateLowongan' => $templateLowongan,
             'statuses' => $statuses,
             'hasTestStage' => $hasTestStage,
+            'callbackReturn' => request()->boolean('callback'),
         ]);
     }
 
@@ -134,7 +135,7 @@ class JobTemplateController extends Controller
         $flyerPath = $request->file('flyer')->store('flyers', 'public');
 
         try {
-            $publisher->publish($templateLowongan, [
+            $vacancy = $publisher->publish($templateLowongan, [
                 'jumlah_posisi' => $request->validated('jumlah_posisi'),
                 'tenggat_lamaran' => $request->validated('tenggat_lamaran'),
                 'flyer_path' => $flyerPath,
@@ -145,6 +146,11 @@ class JobTemplateController extends Controller
             Storage::disk('public')->delete($flyerPath);
 
             throw $e;
+        }
+
+        if ($request->boolean('callback') && $vacancy->isOpenForApplications()) {
+            return redirect()->route('callback.index', $vacancy)
+                ->with('status', 'Periode baru diterbitkan. Pilih kandidat untuk dipanggil kembali.');
         }
 
         return redirect()->route('lowongan.index')

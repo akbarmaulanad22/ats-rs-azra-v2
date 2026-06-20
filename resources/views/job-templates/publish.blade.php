@@ -22,6 +22,9 @@
     <div class="bg-white/80 border border-gray-200 rounded-md">
         <form method="POST" action="{{ route('template-lowongan.terbitkan', $templateLowongan) }}" enctype="multipart/form-data">
             @csrf
+            @if (! empty($callbackReturn))
+                <input type="hidden" name="callback" value="1">
+            @endif
 
             <div class="px-4 pt-4 pb-5">
                 <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Periode Lowongan</p>
