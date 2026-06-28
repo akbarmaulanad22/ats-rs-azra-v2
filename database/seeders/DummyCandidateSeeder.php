@@ -52,6 +52,16 @@ class DummyCandidateSeeder extends Seeder
                 'jabatan' => 'Kepala Unit',
             ]
         );
+        $existingDemo = Vacancy::where('judul_posisi', 'Koordinator Medis (Demo)')->first();
+
+        if ($existingDemo) {
+            Application::where('vacancy_id', $existingDemo->id)->each(function (Application $application): void {
+                $application->stages()->delete();
+                $application->delete();
+            });
+            $existingDemo->delete();
+        }
+
         $vacancy = Vacancy::factory()
             ->withGeneratedFlyer()
             ->create([
@@ -70,11 +80,7 @@ class DummyCandidateSeeder extends Seeder
         $lastIndex = $snapshotStages->count() - 1;
 
         foreach ($snapshotStages as $currentIndex => $targetStage) {
-            $candidate = Candidate::create([
-                'nama_lengkap' => fake()->name(),
-                'email' => fake()->unique()->safeEmail(),
-                'no_telepon' => fake()->numerify('08##########'),
-            ]);
+            $candidate = Candidate::factory()->create();
 
             $application = Application::create([
                 'candidate_id' => $candidate->id,
