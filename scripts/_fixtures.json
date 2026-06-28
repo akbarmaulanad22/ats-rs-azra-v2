@@ -1,0 +1,130 @@
+{
+    "baseURL": "http:\/\/127.0.0.1:8000",
+    "users": {
+        "hr_admin": {
+            "u": "admin",
+            "p": "password"
+        },
+        "unit_head": {
+            "u": "kepala_unit",
+            "p": "password"
+        },
+        "hr_manager": {
+            "u": "hr_manager",
+            "p": "password"
+        },
+        "director": {
+            "u": "direktur",
+            "p": "password"
+        },
+        "employee": {
+            "u": "staff_demo",
+            "p": "password"
+        }
+    },
+    "demo_vacancy_id": 19,
+    "published_vacancy_id": 12,
+    "apps": [
+        {
+            "id": 11,
+            "token": "392ae48e-6f36-48f2-bbc3-36a272890286",
+            "cand": "Prof. Mazie Grant V",
+            "active_stage": "lamaran",
+            "active_nama": "Lamaran"
+        },
+        {
+            "id": 12,
+            "token": "c8c3b591-4cb1-432e-8b7b-18e553e59271",
+            "cand": "Britney Macejkovic",
+            "active_stage": "skrining_cv_hr",
+            "active_nama": "Skrining CV HR"
+        },
+        {
+            "id": 13,
+            "token": "a02fc022-9226-4b36-b0e5-fb11c4167da2",
+            "cand": "Shayne Hand",
+            "active_stage": "skrining_cv_user",
+            "active_nama": "Skrining CV User"
+        },
+        {
+            "id": 14,
+            "token": "a85f7df7-5217-493c-a670-96b93e32164d",
+            "cand": "Miss Candida Littel",
+            "active_stage": "tes_kompetensi",
+            "active_nama": "Tes Kompetensi"
+        },
+        {
+            "id": 15,
+            "token": "2e7e27d8-105f-4d85-bcb4-de270ab61729",
+            "cand": "Ubaldo Langosh",
+            "active_stage": "wawancara_user",
+            "active_nama": "Wawancara User"
+        },
+        {
+            "id": 16,
+            "token": "65efd593-183d-491c-b720-c312d72b0f87",
+            "cand": "Miss Laisha Eichmann",
+            "active_stage": "wawancara_manajer_hr",
+            "active_nama": "Wawancara Manajer HR"
+        },
+        {
+            "id": 17,
+            "token": "e9970e96-bdf5-4aa8-b9d9-d3e0444ffb02",
+            "cand": "Jaleel Stamm I",
+            "active_stage": "wawancara_direktur",
+            "active_nama": "Wawancara Direktur"
+        },
+        {
+            "id": 18,
+            "token": "d5c31e90-c8fa-453a-97a0-e19387311753",
+            "cand": "Alison Baumbach PhD",
+            "active_stage": "tes_disc",
+            "active_nama": "Tes DiSC"
+        },
+        {
+            "id": 19,
+            "token": "ca8ee1f1-e0b0-4393-aa94-be31a3ce3c26",
+            "cand": "Dr. Neal Blanda DDS",
+            "active_stage": "tes_mbti",
+            "active_nama": "Tes MBTI"
+        },
+        {
+            "id": 20,
+            "token": "86add8c3-51c2-4e3b-a79e-39e7f097c792",
+            "cand": "Ilene Mante",
+            "active_stage": "surat_penawaran",
+            "active_nama": "Surat Penawaran"
+        },
+        {
+            "id": 21,
+            "token": "6431dcda-a270-4697-b466-3ac6de5da108",
+            "cand": "Elmer Pollich",
+            "active_stage": "mcu",
+            "active_nama": "MCU"
+        },
+        {
+            "id": 22,
+            "token": "6f0ebc56-8a8e-45e2-befb-0f7229dd793e",
+            "cand": "Mr. Ewald Becker DVM",
+            "active_stage": null,
+            "active_nama": null
+        }
+    ],
+    "tokens": {
+        "tes_kompetensi": "fa1e407a-dc36-4d21-8c9e-515e6b62b58b",
+        "tes_disc": "2f052fe7-107f-43bb-964a-be7d08a43171",
+        "tes_mbti": "f6e6b5ad-6da6-493e-a7ec-c5ead6aa2982",
+        "offering_id": 1,
+        "offering_url": "http://127.0.0.1:8000/penawaran/1/terima?signature=ae338884d7a25b541e54ca10ee13fb93d8e9fb0c631fa8e7ad8f703607d5961a"
+    },
+    "cases": {
+        "tes_kompetensi": 23,
+        "tes_disc": 24,
+        "tes_mbti": 25,
+        "wawancara_user": 26,
+        "wawancara_manajer_hr": 27,
+        "wawancara_direktur": 28,
+        "mcu": 29,
+        "callback_reapply": 33
+    }
+}
